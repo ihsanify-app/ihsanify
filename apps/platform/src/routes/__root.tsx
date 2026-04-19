@@ -1,7 +1,7 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-
+import { Navbar } from "../components/Navbar";
 import appCss from "../styles.css?url";
 import "@lmsproject/ui/globals.css";
 
@@ -36,6 +36,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
+				<Navbar />
 				{children}
 				<TanStackDevtools
 					config={{

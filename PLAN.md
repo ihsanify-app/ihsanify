@@ -290,7 +290,7 @@
 - ✅ `GET /me`
 
 **Phase 1 — Public Pages**
-- ❌ Hour 1 — Landing Page: Hero + Nav
+- ✅ Hour 1 — Landing Page: Hero + Nav
 - ❌ Hour 2 — Landing Page: Features + Teachers Section
 - ❌ Hour 3 — Landing Page: Success Stories + Footer
 - ❌ Hour 4 — Login Page
