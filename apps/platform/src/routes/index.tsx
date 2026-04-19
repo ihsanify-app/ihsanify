@@ -1,5 +1,6 @@
 // import { Sidebar, SidebarItem } from "@lmsproject/ui";
 import { createFileRoute } from "@tanstack/react-router";
+import { Features } from "../components/landing/Features";
 import { Hero } from "../components/landing/Hero";
 export const Route = createFileRoute("/")({ component: App });
 
@@ -12,6 +13,7 @@ function App() {
 				<SidebarItem icon={<LayoutDashboard size={20} />} />
 			</Sidebar> */}
 			<Hero schoolName="Madrasatul Ilmin Naafi" />
+			<Features />
 		</div>
 	);
 }
