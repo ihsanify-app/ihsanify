@@ -282,6 +282,73 @@
 
 ---
 
+## Progress Checklist
+
+**Backend (pre-plan)**
+- ✅ `POST /register`
+- ✅ `POST /login`
+- ✅ `GET /me`
+
+**Phase 1 — Public Pages**
+- ❌ Hour 1 — Landing Page: Hero + Nav
+- ❌ Hour 2 — Landing Page: Features + Teachers Section
+- ❌ Hour 3 — Landing Page: Success Stories + Footer
+- ❌ Hour 4 — Login Page
+
+**Phase 2 — Dashboard UI**
+- ❌ Hour 5 — App Shell & Layout
+- ❌ Hour 6 — Notification Panel
+- ❌ Hour 7 — Dashboard: Admin View
+- ❌ Hour 8 — Dashboard: Teacher View
+- ❌ Hour 9 — Dashboard: Student View
+
+**Phase 3 — Class & Enrollment UI**
+- ❌ Hour 10 — Classes List Page
+- ❌ Hour 11 — Class Detail Page
+- ❌ Hour 12 — User Management Page (Admin)
+- ❌ Hour 13 — Enrollment Flow UI
+
+**Phase 4 — Assignment UI**
+- ❌ Hour 14 — Assignment List Page
+- ❌ Hour 15 — Assignment Builder: Shell
+- ❌ Hour 16 — Assignment Builder: Question Types
+- ❌ Hour 17 — Assignment Builder: Settings & Preview
+- ❌ Hour 18 — Student Assignment Attempt Page
+- ❌ Hour 19 — Assignment Results Page
+
+**Phase 5 — Progress Report UI**
+- ❌ Hour 20 — Progress Report List
+- ❌ Hour 21 — Progress Report Builder (Teacher)
+- ❌ Hour 22 — Progress Report View (Student)
+- ❌ Hour 23 — Progress Report: Admin Overview
+
+**Phase 6 — Backend APIs**
+- ✅ `GET /me` — current user profile
+- ❌ `PATCH /me` — update profile
+- ❌ Hour 24 — Users & Auth Endpoints (remaining)
+- ❌ Hour 25 — Classes & Enrollment Endpoints
+- ❌ Hour 26 — Assignment Endpoints
+- ❌ Hour 27 — Submission Endpoints
+- ❌ Hour 28 — Progress Report Endpoints
+- ❌ Hour 29 — Notification Endpoints
+- ❌ Hour 30 — Dashboard Aggregate Endpoints
+- ❌ Hour 31 — Validation, Guards & Error Handling
+- ❌ Hour 32 — Monthly Report Aggregate Endpoint
+- ❌ Hour 33 — Seed Script
+
+**Phase 7 — Connect UI to Real API**
+- ❌ Hour 34 — Auth + /me connection
+- ❌ Hour 35 — Dashboard + Notifications
+- ❌ Hour 36 — Classes + Enrollment
+- ❌ Hour 37 — Assignments
+- ❌ Hour 38 — Progress Reports
+- ❌ Hour 39 — Polish: Loading, Errors, Empty States
+
+**Phase 8 — Deployment**
+- ❌ Hour 40 — Deploy & Smoke Test
+
+---
+
 ## Build Order Summary
 
 ```
