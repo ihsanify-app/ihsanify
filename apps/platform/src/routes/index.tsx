@@ -2,6 +2,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Features } from "../components/landing/Features";
 import { Hero } from "../components/landing/Hero";
+import { Stats } from "../components/landing/Stats";
 import { Teachers } from "../components/landing/Teachers";
 import { Testimonials } from "../components/landing/Testimonials";
 export const Route = createFileRoute("/")({ component: App });
@@ -15,9 +16,10 @@ function App() {
 				<SidebarItem icon={<LayoutDashboard size={20} />} />
 			</Sidebar> */}
 			<Hero schoolName="Madrasatul Ilmin Naafi" />
-			<Testimonials />
-			<Teachers />
 			<Features />
+			<Teachers />
+			<Testimonials />
+			<Stats />
 		</div>
 	);
 }
