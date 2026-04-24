@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Features } from "../components/landing/Features";
 import { Hero } from "../components/landing/Hero";
 import { Teachers } from "../components/landing/Teachers";
+import { Testimonials } from "../components/landing/Testimonials";
 export const Route = createFileRoute("/")({ component: App });
 
 // https://www.youtube.com/watch?v=NFrFhBJPTmI
@@ -14,6 +15,7 @@ function App() {
 				<SidebarItem icon={<LayoutDashboard size={20} />} />
 			</Sidebar> */}
 			<Hero schoolName="Madrasatul Ilmin Naafi" />
+			<Testimonials />
 			<Teachers />
 			<Features />
 		</div>
