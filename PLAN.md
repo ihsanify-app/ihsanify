@@ -349,6 +349,55 @@
 
 ---
 
+## Data Model Decisions
+
+### Core Entities
+```
+Subject         → the curriculum (Tahsin, Tahfizh, Bahasa Arab, Bahasa Inggris)
+Group           → a set of students + teacher studying a Subject (replaces "Class")
+Session         → one meeting of a Group on a specific date/time
+GroupEnrollment → audit log of student joins/leaves per Group
+GroupTeacher    → audit log of teacher assignments/switches per Group
+GroupPricing    → price history per Group (new record on price change)
+SessionAttendance → per-session attendance per student (PRESENT | ABSENT)
+Payment         → monthly billing record per student per Group
+```
+
+### Business Rules
+- 1 Subject → many Groups
+- 1 Group → many Sessions, many Students (via GroupEnrollment), 1 active Teacher
+- Bill = (PRESENT sessions / expectedSessionsPerMonth) × pricePerMonth
+- Session cancelled by teacher → no one billed for that session
+- Student absent → not billed for that session
+- Student joins mid-month → billed only from join date
+- Payment method: bank transfer with proof of transfer image
+- Payment status: PENDING → VERIFIED (admin manually verifies)
+
+### Key Models (for Prisma schema in Phase 6)
+
+**Group**
+- id, subjectId, name, expectedSessionsPerMonth
+
+**GroupEnrollment**
+- id, groupId, studentId, action (JOIN | LEAVE), date
+
+**GroupTeacher**
+- id, groupId, teacherId, action (ASSIGN | REMOVED), date
+
+**GroupPricing**
+- id, groupId, pricePerMonth, effectiveFrom
+
+**Session**
+- id, groupId, date, startTime, endTime, status (SCHEDULED | COMPLETED | CANCELLED)
+
+**SessionAttendance**
+- id, sessionId, studentId, status (PRESENT | ABSENT)
+
+**Payment**
+- id, studentId, groupId, month, year, amount, proofOfTransfer, status (PENDING | VERIFIED)
+
+---
+
 ## Build Order Summary
 
 ```
