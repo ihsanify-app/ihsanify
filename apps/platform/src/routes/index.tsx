@@ -6,6 +6,7 @@ import { Hero } from "../components/landing/Hero";
 import { Stats } from "../components/landing/Stats";
 import { Teachers } from "../components/landing/Teachers";
 import { Testimonials } from "../components/landing/Testimonials";
+
 export const Route = createFileRoute("/")({ component: App });
 
 // https://www.youtube.com/watch?v=NFrFhBJPTmI
