@@ -19,8 +19,14 @@ export function Header() {
 				</button>
 				{isOpen && (
 					<div className="absolute right-1 top-8 z-50 text-white bg-gray-800 py-3 px-2 w-full rounded-lg">
-						<div>⚪ Quiz</div>
-						<div>⚪ Report</div>
+						<div className="text-sm">⚪ Quiz</div>
+						<div className="text-sm">⚪ Report</div>
+						<button
+							type="button"
+							className="text-xs text-white hover:bg-amber-50 rounded-lg p-1 hover:text-gray-800 mt-2"
+						>
+							Mark All as Read
+						</button>
 					</div>
 				)}
 				<span>👤 Admin</span>
