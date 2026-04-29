@@ -297,7 +297,7 @@
 
 **Phase 2 — Dashboard UI**
 - ✅ Hour 5 — App Shell & Layout
-- ❌ Hour 6 — Notification Panel
+- ✅ Hour 6 — Notification Panel
 - ❌ Hour 7 — Dashboard: Admin View
 - ❌ Hour 8 — Dashboard: Teacher View
 - ❌ Hour 9 — Dashboard: Student View
