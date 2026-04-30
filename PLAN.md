@@ -45,10 +45,11 @@
 - Unread badge count on bell
 - Mark all as read button
 
-**Hour 7 — Dashboard: Admin View**
-- Summary cards: Total Students, Teachers, Classes, Active Assignments
-- Recent enrollments table (mock data)
-- Quick action buttons: "Add Teacher", "Add Student", "Create Class"
+**Hour 7 — Dashboard: Admin View** _(updated 2026-04-30)_
+- 2 tabs: "Student Progress" and "Session Attendance"
+- Tab 1 "Student Progress": all students × monthly assignments (submitted/score or N/A) + report status, filtered by month picker (default: current month)
+- Tab 2 "Session Attendance": all students × sessions for selected month, gray cell = student not in that group, checkmark = present
+- Gray cell distinguishes "not in this group" from "absent/not submitted"
 
 **Hour 8 — Dashboard: Teacher View**
 - "My Classes" cards: class name, student count, next assignment due
@@ -350,28 +351,35 @@
 ---
 
 ## Data Model Decisions
+_Last updated: 2026-04-30_
 
 ### Core Entities
 ```
-Subject         → the curriculum (Tahsin, Tahfizh, Bahasa Arab, Bahasa Inggris)
-Group           → a set of students + teacher studying a Subject (replaces "Class")
-Session         → one meeting of a Group on a specific date/time
-GroupEnrollment → audit log of student joins/leaves per Group
-GroupTeacher    → audit log of teacher assignments/switches per Group
-GroupPricing    → price history per Group (new record on price change)
-SessionAttendance → per-session attendance per student (PRESENT | ABSENT)
-Payment         → monthly billing record per student per Group
+Subject              → the curriculum (Tahsin, Tahfizh, Bahasa Arab, Bahasa Inggris)
+Group                → a set of students + teacher studying a Subject (replaces "Class")
+Session              → a log of a completed meeting, created by teacher after class
+GroupEnrollment      → audit log of student joins/leaves per Group
+GroupTeacher         → audit log of teacher assignments/switches per Group
+GroupPricing         → price history per Group (new record on price change)
+SessionAttendance    → per-session attendance per student
+Assignment           → monthly multiple choice quiz created by teacher per Group
+AssignmentQuestion   → individual question with options and correct answer
+AssignmentSubmission → student's completed attempt with auto-calculated score
+AssignmentAnswer     → student's selected option per question
+Report               → free text monthly report written by teacher per student
+Payment              → monthly billing record per student per Group
 ```
 
 ### Business Rules
 - 1 Subject → many Groups
 - 1 Group → many Sessions, many Students (via GroupEnrollment), 1 active Teacher
 - Bill = (PRESENT sessions / expectedSessionsPerMonth) × pricePerMonth
-- Session cancelled by teacher → no one billed for that session
+- Sessions are logged after the fact by the teacher — no pre-scheduling
 - Student absent → not billed for that session
-- Student joins mid-month → billed only from join date
+- Student always enrolled from start of month — billing always filtered per month
 - Payment method: bank transfer with proof of transfer image
 - Payment status: PENDING → VERIFIED (admin manually verifies)
+- Monthly cycle: Teacher creates Assignment → Students answer → Teacher writes Report → Student sees score + report
 
 ### Key Models (for Prisma schema in Phase 6)
 
@@ -388,10 +396,25 @@ Payment         → monthly billing record per student per Group
 - id, groupId, pricePerMonth, effectiveFrom
 
 **Session**
-- id, groupId, date, startTime, endTime, status (SCHEDULED | COMPLETED | CANCELLED)
+- id, groupId, teacherId, date, createdAt
 
 **SessionAttendance**
-- id, sessionId, studentId, status (PRESENT | ABSENT)
+- id, sessionId, studentId, present (boolean)
+
+**Assignment**
+- id, groupId, teacherId, month, year, title
+
+**AssignmentQuestion**
+- id, assignmentId, question, options (string[]), correctAnswer (string)
+
+**AssignmentSubmission**
+- id, assignmentId, studentId, score, submittedAt
+
+**AssignmentAnswer**
+- id, submissionId, questionId, selectedOption (string)
+
+**Report**
+- id, groupId, studentId, teacherId, month, year, content, publishedAt
 
 **Payment**
 - id, studentId, groupId, month, year, amount, proofOfTransfer, status (PENDING | VERIFIED)
