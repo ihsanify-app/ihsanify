@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const mockData = [
+const mockDataProgress = [
 	{
 		studentId: "1",
 		studentName: "Maryam",
@@ -59,6 +59,76 @@ const mockData = [
 	},
 ];
 
+const _mockGroupTahsin1 = {
+	groupId: "TH01",
+	groupName: "Tahsin Dasar 01",
+	month: 5,
+	year: 2026,
+	sessions: [
+		{
+			sessionId: 1,
+			date: "2026-05-05",
+			attendance: [
+				{ studentId: 1, studentName: "Maryam", isPresent: true },
+				{ studentId: 2, studentName: "Ibrahim", isPresent: true },
+			],
+		},
+		{
+			sessionId: 2,
+			date: "2026-05-12",
+			attendance: [
+				{ studentId: 1, studentName: "Maryam", isPresent: true },
+				{ studentId: 2, studentName: "Ibrahim", isPresent: true },
+			],
+		},
+		{
+			sessionId: 2,
+			date: "2026-05-19",
+			attendance: [
+				{ studentId: 1, studentName: "Maryam", isPresent: true },
+				{ studentId: 2, studentName: "Ibrahim", isPresent: true },
+			],
+		},
+		{
+			sessionId: 2,
+			date: "2026-05-26",
+			attendance: [
+				{ studentId: 1, studentName: "Maryam", isPresent: true },
+				{ studentId: 2, studentName: "Ibrahim", isPresent: false },
+			],
+		},
+	],
+};
+
+const _mockGroupEnglish1 = {
+	groupId: 2,
+	groupName: "Bahasa Inggris 01",
+	month: 5,
+	year: 2026,
+	sessions: [
+		{
+			sessionId: 1,
+			date: "2026-05-08",
+			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
+		},
+		{
+			sessionId: 2,
+			date: "2026-05-15",
+			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
+		},
+		{
+			sessionId: 3,
+			date: "2026-05-22",
+			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
+		},
+		{
+			sessionId: 4,
+			date: "2026-05-29",
+			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
+		},
+	],
+};
+
 export function AdminView() {
 	const [activeTab, setActiveTab] = useState<"progress" | "attendance">(
 		"progress",
@@ -67,7 +137,7 @@ export function AdminView() {
 	const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 	const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
 	const [year, month] = selectedMonth.split("-").map(Number);
-	const filteredData = mockData.filter(
+	const filteredData = mockDataProgress.filter(
 		(d) => d.month === month && d.year === year,
 	);
 	return (
