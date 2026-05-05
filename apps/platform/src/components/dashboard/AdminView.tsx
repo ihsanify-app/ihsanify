@@ -59,7 +59,7 @@ const mockDataProgress = [
 	},
 ];
 
-const _mockGroupTahsin1 = {
+const mockGroupTahsin1 = {
 	groupId: "TH01",
 	groupName: "Tahsin Dasar 01",
 	month: 5,
@@ -68,6 +68,8 @@ const _mockGroupTahsin1 = {
 		{
 			sessionId: 1,
 			date: "2026-05-05",
+			teacherId: 1,
+			teacherName: "Ustadzah Lisna",
 			attendance: [
 				{ studentId: 1, studentName: "Maryam", isPresent: true },
 				{ studentId: 2, studentName: "Ibrahim", isPresent: true },
@@ -76,22 +78,28 @@ const _mockGroupTahsin1 = {
 		{
 			sessionId: 2,
 			date: "2026-05-12",
+			teacherId: 1,
+			teacherName: "Ustadzah Lisna",
 			attendance: [
 				{ studentId: 1, studentName: "Maryam", isPresent: true },
 				{ studentId: 2, studentName: "Ibrahim", isPresent: true },
 			],
 		},
 		{
-			sessionId: 2,
+			sessionId: 3,
 			date: "2026-05-19",
+			teacherId: 1,
+			teacherName: "Ustadzah Lisna",
 			attendance: [
 				{ studentId: 1, studentName: "Maryam", isPresent: true },
 				{ studentId: 2, studentName: "Ibrahim", isPresent: true },
 			],
 		},
 		{
-			sessionId: 2,
+			sessionId: 4,
 			date: "2026-05-26",
+			teacherId: 1,
+			teacherName: "Ustadzah Lisna",
 			attendance: [
 				{ studentId: 1, studentName: "Maryam", isPresent: true },
 				{ studentId: 2, studentName: "Ibrahim", isPresent: false },
@@ -100,7 +108,7 @@ const _mockGroupTahsin1 = {
 	],
 };
 
-const _mockGroupEnglish1 = {
+const mockGroupEnglish1 = {
 	groupId: 2,
 	groupName: "Bahasa Inggris 01",
 	month: 5,
@@ -109,25 +117,35 @@ const _mockGroupEnglish1 = {
 		{
 			sessionId: 1,
 			date: "2026-05-08",
+			teacherId: 2,
+			teacherName: "Miss Poetry",
 			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
 		},
 		{
 			sessionId: 2,
 			date: "2026-05-15",
+			teacherId: 2,
+			teacherName: "Miss Poetry",
 			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
 		},
 		{
 			sessionId: 3,
 			date: "2026-05-22",
+			teacherId: 2,
+			teacherName: "Miss Poetry",
 			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
 		},
 		{
 			sessionId: 4,
 			date: "2026-05-29",
+			teacherId: 2,
+			teacherName: "Miss Poetry",
 			attendance: [{ studentId: 3, studentName: "Ahmad", isPresent: true }],
 		},
 	],
 };
+
+const mockAttendanceData = [mockGroupTahsin1, mockGroupEnglish1];
 
 export function AdminView() {
 	const [activeTab, setActiveTab] = useState<"progress" | "attendance">(
@@ -224,7 +242,57 @@ export function AdminView() {
 				)}
 				{activeTab === "attendance" && (
 					<div className="mt-3 border border-green-800 min-h-screen rounded-lg p-2">
-						Attendance Content
+						{mockAttendanceData.map((d) => (
+							<div key={d.groupId} className="flex flex-col">
+								<h3 className="text-xl font-bold text-green-800 mt-5 mb-3">
+									{d.groupName}
+								</h3>
+								<table className="w-full mb-10">
+									<thead className="bg-green-800 text-white uppercase">
+										<tr>
+											<th className="px-4 py-3 text-left">Student</th>
+											<th className="px-4 py-3 text-left">Teacher</th>
+											{d.sessions.map((s) => (
+												<th className="px-4 py-3 text-left" key={s.sessionId}>
+													{s.date}
+												</th>
+											))}
+											<th className="px-4 py-3 text-left">Total Attendance</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-gray-300">
+										{d.sessions[0].attendance.map((a) => (
+											<tr key={a.studentId} className="hover:bg-green-100">
+												<td className="px-4 py-3">{a.studentName}</td>
+												<td className="px-4 py-3">
+													{d.sessions[0].teacherName}
+												</td>
+												{d.sessions.map((session) => {
+													const record = session.attendance.find(
+														(att) => att.studentId === a.studentId,
+													);
+													return (
+														<td key={session.sessionId} className="px-4 py-3">
+															{record.isPresent ? "✅" : "❌"}
+														</td>
+													);
+												})}
+												{(() => {
+													const totalPresence = d.sessions.filter((session) =>
+														session.attendance.find(
+															(att) =>
+																att.studentId === a.studentId &&
+																att.isPresent === true,
+														),
+													).length;
+													return <td className="px-4 py-3">{totalPresence}</td>;
+												})()}
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						))}
 					</div>
 				)}
 			</div>
