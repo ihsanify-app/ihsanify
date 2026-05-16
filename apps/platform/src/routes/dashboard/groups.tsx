@@ -14,9 +14,11 @@ export const Route = createFileRoute("/dashboard/groups")({
 });
 
 function CreateGroupModal({
+	initialData,
 	onClose,
 	onSubmit,
 }: {
+	initialData: [];
 	onClose: () => void;
 	onSubmit: (newGroup: {
 		groupId: string;
@@ -28,10 +30,12 @@ function CreateGroupModal({
 		isActive: true;
 	}) => void;
 }) {
-	const [groupName, setGroupName] = useState("");
-	const [subjectId, setSubjectId] = useState("");
-	const [teacherId, setTeacherId] = useState("");
-	const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+	const [groupName, setGroupName] = useState(initialData?.groupName ?? "");
+	const [subjectId, setSubjectId] = useState(initialData?.subjectId ?? "");
+	const [teacherId, setTeacherId] = useState(initialData?.teacherId ?? "");
+	const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>(
+		initialData?.studentIds.map((s) => s.studentId) ?? [],
+	);
 	const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState<
 		true | false
 	>(false);
@@ -155,7 +159,7 @@ function CreateGroupModal({
 						type="button"
 						onClick={() =>
 							onSubmit({
-								groupId: Date.now().toString(),
+								groupId: initialData?.groupId ?? Date.now().toString(),
 								groupName,
 								subjectId,
 								subjectName: mockSubjects.find((s) => subjectId === s.subjectId)
@@ -171,7 +175,7 @@ function CreateGroupModal({
 						}
 						className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
 					>
-						Create
+						{initialData ? "Save Changes" : "Create"}
 					</button>
 				</div>
 			</div>
@@ -182,15 +186,29 @@ function RouteComponent() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedQuery, setSelectedQuery] = useState("");
 	const [groups, setGroups] = useState(mockGroups);
+	const [editingGroup, setEditingGroup] = useState(null);
 
 	return (
 		<section className="p-6">
 			{isModalOpen && (
 				<CreateGroupModal
+					initialData={editingGroup}
 					onClose={() => setIsModalOpen(false)}
 					onSubmit={(newGroup) => {
 						setGroups((prev) => [...prev, newGroup]);
 						setIsModalOpen(false);
+					}}
+				/>
+			)}
+			{editingGroup && (
+				<CreateGroupModal
+					initialData={editingGroup}
+					onClose={() => setEditingGroup(null)}
+					onSubmit={(updated) => {
+						setGroups((prev) =>
+							prev.map((g) => (g.groupId === updated.groupId ? updated : g)),
+						);
+						setEditingGroup(null);
 					}}
 				/>
 			)}
@@ -254,7 +272,11 @@ function RouteComponent() {
 							</div>
 							{mockUser.role === "admin" && (
 								<div className="flex justify-end gap-3">
-									<Pencil size="18" className="hover:text-yellow-400" />
+									<Pencil
+										size="18"
+										className="hover:text-yellow-400"
+										onClick={() => setEditingGroup(g)}
+									/>
 									<Ban size="18" className="hover:text-yellow-400" />
 								</div>
 							)}
