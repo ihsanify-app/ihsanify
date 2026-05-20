@@ -99,10 +99,10 @@
 - All tabs use mock data for now
 
 **Hour 12 — User Management Page (Admin)**
-- Tabs: "Teachers" | "Students"
-- Table: name, email, role, status, actions (edit, deactivate)
-- "Add Teacher" / "Add Student" button → form modal
-- Mock data: 5 teachers, 10 students
+- Table: name, email, role, subject badges, status — no tabs
+- "Add User" button → form modal (name, email, role, subjects)
+- Edit User: pencil icon per row → prefills modal
+- Delete User: trash icon per row → ConfirmModal
 
 **Hour 13 — Enrollment Flow UI**
 - "Enroll Student" → searchable student picker modal
