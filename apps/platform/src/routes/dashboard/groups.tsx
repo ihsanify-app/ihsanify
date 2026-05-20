@@ -13,6 +13,50 @@ export const Route = createFileRoute("/dashboard/groups")({
 	component: RouteComponent,
 });
 
+function ConfirmModal({
+	onConfirm,
+	onClose,
+}: {
+	onConfirm: () => void;
+	onClose: () => void;
+}) {
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-black/50 flex items-center justify-center font-bold z-50"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-lg p-6 w-96 flex flex-col gap-4"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2>Are you sure you want to delete this group?</h2>
+				<form>
+					<div className="flex flex-col gap-2">
+						<button
+							type="button"
+							className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+							onClick={onConfirm}
+						>
+							Yes
+						</button>
+						<button
+							type="button"
+							className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+							onClick={onClose}
+						>
+							No
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	);
+}
+
 function CreateGroupModal({
 	initialData,
 	onClose,
@@ -187,6 +231,7 @@ function RouteComponent() {
 	const [selectedQuery, setSelectedQuery] = useState("");
 	const [groups, setGroups] = useState(mockGroups);
 	const [editingGroup, setEditingGroup] = useState(null);
+	const [deletingGroupId, setDeletingGroupId] = useState(null);
 
 	return (
 		<section className="p-6">
@@ -210,6 +255,17 @@ function RouteComponent() {
 						);
 						setEditingGroup(null);
 					}}
+				/>
+			)}
+			{deletingGroupId && (
+				<ConfirmModal
+					onConfirm={() => {
+						setGroups((prev) =>
+							prev.filter((g) => g.groupId !== deletingGroupId),
+						);
+						setDeletingGroupId(null);
+					}}
+					onClose={() => setDeletingGroupId(null)}
 				/>
 			)}
 			<div className="flex justify-between items-center mb-4">
@@ -277,7 +333,11 @@ function RouteComponent() {
 										className="hover:text-yellow-400"
 										onClick={() => setEditingGroup(g)}
 									/>
-									<Ban size="18" className="hover:text-yellow-400" />
+									<Ban
+										size="18"
+										className="hover:text-yellow-400"
+										onClick={() => setDeletingGroupId(g.groupId)}
+									/>
 								</div>
 							)}
 						</div>
