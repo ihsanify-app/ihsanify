@@ -326,7 +326,7 @@
 **Phase 3 — Class & Enrollment UI**
 - ✅ Hour 10 — Groups List Page (fully complete — Create, Edit, Delete all working; Edit reuses CreateGroupModal with pre-filled data; Delete uses ConfirmModal with selection-slot pattern)
 - ❌ Hour 11 — Class Detail Page
-- 🔄 Hour 12 — User Management Page (in progress — table with role/status/subject badges done; Add Teacher + Add Student modal pending; Edit + Deactivate User not yet implemented)
+- 🔄 Hour 12 — User Management Page (in progress — table with role/status/subject badges done; Add User modal + Edit + Delete not yet implemented)
 - ❌ Hour 13 — Enrollment Flow UI
 
 **Phase 4 — Assignment UI**
