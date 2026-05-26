@@ -1,5 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle, User, UserCheck, XCircle } from "lucide-react";
+import {
+	Ban,
+	CheckCircle,
+	Pencil,
+	User,
+	UserCheck,
+	XCircle,
+} from "lucide-react";
+import { useState } from "react";
 import { mockUsers } from "../../lib/mockData";
 
 export const Route = createFileRoute("/dashboard/users")({
@@ -7,6 +15,8 @@ export const Route = createFileRoute("/dashboard/users")({
 });
 
 function RouteComponent() {
+	const [users, setUsers] = useState(mockUsers);
+
 	return (
 		<section className="m-10">
 			<div>
@@ -29,15 +39,14 @@ function RouteComponent() {
 								<th className="px-4 py-3 text-left">Student ID</th>
 								<th className="px-4 py-3 text-left">Subject</th>
 								<th className="px-4 py-3 text-left">Active</th>
+								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-gray-300">
-							{mockUsers.map((u) => (
+							{users.map((u) => (
 								<tr
 									key={u.userId}
-									className={
-										u.isActive ? "hover:bg-green-100" : "hover:bg-red-100"
-									}
+									className={u.isActive ? "hover:bg-green-100" : "bg-red-100"}
 								>
 									<td className="px-4 py-3">{u.userId}</td>
 									<td className="px-4 py-3">{u.name}</td>
@@ -92,18 +101,47 @@ function RouteComponent() {
 												: "-"}
 										</div>
 									</td>
-									<td className="px-4 py-3">
+									<td className="px-4 py-3 flex flex-row items-center gap-2">
 										{u.isActive ? (
-											<div className="flex flex-row gap-3">
-												<CheckCircle size={16} className="text-green-600" />
-												<span>Active</span>
-											</div>
+											<CheckCircle size={16} className="text-green-600" />
 										) : (
-											<div className="flex flex-row gap-3">
-												<XCircle size={16} className="text-red-600" />
-												<span>Inactive</span>
-											</div>
+											<XCircle size={16} className="text-red-600" />
 										)}
+										<button
+											type="button"
+											className={`cursor-pointer rounded-lg border-gray-400 shadow-2xl p-1 hover:text-white ${u.isActive ? "hover:bg-green-800" : "hover:bg-red-800"}`}
+											onClick={() =>
+												setUsers((prev) =>
+													prev.map((user) =>
+														user.userId === u.userId
+															? { ...user, isActive: !u.isActive }
+															: user,
+													),
+												)
+											}
+										>
+											{u.isActive ? (
+												<span>Deactivate</span>
+											) : (
+												<span>Activate</span>
+											)}
+										</button>
+									</td>
+									<td className="px-4 py-3">
+										<div className="flex flex-row gap-3">
+											<Pencil
+												size={16}
+												className="text-green-600 hover:cursor-pointer"
+											/>
+											<span>Edit</span>
+										</div>
+										<div className="flex flex-row gap-3">
+											<Ban
+												size={16}
+												className="text-red-600 hover:cursor-pointer"
+											/>
+											<span>Delete</span>
+										</div>
 									</td>
 								</tr>
 							))}
