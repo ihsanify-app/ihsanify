@@ -172,6 +172,7 @@
   - Each row: 1–5 star/dot rating scale
   - Optional short note per criteria
 - Overall summary textarea
+- "Enhance with AI" button next to the summary textarea → sends draft content to Claude API → streams improved version back into the textarea (teacher can edit further before saving)
 - "Save Draft" / "Publish to Student" buttons
 
 **Hour 22 — Progress Report View (Student)**
