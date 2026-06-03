@@ -193,6 +193,7 @@
 ## PHASE 6 — Backend APIs (Hours 24–33)
 
 > Now that UI is done, we know exactly what we need. Build only what the UI actually calls.
+> **Stack decision:** Use **Supabase** for database (Postgres), auth, and file storage. Keep **HonoJS** slim — only for the Claude API proxy (AI report enhancement) and any business logic that doesn't belong in SQL. Prisma is dropped in favour of Supabase's own client.
 
 **Hour 24 — Users & Auth Endpoints**
 - `GET /me` — current user profile + role
@@ -301,6 +302,8 @@
 - Set env vars both sides
 - Log in as each role, test full flow end to end
 - PDF export wiring (print CSS or jsPDF)
+- **Sentry** — wire up error monitoring on both frontend and backend (free tier); catches crashes in prod across all roles
+- **PostHog** — add product analytics (free up to 1M events/month); track how teachers/students navigate, which features get used
 
 ---
 
