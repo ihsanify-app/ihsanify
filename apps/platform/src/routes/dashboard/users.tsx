@@ -24,9 +24,12 @@ function CreateGroupModal({
 	initialData: [];
 	onClose: () => void;
 	onSubmit: (newUser: {
+		userId: string;
 		name: string;
 		email: string;
 		role: "teacher" | "student";
+		teacherId: string | null;
+		studentId: string | null;
 		gender: "male" | "female";
 		isActive: true;
 	}) => void;
@@ -35,7 +38,10 @@ function CreateGroupModal({
 	const [email, setEmail] = useState(initialData?.email ?? "");
 	const [role, setRole] = useState(initialData?.role ?? "");
 	const [gender, setGender] = useState(initialData?.gender ?? "");
-	const dropdownRef = useRef<HTMLDivElement>(null);
+	const [userId, setUserId] = useState(initialData?.userId ?? "");
+	const [studentId, setStudentId] = useState(initialData?.studentId ?? "");
+	const [teacherId, setTeacherId] = useState(initialData?.teacherId ?? "");
+	const _dropdownRef = useRef<HTMLDivElement>(null);
 
 	// function toggleStudent(id: string) {
 	// 	setSelectedStudentIds((prev) =>
@@ -76,6 +82,12 @@ function CreateGroupModal({
 					<div className="flex flex-col gap-2">
 						<input
 							className="border rounded-md p-2 text-sm"
+							placeholder="e.g. usr-01"
+							value={userId}
+							onChange={(e) => setUserId(e.target.value)}
+						/>
+						<input
+							className="border rounded-md p-2 text-sm"
 							placeholder="e.g. Ibrahim"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
@@ -89,18 +101,38 @@ function CreateGroupModal({
 						<select
 							className="border rounded-md p-2 text-sm"
 							value={role}
-							onChange={(e) => setRole(e.target.value)}
+							onChange={(e) => {
+								setRole(e.target.value);
+								setTeacherId("");
+								setStudentId("");
+							}}
 						>
 							<option value="">Select Role</option>
 							<option value="teacher">Teacher</option>
 							<option value="student">Student</option>
 						</select>
+						{role === "teacher" && (
+							<input
+								className="border rounded-md p-2 text-sm"
+								placeholder="e.g. te-01"
+								value={teacherId}
+								onChange={(e) => setTeacherId(e.target.value)}
+							/>
+						)}
+						{role === "student" && (
+							<input
+								className="border rounded-md p-2 text-sm"
+								placeholder="e.g. st-01"
+								value={studentId}
+								onChange={(e) => setStudentId(e.target.value)}
+							/>
+						)}
 						<select
 							className="border rounded-md p-2 text-sm"
 							value={gender}
 							onChange={(e) => setGender(e.target.value)}
 						>
-							<option value="">Select teacher</option>
+							<option value="">Select Gender</option>
 							<option value="male">Male</option>
 							<option value="female">Female</option>
 						</select>
@@ -118,10 +150,12 @@ function CreateGroupModal({
 						type="button"
 						onClick={() =>
 							onSubmit({
-								groupId: initialData?.userId ?? Date.now().toString(),
+								userId, //initialData?.userId ?? Date.now().toString(),
 								name,
 								email,
 								role,
+								studentId,
+								teacherId,
 								gender,
 								isActive: true,
 							})
@@ -281,10 +315,7 @@ function RouteComponent() {
 									</td>
 									<td className="px-4 py-3">
 										<div className="flex flex-row gap-3">
-											<button
-												type="button"
-												onClick={() => setEditingUser(true)}
-											>
+											<button type="button" onClick={() => setEditingUser(u)}>
 												<Pencil
 													size={16}
 													className="text-green-600 hover:cursor-pointer"
