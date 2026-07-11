@@ -302,8 +302,6 @@
 - Set env vars both sides
 - Log in as each role, test full flow end to end
 - PDF export wiring (print CSS or jsPDF)
-- **Sentry** — wire up error monitoring on both frontend and backend (free tier); catches crashes in prod across all roles
-- **PostHog** — add product analytics (free up to 1M events/month); track how teachers/students navigate, which features get used
 
 ---
 
