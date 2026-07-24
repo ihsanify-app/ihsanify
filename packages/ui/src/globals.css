@@ -1,1 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap");
 @import "tailwindcss";
+
+@theme {
+	--font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+	--font-heading: "Baloo 2", "Nunito", ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-heading);
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-green-600);
+	outline-offset: 2px;
+}
