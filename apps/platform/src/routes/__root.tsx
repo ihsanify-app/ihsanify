@@ -1,7 +1,6 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { Navbar } from "../components/landing/Navbar";
 import appCss from "../styles.css?url";
 import "@lmsproject/ui/globals.css";
 
@@ -16,13 +15,22 @@ export const Route = createRootRoute({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "TanStack Start Starter",
+				title: "Ihsanify",
+			},
+			{
+				name: "description",
+				content:
+					"A warm, simple learning platform for teachers, students, and families.",
 			},
 		],
 		links: [
 			{
 				rel: "stylesheet",
 				href: appCss,
+			},
+			{
+				rel: "icon",
+				href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>",
 			},
 		],
 	}),
@@ -36,7 +44,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				<Navbar />
 				{children}
 				<TanStackDevtools
 					config={{
