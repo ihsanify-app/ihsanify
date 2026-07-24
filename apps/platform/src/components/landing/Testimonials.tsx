@@ -35,19 +35,26 @@ const testimonials = [
 
 export function Testimonials() {
 	return (
-		<section className="bg-gray-70 py-10 px-6 text-center">
-			<h2 className="text-3xl font-bold text-green-700 ">Testimonials</h2>
-			<div className="grid grid-cols-4 gap-6 bg-white">
+		<section className="bg-green-50 py-16 px-6 text-center">
+			<h2 className="font-heading text-3xl font-bold text-green-800 mb-10">
+				What Families Say
+			</h2>
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
 				{testimonials.map((t) => (
-					<div key={t.id}>
-						<span className="text-4xl">{t.icon}</span>
-						<h4 className="text-lg font-semibold mt-3">{t.name}</h4>
-						<p className="text-gray-500 text-sm mt-1">
+					<div
+						key={t.id}
+						className="bg-white rounded-2xl p-6 shadow-sm border border-green-100 flex flex-col items-center"
+					>
+						<div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-3xl mb-3">
+							{t.icon}
+						</div>
+						<h4 className="text-lg font-semibold text-stone-800">{t.name}</h4>
+						<p className="text-sm text-stone-500 mb-3">
 							<i>{t.subject}</i>
 						</p>
-						<div className="bg-green-100 py-10 px-1 rounded-2xl ml-10 mr-10 mt-5 opacity-200 text-amber-800">
-							<p className="text-gray-700 text-lg">{t.content}</p>
-						</div>
+						<p className="text-stone-600 text-sm leading-relaxed">
+							{t.content}
+						</p>
 					</div>
 				))}
 			</div>
