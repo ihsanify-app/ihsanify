@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Features } from "../components/landing/Features";
 import { Footer } from "../components/landing/Footer";
 import { Hero } from "../components/landing/Hero";
+import { Navbar } from "../components/landing/Navbar";
 import { Stats } from "../components/landing/Stats";
 import { Teachers } from "../components/landing/Teachers";
 import { Testimonials } from "../components/landing/Testimonials";
@@ -17,6 +18,7 @@ function App() {
 			{/* <Sidebar>
 				<SidebarItem icon={<LayoutDashboard size={20} />} />
 			</Sidebar> */}
+			<Navbar />
 			<Hero schoolName="Madrasatul Ilmin Naafi" />
 			<Features />
 			<Teachers />
