@@ -68,38 +68,40 @@ function CreateGroupModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-black/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-lg p-6 w-96 gap-1"
+				className="bg-white rounded-2xl p-6 w-96 gap-1 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<h2>Create User</h2>
+				<h2 className="font-heading text-lg text-green-800 mb-3">
+					Create User
+				</h2>
 				<form>
 					<div className="flex flex-col gap-2">
 						<input
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							placeholder="e.g. usr-01"
 							value={userId}
 							onChange={(e) => setUserId(e.target.value)}
 						/>
 						<input
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							placeholder="e.g. Ibrahim"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 						/>
 						<input
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							placeholder="e.g. admin@ihsanify.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 						/>
 						<select
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							value={role}
 							onChange={(e) => {
 								setRole(e.target.value);
@@ -113,7 +115,7 @@ function CreateGroupModal({
 						</select>
 						{role === "teacher" && (
 							<input
-								className="border rounded-md p-2 text-sm"
+								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 								placeholder="e.g. te-01"
 								value={teacherId}
 								onChange={(e) => setTeacherId(e.target.value)}
@@ -121,14 +123,14 @@ function CreateGroupModal({
 						)}
 						{role === "student" && (
 							<input
-								className="border rounded-md p-2 text-sm"
+								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 								placeholder="e.g. st-01"
 								value={studentId}
 								onChange={(e) => setStudentId(e.target.value)}
 							/>
 						)}
 						<select
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							value={gender}
 							onChange={(e) => setGender(e.target.value)}
 						>
@@ -142,7 +144,7 @@ function CreateGroupModal({
 					<button
 						type="button"
 						onClick={onClose}
-						className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
 					>
 						Cancel
 					</button>
@@ -160,7 +162,7 @@ function CreateGroupModal({
 								isActive: true,
 							})
 						}
-						className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						{initialData ? "Save Changes" : "Create"}
 					</button>
@@ -203,20 +205,17 @@ function RouteComponent() {
 					<div className="flex justify-items-start mb-4">
 						<button
 							type="button"
-							className="flex font-bold items-center gap-2 cursor-pointer hover:text-white hover:bg-green-800 hover:rounded-md p-2"
+							className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
 							onClick={() => setIsModalOpen(true)}
 						>
-							<PlusCircle
-								size={18}
-								className="cursor-pointer hover:bg-yellow-400 rounded-full"
-							/>
+							<PlusCircle size={18} />
 							Create User
 						</button>
 					</div>
 				)}
-				<div className="mt-3 border border-green-800 min-h-screen rounded-lg p-2">
+				<div className="mt-3 border border-green-100 min-h-screen rounded-2xl overflow-hidden bg-white shadow-sm">
 					<table className="w-full">
-						<thead className="bg-green-800 text-white uppercase">
+						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
 								<th className="px-4 py-3 text-left">User ID</th>
 								<th className="px-4 py-3 text-left">Name</th>
@@ -228,19 +227,19 @@ function RouteComponent() {
 								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
 						</thead>
-						<tbody className="divide-y divide-gray-300">
+						<tbody className="divide-y divide-stone-100">
 							{users.map((u) => (
 								<tr
 									key={u.userId}
-									className={u.isActive ? "hover:bg-green-100" : "bg-red-100"}
+									className={u.isActive ? "hover:bg-green-50" : "bg-rose-50"}
 								>
 									<td className="px-4 py-3">{u.userId}</td>
 									<td className="px-4 py-3">{u.name}</td>
-									<td className="px-4 py-3">{u.role}</td>
+									<td className="px-4 py-3 capitalize">{u.role}</td>
 									<td className="px-4 py-3">
 										{u.teacherId ? (
-											<div className="flex flex-row gap-3">
-												<User size={16} className="text-blue-600" />
+											<div className="flex flex-row items-center gap-2">
+												<User size={16} className="text-sky-600" />
 												<span>{u.teacherId}</span>
 											</div>
 										) : (
@@ -251,7 +250,7 @@ function RouteComponent() {
 									</td>
 									<td className="px-4 py-3">
 										{u.studentId ? (
-											<div className="flex flex-row gap-3">
+											<div className="flex flex-row items-center gap-2">
 												<UserCheck size={16} className="text-green-600" />
 												<span>{u.studentId}</span>
 											</div>
@@ -269,16 +268,16 @@ function RouteComponent() {
 															key={s.subjectId}
 															className={
 																s.subjectName === "Calistung"
-																	? "bg-purple-800 text-white w-fit p-1 rounded-md"
+																	? "bg-violet-100 text-violet-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
 																	: s.subjectName === "Tahsin"
-																		? "bg-blue-800 text-white rounded-md w-fit p-1"
+																		? "bg-sky-100 text-sky-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
 																		: s.subjectName === "Tahfizh"
-																			? "bg-green-800 text-white w-fit p-1 rounded-md"
+																			? "bg-green-100 text-green-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
 																			: s.subjectName === "Bahasa Arab"
-																				? "bg-red-800 text-white w-fit p-1 rounded-md"
+																				? "bg-rose-100 text-rose-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
 																				: s.subjectName === "Bahasa Inggris"
-																					? "bg-yellow-600 text-white w-fit p-1 rounded-md"
-																					: "bg-gray-400 text-white w-fit p-1 rounded-md"
+																					? "bg-amber-100 text-amber-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																					: "bg-stone-100 text-stone-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
 															}
 														>
 															{s.subjectName}
@@ -287,48 +286,51 @@ function RouteComponent() {
 												: "-"}
 										</div>
 									</td>
-									<td className="px-4 py-3 flex flex-row items-center gap-2">
-										{u.isActive ? (
-											<CheckCircle size={16} className="text-green-600" />
-										) : (
-											<XCircle size={16} className="text-red-600" />
-										)}
-										<button
-											type="button"
-											className={`cursor-pointer rounded-lg border-gray-400 shadow-2xl p-1 hover:text-white ${u.isActive ? "hover:bg-green-800" : "hover:bg-red-800"}`}
-											onClick={() =>
-												setUsers((prev) =>
-													prev.map((user) =>
-														user.userId === u.userId
-															? { ...user, isActive: !u.isActive }
-															: user,
-													),
-												)
-											}
-										>
+									<td className="px-4 py-3">
+										<div className="flex flex-row items-center gap-2">
 											{u.isActive ? (
-												<span>Deactivate</span>
+												<CheckCircle size={16} className="text-green-600" />
 											) : (
-												<span>Activate</span>
+												<XCircle size={16} className="text-rose-500" />
 											)}
-										</button>
+											<button
+												type="button"
+												className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+													u.isActive
+														? "bg-green-100 text-green-700 hover:bg-green-200"
+														: "bg-rose-100 text-rose-700 hover:bg-rose-200"
+												}`}
+												onClick={() =>
+													setUsers((prev) =>
+														prev.map((user) =>
+															user.userId === u.userId
+																? { ...user, isActive: !u.isActive }
+																: user,
+														),
+													)
+												}
+											>
+												{u.isActive ? "Deactivate" : "Activate"}
+											</button>
+										</div>
 									</td>
 									<td className="px-4 py-3">
 										<div className="flex flex-row gap-3">
-											<button type="button" onClick={() => setEditingUser(u)}>
-												<Pencil
-													size={16}
-													className="text-green-600 hover:cursor-pointer"
-												/>
+											<button
+												type="button"
+												className="flex items-center gap-1 text-green-700 hover:text-green-800 cursor-pointer"
+												onClick={() => setEditingUser(u)}
+											>
+												<Pencil size={16} />
 												<span>Edit</span>
 											</button>
-										</div>
-										<div className="flex flex-row gap-3">
-											<Ban
-												size={16}
-												className="text-red-600 hover:cursor-pointer"
-											/>
-											<span>Delete</span>
+											<button
+												type="button"
+												className="flex items-center gap-1 text-rose-500 hover:text-rose-600 cursor-pointer"
+											>
+												<Ban size={16} />
+												<span>Delete</span>
+											</button>
 										</div>
 									</td>
 								</tr>
