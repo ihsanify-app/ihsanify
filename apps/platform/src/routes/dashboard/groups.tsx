@@ -24,28 +24,30 @@ function ConfirmModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-black/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-lg p-6 w-96 flex flex-col gap-4"
+				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<h2>Are you sure you want to delete this group?</h2>
+				<h2 className="text-stone-800">
+					Are you sure you want to delete this group?
+				</h2>
 				<form>
 					<div className="flex flex-col gap-2">
 						<button
 							type="button"
-							className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+							className="cursor-pointer rounded-xl bg-rose-600 text-white p-2 hover:bg-rose-700 transition-colors"
 							onClick={onConfirm}
 						>
 							Yes
 						</button>
 						<button
 							type="button"
-							className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+							className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 p-2 hover:bg-stone-50 transition-colors"
 							onClick={onClose}
 						>
 							No
@@ -110,26 +112,28 @@ function CreateGroupModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-black/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-lg p-6 w-96"
+				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<h2>Create Group</h2>
+				<h2 className="font-heading text-lg text-green-800 mb-3">
+					Create Group
+				</h2>
 				<form>
 					<div className="flex flex-col gap-2">
 						<input
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							placeholder="e.g. Tahsin Dasar 01"
 							value={groupName}
 							onChange={(e) => setGroupName(e.target.value)}
 						/>
 						<select
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							value={subjectId}
 							onChange={(e) => setSubjectId(e.target.value)}
 						>
@@ -141,7 +145,7 @@ function CreateGroupModal({
 							))}
 						</select>
 						<select
-							className="border rounded-md p-2 text-sm"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							value={teacherId}
 							onChange={(e) => setTeacherId(e.target.value)}
 						>
@@ -160,7 +164,7 @@ function CreateGroupModal({
 								onKeyDown={(e) =>
 									e.key === "Enter" && setIsStudentDropdownOpen((prev) => !prev)
 								}
-								className="border rounded-md p-2 text-sm cursor-pointer min-h-9 w-full text-left"
+								className="border border-stone-300 rounded-xl p-2 text-sm cursor-pointer min-h-9 w-full text-left"
 							>
 								{selectedStudentIds.length === 0
 									? "Select Students"
@@ -170,13 +174,13 @@ function CreateGroupModal({
 											.join(", ")}
 							</button>
 							{isStudentDropdownOpen && (
-								<div className="border rounded-md mt-1 p-2 grid grid-cols-3 gap-1 max-h-30 overflow-y-auto">
+								<div className="border border-stone-200 rounded-xl mt-1 p-2 grid grid-cols-3 gap-1 max-h-30 overflow-y-auto">
 									{mockStudents.map((s) => (
 										<label
 											key={s.studentId}
 											onClick={(e) => e.stopPropagation()}
 											onKeyDown={(e) => e.stopPropagation()}
-											className="flex items-center gap-2 text-sm cursor-pointer hover:text-green-800 hover:underline"
+											className="flex items-center gap-2 text-sm cursor-pointer text-stone-600 hover:text-green-700"
 										>
 											<input
 												type="checkbox"
@@ -195,7 +199,7 @@ function CreateGroupModal({
 					<button
 						type="button"
 						onClick={onClose}
-						className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
 					>
 						Cancel
 					</button>
@@ -217,7 +221,7 @@ function CreateGroupModal({
 								isActive: true,
 							})
 						}
-						className="cursor-pointer rounded-lg border shadow-2xl p-2 hover:bg-green-800 hover:text-white"
+						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						{initialData ? "Save Changes" : "Create"}
 					</button>
@@ -269,26 +273,25 @@ function RouteComponent() {
 				/>
 			)}
 			<div className="flex justify-between items-center mb-4">
-				<h1 className="text-xl font-bold">Groups</h1>
+				<h1 className="font-heading text-2xl font-bold text-green-800">
+					Groups
+				</h1>
 				<input
 					type="text"
 					placeholder="Search Group / Teacher / Subject ..."
 					value={selectedQuery}
 					onChange={(e) => setSelectedQuery(e.target.value)}
-					className="border rounded-md p-2"
+					className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors"
 				/>
 			</div>
 			{mockUser.role === "admin" && (
 				<div className="flex justify-items-start mb-4">
 					<button
 						type="button"
-						className="flex font-bold items-center gap-2 cursor-pointer hover:text-white hover:bg-green-800 hover:rounded-md p-2"
+						className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
 						onClick={() => setIsModalOpen(true)}
 					>
-						<PlusCircle
-							size={18}
-							className="cursor-pointer hover:bg-yellow-400 rounded-full"
-						/>
+						<PlusCircle size={18} />
 						Create Group
 					</button>
 				</div>
@@ -308,34 +311,30 @@ function RouteComponent() {
 						<div
 							key={g.groupId}
 							className={`animate-fade-slide-up
-					border rounded-lg
+					rounded-2xl
 					text-white p-5 cursor-pointer
 					transition-all duration-200
 					hover:-translate-y-1 hover:scale-105
 					hover:shadow-xl flex flex-col gap-3
-				${g.isActive === false ? "bg-gray-400" : "bg-green-800"}`}
+				${g.isActive === false ? "bg-stone-400" : "bg-green-700"}`}
 							style={{ animationDelay: `${i * 80}ms` }}
 						>
-							<div className="font-semibold">{g.groupName}</div>
-							<div className="text-sm">{g.teacherName}</div>
-							<div className="flex flex-row gap-3">
-								<div className="text-4xl text-white font-bold hover:text-yellow-400">
-									{g.studentIds.length}{" "}
-								</div>
-								<div className="items-baseline">
-									{g.studentIds.length === 1 ? "Student" : "Students"}
-								</div>
+							<div className="font-heading font-semibold">{g.groupName}</div>
+							<div className="text-sm text-green-100">{g.teacherName}</div>
+							<div className="flex flex-row gap-3 items-baseline">
+								<div className="text-4xl font-bold">{g.studentIds.length} </div>
+								<div>{g.studentIds.length === 1 ? "Student" : "Students"}</div>
 							</div>
 							{mockUser.role === "admin" && (
-								<div className="flex justify-end gap-3">
+								<div className="flex justify-end gap-3 text-green-100">
 									<Pencil
 										size="18"
-										className="hover:text-yellow-400"
+										className="hover:text-white cursor-pointer"
 										onClick={() => setEditingGroup(g)}
 									/>
 									<Ban
 										size="18"
-										className="hover:text-yellow-400"
+										className="hover:text-white cursor-pointer"
 										onClick={() => setDeletingGroupId(g.groupId)}
 									/>
 								</div>
