@@ -90,6 +90,7 @@ model Group {
 
   enrollmentHistory GroupEnrollment[]
   teacherHistory    GroupTeacher[]
+  sessions          Session[]
 }
 
 model GroupEnrollment {
