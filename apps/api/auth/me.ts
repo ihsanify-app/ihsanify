@@ -17,7 +17,7 @@ meRouter.get("/me", async (c) => {
 	}
 	const token = authHeader.split(" ")[1];
 	try {
-		const verifiedMe: TokenPayload = jwt.verify(token, JWT_SECRET);
+		const verifiedMe = jwt.verify(token, JWT_SECRET) as TokenPayload;
 		const verifiedUser = await prisma.user.findUnique({
 			where: {
 				id: verifiedMe.userId,
