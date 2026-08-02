@@ -1,17 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ban, Pencil, PlusCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
-import {
-	mockGroups,
-	mockStudents,
-	mockSubjects,
-	mockTeachers,
-} from "../../lib/mockData";
 
 export const Route = createFileRoute("/dashboard/groups")({
 	component: RouteComponent,
 });
+
+type Group = {
+	groupId: string;
+	groupName: string;
+	subjectId: string;
+	subjectName: string | null;
+	teacherId: string | null;
+	teacherName: string | null;
+	isActive: boolean;
+	studentIds: { studentId: string; studentName: string }[];
+};
+type Option = { id: string; name: string };
 
 function ConfirmModal({
 	onConfirm,
@@ -61,19 +68,22 @@ function ConfirmModal({
 
 function CreateGroupModal({
 	initialData,
+	subjects,
+	teachers,
+	students,
 	onClose,
 	onSubmit,
 }: {
-	initialData: [];
+	initialData: Group | null;
+	subjects: Option[];
+	teachers: Option[];
+	students: Option[];
 	onClose: () => void;
-	onSubmit: (newGroup: {
-		groupId: string;
+	onSubmit: (payload: {
 		groupName: string;
 		subjectId: string;
 		teacherId: string;
-		teacherName: string;
-		studentIds: [];
-		isActive: true;
+		studentIds: string[];
 	}) => void;
 }) {
 	const [groupName, setGroupName] = useState(initialData?.groupName ?? "");
@@ -122,7 +132,7 @@ function CreateGroupModal({
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
-					Create Group
+					{initialData ? "Edit Group" : "Create Group"}
 				</h2>
 				<form>
 					<div className="flex flex-col gap-2">
@@ -138,9 +148,9 @@ function CreateGroupModal({
 							onChange={(e) => setSubjectId(e.target.value)}
 						>
 							<option value="">Select subject</option>
-							{mockSubjects.map((s) => (
-								<option key={s.subjectId} value={s.subjectId}>
-									{s.subjectName}
+							{subjects.map((s) => (
+								<option key={s.id} value={s.id}>
+									{s.name}
 								</option>
 							))}
 						</select>
@@ -150,9 +160,9 @@ function CreateGroupModal({
 							onChange={(e) => setTeacherId(e.target.value)}
 						>
 							<option value="">Select teacher</option>
-							{mockTeachers.map((t) => (
-								<option key={t.teacherId} value={t.teacherId}>
-									{t.teacherName}
+							{teachers.map((t) => (
+								<option key={t.id} value={t.id}>
+									{t.name}
 								</option>
 							))}
 						</select>
@@ -168,26 +178,26 @@ function CreateGroupModal({
 							>
 								{selectedStudentIds.length === 0
 									? "Select Students"
-									: mockStudents
-											.filter((s) => selectedStudentIds.includes(s.studentId))
-											.map((s) => s.studentName)
+									: students
+											.filter((s) => selectedStudentIds.includes(s.id))
+											.map((s) => s.name)
 											.join(", ")}
 							</button>
 							{isStudentDropdownOpen && (
 								<div className="border border-stone-200 rounded-xl mt-1 p-2 grid grid-cols-3 gap-1 max-h-30 overflow-y-auto">
-									{mockStudents.map((s) => (
+									{students.map((s) => (
 										<label
-											key={s.studentId}
+											key={s.id}
 											onClick={(e) => e.stopPropagation()}
 											onKeyDown={(e) => e.stopPropagation()}
 											className="flex items-center gap-2 text-sm cursor-pointer text-stone-600 hover:text-green-700"
 										>
 											<input
 												type="checkbox"
-												onChange={() => toggleStudent(s.studentId)}
-												checked={selectedStudentIds.includes(s.studentId)}
+												onChange={() => toggleStudent(s.id)}
+												checked={selectedStudentIds.includes(s.id)}
 											/>
-											{s.studentName}
+											{s.name}
 										</label>
 									))}
 								</div>
@@ -207,18 +217,10 @@ function CreateGroupModal({
 						type="button"
 						onClick={() =>
 							onSubmit({
-								groupId: initialData?.groupId ?? Date.now().toString(),
 								groupName,
 								subjectId,
-								subjectName: mockSubjects.find((s) => subjectId === s.subjectId)
-									?.subjectName,
 								teacherId,
-								teacherName: mockTeachers.find((t) => teacherId === t.teacherId)
-									?.teacherName,
-								studentIds: mockStudents.filter((s) =>
-									selectedStudentIds.includes(s.studentId),
-								),
-								isActive: true,
+								studentIds: selectedStudentIds,
 							})
 						}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
@@ -230,45 +232,139 @@ function CreateGroupModal({
 		</div>
 	);
 }
+
 function RouteComponent() {
+	const [loadState, setLoadState] = useState<
+		"loading" | "ready" | "unauthorized"
+	>("loading");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedQuery, setSelectedQuery] = useState("");
-	const [groups, setGroups] = useState(mockGroups);
-	const [editingGroup, setEditingGroup] = useState(null);
-	const [deletingGroupId, setDeletingGroupId] = useState(null);
+	const [groups, setGroups] = useState<Group[]>([]);
+	const [subjects, setSubjects] = useState<Option[]>([]);
+	const [teachers, setTeachers] = useState<Option[]>([]);
+	const [students, setStudents] = useState<Option[]>([]);
+	const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+	const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
+
+	useEffect(() => {
+		apiFetch("/groups").then(({ status, body }) => {
+			if (status === 401) {
+				setLoadState("unauthorized");
+				return;
+			}
+			setGroups(body?.data ?? []);
+			setLoadState("ready");
+		});
+
+		if (mockUser.role === "admin") {
+			apiFetch("/subjects").then(({ body }) =>
+				setSubjects(
+					(body?.data ?? []).map((s: any) => ({
+						id: s.subjectId,
+						name: s.subjectName,
+					})),
+				),
+			);
+			apiFetch("/teachers").then(({ body }) =>
+				setTeachers(
+					(body?.data ?? []).map((t: any) => ({
+						id: t.teacherId,
+						name: t.teacherName,
+					})),
+				),
+			);
+			apiFetch("/students").then(({ body }) =>
+				setStudents(
+					(body?.data ?? []).map((s: any) => ({
+						id: s.studentId,
+						name: s.studentName,
+					})),
+				),
+			);
+		}
+	}, []);
+
+	async function handleCreate(payload: {
+		groupName: string;
+		subjectId: string;
+		teacherId: string;
+		studentIds: string[];
+	}) {
+		const { body } = await apiFetch("/groups", {
+			method: "POST",
+			body: JSON.stringify(payload),
+		});
+		if (body?.success) {
+			setGroups((prev) => [...prev, body.data]);
+			setIsModalOpen(false);
+		}
+	}
+
+	async function handleUpdate(
+		groupId: string,
+		payload: {
+			groupName: string;
+			subjectId: string;
+			teacherId: string;
+			studentIds: string[];
+		},
+	) {
+		const { body } = await apiFetch(`/groups/${groupId}`, {
+			method: "PATCH",
+			body: JSON.stringify(payload),
+		});
+		if (body?.success) {
+			setGroups((prev) =>
+				prev.map((g) => (g.groupId === groupId ? body.data : g)),
+			);
+			setEditingGroup(null);
+		}
+	}
+
+	async function handleDelete(groupId: string) {
+		const { body } = await apiFetch(`/groups/${groupId}`, { method: "DELETE" });
+		if (body?.success) {
+			setGroups((prev) => prev.filter((g) => g.groupId !== groupId));
+			setDeletingGroupId(null);
+		}
+	}
+
+	if (loadState === "unauthorized") {
+		return (
+			<section className="p-6 text-center text-stone-500">
+				<p className="mb-3">Please log in to view groups.</p>
+				<Link to="/login" className="text-green-700 font-semibold underline">
+					Go to login
+				</Link>
+			</section>
+		);
+	}
 
 	return (
 		<section className="p-6">
 			{isModalOpen && (
 				<CreateGroupModal
-					initialData={editingGroup}
+					initialData={null}
+					subjects={subjects}
+					teachers={teachers}
+					students={students}
 					onClose={() => setIsModalOpen(false)}
-					onSubmit={(newGroup) => {
-						setGroups((prev) => [...prev, newGroup]);
-						setIsModalOpen(false);
-					}}
+					onSubmit={handleCreate}
 				/>
 			)}
 			{editingGroup && (
 				<CreateGroupModal
 					initialData={editingGroup}
+					subjects={subjects}
+					teachers={teachers}
+					students={students}
 					onClose={() => setEditingGroup(null)}
-					onSubmit={(updated) => {
-						setGroups((prev) =>
-							prev.map((g) => (g.groupId === updated.groupId ? updated : g)),
-						);
-						setEditingGroup(null);
-					}}
+					onSubmit={(payload) => handleUpdate(editingGroup.groupId, payload)}
 				/>
 			)}
 			{deletingGroupId && (
 				<ConfirmModal
-					onConfirm={() => {
-						setGroups((prev) =>
-							prev.filter((g) => g.groupId !== deletingGroupId),
-						);
-						setDeletingGroupId(null);
-					}}
+					onConfirm={() => handleDelete(deletingGroupId)}
 					onClose={() => setDeletingGroupId(null)}
 				/>
 			)}
@@ -302,10 +398,12 @@ function RouteComponent() {
 					.filter(
 						(g) =>
 							g.groupName.toLowerCase().includes(selectedQuery.toLowerCase()) ||
-							g.teacherName
+							(g.teacherName ?? "")
 								.toLowerCase()
 								.includes(selectedQuery.toLowerCase()) ||
-							g.subjectName.toLowerCase().includes(selectedQuery.toLowerCase()),
+							(g.subjectName ?? "")
+								.toLowerCase()
+								.includes(selectedQuery.toLowerCase()),
 					)
 					.map((g, i) => (
 						<div
@@ -320,7 +418,9 @@ function RouteComponent() {
 							style={{ animationDelay: `${i * 80}ms` }}
 						>
 							<div className="font-heading font-semibold">{g.groupName}</div>
-							<div className="text-sm text-green-100">{g.teacherName}</div>
+							<div className="text-sm text-green-100">
+								{g.teacherName ?? "No teacher assigned"}
+							</div>
 							<div className="flex flex-row gap-3 items-baseline">
 								<div className="text-4xl font-bold">{g.studentIds.length} </div>
 								<div>{g.studentIds.length === 1 ? "Student" : "Students"}</div>
