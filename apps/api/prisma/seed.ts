@@ -1,0 +1,258 @@
+import { hash } from "bcryptjs";
+import { prisma } from "../src/utils/prisma";
+
+const SEED_PASSWORD = "password123";
+
+async function main() {
+	const password = await hash(SEED_PASSWORD, 10);
+
+	const subjectNames = [
+		"Tahsin",
+		"Tahfizh",
+		"Bahasa Inggris",
+		"Bahasa Arab",
+		"Calistung",
+	];
+	const subjects: Record<string, { id: string }> = {};
+	for (const name of subjectNames) {
+		subjects[name] = await prisma.subject.upsert({
+			where: { name },
+			update: {},
+			create: { name },
+		});
+	}
+
+	await prisma.user.upsert({
+		where: { email: "admin@ihsanify.com" },
+		update: {},
+		create: {
+			email: "admin@ihsanify.com",
+			password,
+			name: "Admin",
+			role: "ADMIN",
+		},
+	});
+
+	const teacherSeeds = [
+		{
+			email: "lisna@ihsanify.com",
+			name: "Ustadzah Lisna",
+			gender: "FEMALE" as const,
+			subjects: ["Tahsin", "Calistung"],
+			isActive: true,
+		},
+		{
+			email: "mulki@ihsanify.com",
+			name: "Mister Mulki",
+			gender: "MALE" as const,
+			subjects: ["Bahasa Inggris"],
+			isActive: true,
+		},
+		{
+			email: "siska@ihsanify.com",
+			name: "Ustadzah Siska",
+			gender: "FEMALE" as const,
+			subjects: ["Tahfizh"],
+			isActive: true,
+		},
+		{
+			email: "afifah@ihsanify.com",
+			name: "Ustadzah Afifah",
+			gender: "FEMALE" as const,
+			subjects: ["Bahasa Arab"],
+			isActive: true,
+		},
+		{
+			email: "ghalda@ihsanify.com",
+			name: "Ustadzah Ghalda",
+			gender: "FEMALE" as const,
+			subjects: ["Calistung"],
+			isActive: false,
+		},
+	];
+
+	const teachers: Record<string, { id: string; userId: string }> = {};
+	for (const t of teacherSeeds) {
+		const user = await prisma.user.upsert({
+			where: { email: t.email },
+			update: {},
+			create: {
+				email: t.email,
+				password,
+				name: t.name,
+				role: "TEACHER",
+				gender: t.gender,
+				isActive: t.isActive,
+			},
+		});
+		const teacher = await prisma.teacher.upsert({
+			where: { userId: user.id },
+			update: {},
+			create: { userId: user.id },
+		});
+		teachers[t.name] = teacher;
+
+		for (const subjectName of t.subjects) {
+			await prisma.teacherSubject.upsert({
+				where: {
+					teacherId_subjectId: {
+						teacherId: teacher.id,
+						subjectId: subjects[subjectName].id,
+					},
+				},
+				update: {},
+				create: {
+					teacherId: teacher.id,
+					subjectId: subjects[subjectName].id,
+				},
+			});
+		}
+	}
+
+	const studentSeeds = [
+		{
+			email: "maryam@ihsanify.com",
+			name: "Maryam",
+			gender: "FEMALE" as const,
+			isActive: true,
+		},
+		{
+			email: "ibrahim@ihsanify.com",
+			name: "Ibrahim",
+			gender: "MALE" as const,
+			isActive: true,
+		},
+		{
+			email: "ahmad@ihsanify.com",
+			name: "Ahmad",
+			gender: "MALE" as const,
+			isActive: true,
+		},
+		{
+			email: "dawud@ihsanify.com",
+			name: "Dawud",
+			gender: "MALE" as const,
+			isActive: true,
+		},
+		{
+			email: "ilyas@ihsanify.com",
+			name: "Ilyas",
+			gender: "MALE" as const,
+			isActive: false,
+		},
+	];
+
+	const students: Record<string, { id: string; userId: string }> = {};
+	for (const s of studentSeeds) {
+		const user = await prisma.user.upsert({
+			where: { email: s.email },
+			update: {},
+			create: {
+				email: s.email,
+				password,
+				name: s.name,
+				role: "STUDENT",
+				gender: s.gender,
+				isActive: s.isActive,
+			},
+		});
+		const student = await prisma.student.upsert({
+			where: { userId: user.id },
+			update: {},
+			create: { userId: user.id },
+		});
+		students[s.name] = student;
+	}
+
+	const groupSeeds = [
+		{
+			name: "Tahsin Dasar - 01",
+			subject: "Tahsin",
+			teacher: "Ustadzah Lisna",
+			students: ["Maryam", "Ibrahim"],
+			isActive: true,
+		},
+		{
+			name: "Tahfizh Dasar - 01",
+			subject: "Tahfizh",
+			teacher: "Ustadzah Siska",
+			students: ["Maryam", "Ibrahim"],
+			isActive: true,
+		},
+		{
+			name: "Bahasa Inggris Dasar - 01",
+			subject: "Bahasa Inggris",
+			teacher: "Mister Mulki",
+			students: ["Ahmad"],
+			isActive: true,
+		},
+		{
+			name: "Bahasa Arab Dasar - 01",
+			subject: "Bahasa Arab",
+			teacher: "Ustadzah Afifah",
+			students: ["Dawud"],
+			isActive: true,
+		},
+		{
+			name: "Calistung Dasar - 01",
+			subject: "Calistung",
+			teacher: "Ustadzah Lisna",
+			students: ["Ilyas"],
+			isActive: false,
+		},
+	];
+
+	for (const g of groupSeeds) {
+		const existing = await prisma.group.findFirst({ where: { name: g.name } });
+		const group =
+			existing ??
+			(await prisma.group.create({
+				data: {
+					name: g.name,
+					subjectId: subjects[g.subject].id,
+					isActive: g.isActive,
+				},
+			}));
+
+		const teacherAssigned = await prisma.groupTeacher.findFirst({
+			where: { groupId: group.id, teacherId: teachers[g.teacher].id },
+		});
+		if (!teacherAssigned) {
+			await prisma.groupTeacher.create({
+				data: {
+					groupId: group.id,
+					teacherId: teachers[g.teacher].id,
+					action: "ASSIGN",
+				},
+			});
+		}
+
+		for (const studentName of g.students) {
+			const enrolled = await prisma.groupEnrollment.findFirst({
+				where: { groupId: group.id, studentId: students[studentName].id },
+			});
+			if (!enrolled) {
+				await prisma.groupEnrollment.create({
+					data: {
+						groupId: group.id,
+						studentId: students[studentName].id,
+						action: "JOIN",
+					},
+				});
+			}
+		}
+	}
+
+	console.log(
+		`Seed complete. All seeded users share the password: ${SEED_PASSWORD}`,
+	);
+}
+
+main()
+	.catch((e) => {
+		console.error(e);
+		process.exit(1);
+	})
+	.finally(async () => {
+		await prisma.$disconnect();
+	});
