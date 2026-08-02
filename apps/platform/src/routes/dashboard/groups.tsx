@@ -257,29 +257,44 @@ function RouteComponent() {
 		});
 
 		if (mockUser.role === "admin") {
-			apiFetch("/subjects").then(({ body }) =>
-				setSubjects(
-					(body?.data ?? []).map((s: any) => ({
-						id: s.subjectId,
-						name: s.subjectName,
-					})),
-				),
+			apiFetch("/subjects").then(
+				({
+					body,
+				}: {
+					body: { data: { subjectId: string; subjectName: string }[] } | null;
+				}) =>
+					setSubjects(
+						(body?.data ?? []).map((s) => ({
+							id: s.subjectId,
+							name: s.subjectName,
+						})),
+					),
 			);
-			apiFetch("/teachers").then(({ body }) =>
-				setTeachers(
-					(body?.data ?? []).map((t: any) => ({
-						id: t.teacherId,
-						name: t.teacherName,
-					})),
-				),
+			apiFetch("/teachers").then(
+				({
+					body,
+				}: {
+					body: { data: { teacherId: string; teacherName: string }[] } | null;
+				}) =>
+					setTeachers(
+						(body?.data ?? []).map((t) => ({
+							id: t.teacherId,
+							name: t.teacherName,
+						})),
+					),
 			);
-			apiFetch("/students").then(({ body }) =>
-				setStudents(
-					(body?.data ?? []).map((s: any) => ({
-						id: s.studentId,
-						name: s.studentName,
-					})),
-				),
+			apiFetch("/students").then(
+				({
+					body,
+				}: {
+					body: { data: { studentId: string; studentName: string }[] } | null;
+				}) =>
+					setStudents(
+						(body?.data ?? []).map((s) => ({
+							id: s.studentId,
+							name: s.studentName,
+						})),
+					),
 			);
 		}
 	}, []);
