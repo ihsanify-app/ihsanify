@@ -241,6 +241,31 @@ async function main() {
 				});
 			}
 		}
+
+		const existingSessionCount = await prisma.session.count({
+			where: { groupId: group.id },
+		});
+		if (existingSessionCount === 0) {
+			const now = new Date();
+			const sampleSessions = [
+				{ daysAgo: 21, durationMinutes: 60, status: "FINISHED" as const },
+				{ daysAgo: 14, durationMinutes: 60, status: "FINISHED" as const },
+				{ daysAgo: 7, durationMinutes: 45, status: "FINISHED" as const },
+				{ daysAgo: 0, durationMinutes: 60, status: "DRAFT" as const },
+			];
+			for (const s of sampleSessions) {
+				const date = new Date(now);
+				date.setDate(date.getDate() - s.daysAgo);
+				await prisma.session.create({
+					data: {
+						groupId: group.id,
+						date,
+						durationMinutes: s.durationMinutes,
+						status: s.status,
+					},
+				});
+			}
+		}
 	}
 
 	console.log(
