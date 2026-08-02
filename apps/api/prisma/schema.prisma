@@ -113,4 +113,14 @@ model GroupTeacher {
   teacher   Teacher                 @relation(fields: [teacherId], references: [id])
 }
 
+model Session {
+  id              String        @id @default(cuid())
+  groupId         String
+  date            DateTime
+  durationMinutes Int
+  status          SessionStatus @default(DRAFT)
+  createdAt       DateTime      @default(now())
+  group           Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
 
