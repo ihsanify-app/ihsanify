@@ -42,6 +42,8 @@ authRouter
 				data: {
 					email: body.email,
 					password: hashedPassword,
+					name: body.name,
+					role: "STUDENT",
 				},
 			});
 
@@ -98,11 +100,17 @@ authRouter
 				});
 			}
 
+			if (!user.isActive) {
+				return c.json({
+					success: false,
+					message: "This account has been deactivated.",
+				});
+			}
+
 			const token = jwt.sign(
 				{
 					userId: user.id,
-					email: body.email,
-					name: body.name,
+					email: user.email,
 				} as TokenPayload,
 				JWT_SECRET,
 				{ expiresIn: "7d" },
@@ -115,6 +123,7 @@ authRouter
 						id: user.id,
 						email: user.email,
 						name: user.name,
+						role: user.role,
 					},
 					token: token,
 				},
