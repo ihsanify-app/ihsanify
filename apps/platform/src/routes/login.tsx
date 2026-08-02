@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Sprout } from "lucide-react";
 import { useState } from "react";
+import { setStoredAuth } from "../lib/mockAuth";
 
 export const Route = createFileRoute("/login")({
 	component: LoginPage,
@@ -11,7 +12,6 @@ function LoginPage() {
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
-	const navigate = useNavigate();
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -29,14 +29,23 @@ function LoginPage() {
 				body: JSON.stringify({ email, password }),
 			});
 			const data = await res.json();
-			if (!res.ok) {
-				setError(data.message);
+			if (!res.ok || !data.success) {
+				setError(data.message ?? "Something went wrong. Please try again.");
 				return;
 			}
-			localStorage.setItem("token", data.body);
-			alert("Login is successful! Redirecting...");
-			navigate({ to: "/dashboard" });
-			console.log(data);
+			setStoredAuth(
+				{
+					id: data.data.user.id,
+					teacherId: null,
+					studentId: null,
+					role: data.data.user.role.toLowerCase(),
+					name: data.data.user.name,
+				},
+				data.data.token,
+			);
+			// Full page navigation so mockUser (read once at module load) picks up
+			// the freshly stored auth instead of the stale pre-login value.
+			window.location.href = "/dashboard";
 		} catch {
 			setError("Something went wrong. Please try again.");
 		} finally {

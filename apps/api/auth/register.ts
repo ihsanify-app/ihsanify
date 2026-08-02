@@ -73,10 +73,13 @@ authRouter
 			const body = (await c.req.json()) as any;
 
 			if (!body.email || !body.password) {
-				return c.json({
-					success: false,
-					message: "Email and Password can't be empty",
-				});
+				return c.json(
+					{
+						success: false,
+						message: "Email and Password can't be empty",
+					},
+					400,
+				);
 			}
 
 			const user = await prisma.user.findUnique({
@@ -85,26 +88,27 @@ authRouter
 				},
 			});
 
-			if (!user) {
-				return c.json({
-					success: false,
-					message: "This user doesn't exist.",
-				});
-			}
-
-			const isPasswordValid = await compare(body.password, user.password);
-			if (!isPasswordValid) {
-				return c.json({
-					success: false,
-					message: "Invalid password.",
-				});
+			const isPasswordValid = user
+				? await compare(body.password, user.password)
+				: false;
+			if (!user || !isPasswordValid) {
+				return c.json(
+					{
+						success: false,
+						message: "Invalid email or password.",
+					},
+					401,
+				);
 			}
 
 			if (!user.isActive) {
-				return c.json({
-					success: false,
-					message: "This account has been deactivated.",
-				});
+				return c.json(
+					{
+						success: false,
+						message: "This account has been deactivated.",
+					},
+					401,
+				);
 			}
 
 			const token = jwt.sign(
