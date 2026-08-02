@@ -3,6 +3,9 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { meRouter } from "../auth/me";
 import { authRouter } from "../auth/register";
+import { groupsRouter } from "./routes/groups";
+import { lookupsRouter } from "./routes/lookups";
+import { usersRouter } from "./routes/users";
 
 const app = new Hono();
 app.use("*", cors({ origin: "http://localhost:3000" }));
@@ -13,7 +16,10 @@ app
 		return c.text("Hello Hono!");
 	})
 	.route("/", authRouter)
-	.route("/", meRouter);
+	.route("/", meRouter)
+	.route("/", usersRouter)
+	.route("/", groupsRouter)
+	.route("/", lookupsRouter);
 
 serve(
 	{
