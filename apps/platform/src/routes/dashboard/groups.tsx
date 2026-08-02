@@ -421,8 +421,10 @@ function RouteComponent() {
 								.includes(selectedQuery.toLowerCase()),
 					)
 					.map((g, i) => (
-						<div
+						<Link
 							key={g.groupId}
+							to="/dashboard/groups/$groupId/sessions"
+							params={{ groupId: g.groupId }}
 							className={`animate-fade-slide-up
 					rounded-2xl
 					text-white p-5 cursor-pointer
@@ -445,16 +447,24 @@ function RouteComponent() {
 									<Pencil
 										size="18"
 										className="hover:text-white cursor-pointer"
-										onClick={() => setEditingGroup(g)}
+										onClick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											setEditingGroup(g);
+										}}
 									/>
 									<Ban
 										size="18"
 										className="hover:text-white cursor-pointer"
-										onClick={() => setDeletingGroupId(g.groupId)}
+										onClick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											setDeletingGroupId(g.groupId);
+										}}
 									/>
 								</div>
 							)}
-						</div>
+						</Link>
 					))}
 			</div>
 		</section>
