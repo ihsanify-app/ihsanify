@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Ban,
 	CheckCircle,
@@ -8,61 +8,46 @@ import {
 	UserCheck,
 	XCircle,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
-import { mockUsers } from "../../lib/mockData";
 
 export const Route = createFileRoute("/dashboard/users")({
 	component: RouteComponent,
 });
 
-function CreateGroupModal({
+type AppUser = {
+	userId: string;
+	name: string;
+	email: string;
+	role: "teacher" | "student";
+	gender: "male" | "female" | null;
+	teacherId: string | null;
+	studentId: string | null;
+	subjectIds: { subjectId: string; subjectName: string }[];
+	isActive: boolean;
+};
+
+function CreateUserModal({
 	initialData,
 	onClose,
 	onSubmit,
 }: {
-	initialData: [];
+	initialData: AppUser | null;
 	onClose: () => void;
-	onSubmit: (newUser: {
-		userId: string;
+	onSubmit: (payload: {
 		name: string;
 		email: string;
+		password?: string;
 		role: "teacher" | "student";
-		teacherId: string | null;
-		studentId: string | null;
 		gender: "male" | "female";
-		isActive: true;
 	}) => void;
 }) {
 	const [name, setName] = useState(initialData?.name ?? "");
 	const [email, setEmail] = useState(initialData?.email ?? "");
+	const [password, setPassword] = useState("");
 	const [role, setRole] = useState(initialData?.role ?? "");
 	const [gender, setGender] = useState(initialData?.gender ?? "");
-	const [userId, setUserId] = useState(initialData?.userId ?? "");
-	const [studentId, setStudentId] = useState(initialData?.studentId ?? "");
-	const [teacherId, setTeacherId] = useState(initialData?.teacherId ?? "");
-	const _dropdownRef = useRef<HTMLDivElement>(null);
-
-	// function toggleStudent(id: string) {
-	// 	setSelectedStudentIds((prev) =>
-	// 		prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
-	// 	);
-	// }
-
-	// useEffect(() => {
-	// 	function handleClickOutside(e: MouseEvent) {
-	// 		if (
-	// 			dropdownRef.current &&
-	// 			!dropdownRef.current.contains(e.target as Node)
-	// 		) {
-	// 			setIsStudentDropdownOpen(false);
-	// 		}
-	// 	}
-	// 	if (isStudentDropdownOpen) {
-	// 		document.addEventListener("click", handleClickOutside);
-	// 	}
-	// 	return () => document.removeEventListener("click", handleClickOutside);
-	// }, [isStudentDropdownOpen]);
 
 	return (
 		<div
@@ -78,16 +63,10 @@ function CreateGroupModal({
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
-					Create User
+					{initialData ? "Edit User" : "Create User"}
 				</h2>
 				<form>
 					<div className="flex flex-col gap-2">
-						<input
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-							placeholder="e.g. usr-01"
-							value={userId}
-							onChange={(e) => setUserId(e.target.value)}
-						/>
 						<input
 							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							placeholder="e.g. Ibrahim"
@@ -100,39 +79,29 @@ function CreateGroupModal({
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 						/>
+						{!initialData && (
+							<input
+								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+								placeholder="Initial password"
+								type="password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+							/>
+						)}
 						<select
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors disabled:bg-stone-100 disabled:text-stone-400"
 							value={role}
-							onChange={(e) => {
-								setRole(e.target.value);
-								setTeacherId("");
-								setStudentId("");
-							}}
+							onChange={(e) => setRole(e.target.value as "teacher" | "student")}
+							disabled={!!initialData}
 						>
 							<option value="">Select Role</option>
 							<option value="teacher">Teacher</option>
 							<option value="student">Student</option>
 						</select>
-						{role === "teacher" && (
-							<input
-								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-								placeholder="e.g. te-01"
-								value={teacherId}
-								onChange={(e) => setTeacherId(e.target.value)}
-							/>
-						)}
-						{role === "student" && (
-							<input
-								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-								placeholder="e.g. st-01"
-								value={studentId}
-								onChange={(e) => setStudentId(e.target.value)}
-							/>
-						)}
 						<select
 							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							value={gender}
-							onChange={(e) => setGender(e.target.value)}
+							onChange={(e) => setGender(e.target.value as "male" | "female")}
 						>
 							<option value="">Select Gender</option>
 							<option value="male">Male</option>
@@ -152,14 +121,11 @@ function CreateGroupModal({
 						type="button"
 						onClick={() =>
 							onSubmit({
-								userId, //initialData?.userId ?? Date.now().toString(),
 								name,
 								email,
-								role,
-								studentId,
-								teacherId,
-								gender,
-								isActive: true,
+								...(password ? { password } : {}),
+								role: role as "teacher" | "student",
+								gender: gender as "male" | "female",
 							})
 						}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
@@ -171,33 +137,98 @@ function CreateGroupModal({
 		</div>
 	);
 }
+
 function RouteComponent() {
-	const [users, setUsers] = useState(mockUsers);
+	const [loadState, setLoadState] = useState<
+		"loading" | "ready" | "unauthorized"
+	>("loading");
+	const [users, setUsers] = useState<AppUser[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [editingUser, setEditingUser] = useState(null);
+	const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+
+	useEffect(() => {
+		apiFetch("/users").then(({ status, body }) => {
+			if (status === 401 || status === 403) {
+				setLoadState("unauthorized");
+				return;
+			}
+			setUsers(body?.data ?? []);
+			setLoadState("ready");
+		});
+	}, []);
+
+	async function handleCreate(payload: {
+		name: string;
+		email: string;
+		password?: string;
+		role: "teacher" | "student";
+		gender: "male" | "female";
+	}) {
+		const { body } = await apiFetch("/users", {
+			method: "POST",
+			body: JSON.stringify(payload),
+		});
+		if (body?.success) {
+			setUsers((prev) => [...prev, body.data]);
+			setIsModalOpen(false);
+		}
+	}
+
+	async function handleUpdate(
+		userId: string,
+		payload: { name: string; email: string; gender: "male" | "female" },
+	) {
+		const { body } = await apiFetch(`/users/${userId}`, {
+			method: "PATCH",
+			body: JSON.stringify(payload),
+		});
+		if (body?.success) {
+			setUsers((prev) =>
+				prev.map((u) => (u.userId === userId ? body.data : u)),
+			);
+			setEditingUser(null);
+		}
+	}
+
+	async function handleToggleActive(user: AppUser) {
+		const { body } = await apiFetch(`/users/${user.userId}`, {
+			method: "PATCH",
+			body: JSON.stringify({ isActive: !user.isActive }),
+		});
+		if (body?.success) {
+			setUsers((prev) =>
+				prev.map((u) => (u.userId === user.userId ? body.data : u)),
+			);
+		}
+	}
+
+	if (loadState === "unauthorized") {
+		return (
+			<section className="m-10 text-center text-stone-500">
+				<p className="mb-3">
+					You need to be logged in as an admin to view this page.
+				</p>
+				<Link to="/login" className="text-green-700 font-semibold underline">
+					Go to login
+				</Link>
+			</section>
+		);
+	}
 
 	return (
 		<section className="m-10">
 			{isModalOpen && (
-				<CreateGroupModal
-					initialData={editingUser}
+				<CreateUserModal
+					initialData={null}
 					onClose={() => setIsModalOpen(false)}
-					onSubmit={(newUser) => {
-						setUsers((prev) => [...prev, newUser]);
-						setIsModalOpen(false);
-					}}
+					onSubmit={handleCreate}
 				/>
 			)}
 			{editingUser && (
-				<CreateGroupModal
+				<CreateUserModal
 					initialData={editingUser}
 					onClose={() => setEditingUser(null)}
-					onSubmit={(updated) => {
-						setUsers((prev) =>
-							prev.map((g) => (g.userId === updated.userId ? updated : g)),
-						);
-						setEditingUser(null);
-					}}
+					onSubmit={(payload) => handleUpdate(editingUser.userId, payload)}
 				/>
 			)}
 			<div>
@@ -217,8 +248,8 @@ function RouteComponent() {
 					<table className="w-full">
 						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
-								<th className="px-4 py-3 text-left">User ID</th>
 								<th className="px-4 py-3 text-left">Name</th>
+								<th className="px-4 py-3 text-left">Email</th>
 								<th className="px-4 py-3 text-left">Role</th>
 								<th className="px-4 py-3 text-left">Teacher ID</th>
 								<th className="px-4 py-3 text-left">Student ID</th>
@@ -233,14 +264,16 @@ function RouteComponent() {
 									key={u.userId}
 									className={u.isActive ? "hover:bg-green-50" : "bg-rose-50"}
 								>
-									<td className="px-4 py-3">{u.userId}</td>
 									<td className="px-4 py-3">{u.name}</td>
+									<td className="px-4 py-3">{u.email}</td>
 									<td className="px-4 py-3 capitalize">{u.role}</td>
 									<td className="px-4 py-3">
 										{u.teacherId ? (
 											<div className="flex flex-row items-center gap-2">
 												<User size={16} className="text-sky-600" />
-												<span>{u.teacherId}</span>
+												<span className="truncate max-w-24" title={u.teacherId}>
+													{u.teacherId}
+												</span>
 											</div>
 										) : (
 											<div className="flex flex-row gap-3">
@@ -252,7 +285,9 @@ function RouteComponent() {
 										{u.studentId ? (
 											<div className="flex flex-row items-center gap-2">
 												<UserCheck size={16} className="text-green-600" />
-												<span>{u.studentId}</span>
+												<span className="truncate max-w-24" title={u.studentId}>
+													{u.studentId}
+												</span>
 											</div>
 										) : (
 											<div className="flex flex-row gap-3">
@@ -262,7 +297,7 @@ function RouteComponent() {
 									</td>
 									<td className="px-4 py-3">
 										<div className="grid grid-rows gap-1">
-											{u.subjectIds
+											{u.subjectIds.length > 0
 												? u.subjectIds.map((s) => (
 														<div
 															key={s.subjectId}
@@ -300,15 +335,7 @@ function RouteComponent() {
 														? "bg-green-100 text-green-700 hover:bg-green-200"
 														: "bg-rose-100 text-rose-700 hover:bg-rose-200"
 												}`}
-												onClick={() =>
-													setUsers((prev) =>
-														prev.map((user) =>
-															user.userId === u.userId
-																? { ...user, isActive: !u.isActive }
-																: user,
-														),
-													)
-												}
+												onClick={() => handleToggleActive(u)}
 											>
 												{u.isActive ? "Deactivate" : "Activate"}
 											</button>
