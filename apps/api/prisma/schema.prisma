@@ -7,12 +7,104 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum EnrollmentAction {
+  JOIN
+  LEAVE
+}
+
+enum TeacherAssignmentAction {
+  ASSIGN
+  REMOVED
+}
+
 model User {
-  id        Int @id @default(autoincrement())
-  email     String @unique
+  id        String   @id @default(cuid())
+  email     String   @unique
   password  String
-  name      String @default("")
+  name      String
+  role      Role
+  gender    Gender?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  teacher Teacher?
+  student Student?
+}
+
+model Teacher {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  subjects     TeacherSubject[]
+  groupHistory GroupTeacher[]
+}
+
+model Student {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  enrollmentHistory GroupEnrollment[]
+}
+
+model Subject {
+  id   String @id @default(cuid())
+  name String @unique
+
+  groups   Group[]
+  teachers TeacherSubject[]
+}
+
+model TeacherSubject {
+  teacherId String
+  subjectId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  @@id([teacherId, subjectId])
+}
+
+model Group {
+  id        String  @id @default(cuid())
+  name      String
+  subjectId String
+  isActive  Boolean @default(true)
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  enrollmentHistory GroupEnrollment[]
+  teacherHistory    GroupTeacher[]
+}
+
+model GroupEnrollment {
+  id        String           @id @default(cuid())
+  groupId   String
+  studentId String
+  action    EnrollmentAction
+  date      DateTime         @default(now())
+  group     Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student   Student          @relation(fields: [studentId], references: [id])
+}
+
+model GroupTeacher {
+  id        String                  @id @default(cuid())
+  groupId   String
+  teacherId String
+  action    TeacherAssignmentAction
+  date      DateTime                @default(now())
+  group     Group                   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  teacher   Teacher                 @relation(fields: [teacherId], references: [id])
 }
 
 
