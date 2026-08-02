@@ -5,6 +5,7 @@ import { meRouter } from "../auth/me";
 import { authRouter } from "../auth/register";
 import { groupsRouter } from "./routes/groups";
 import { lookupsRouter } from "./routes/lookups";
+import { sessionsRouter } from "./routes/sessions";
 import { usersRouter } from "./routes/users";
 
 const app = new Hono();
@@ -19,7 +20,8 @@ app
 	.route("/", meRouter)
 	.route("/", usersRouter)
 	.route("/", groupsRouter)
-	.route("/", lookupsRouter);
+	.route("/", lookupsRouter)
+	.route("/", sessionsRouter);
 
 serve(
 	{
