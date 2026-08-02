@@ -205,7 +205,9 @@
 ## PHASE 6 — Backend APIs (Hours 24–33)
 
 > Now that UI is done, we know exactly what we need. Build only what the UI actually calls.
-> **Stack decision:** Use **Supabase** for database (Postgres), auth, and file storage. Keep **HonoJS** slim — only for the Claude API proxy (AI report enhancement) and any business logic that doesn't belong in SQL. Prisma is dropped in favour of Supabase's own client.
+> **Stack decision:** Use **Prisma** as the ORM against Postgres (matches what's already running — see `docker-compose.dev.yml` and `apps/api/prisma`). HonoJS owns auth (JWT, already in place via `apps/api/auth`) and all business logic. Supabase is not used.
+>
+> Open gap: dropping Supabase also drops its file storage, and `Payment.proofOfTransfer` needs somewhere to store the uploaded image — not decided yet, flagging rather than picking a default.
 
 **Hour 24 — Users & Auth Endpoints** `[commodity]`
 - `GET /me` — current user profile + role
