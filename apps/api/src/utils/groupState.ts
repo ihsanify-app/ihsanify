@@ -1,3 +1,4 @@
+import type { AuthedUser } from "./auth";
 import { prisma } from "./prisma";
 
 export async function getCurrentTeacherId(groupId: string) {
@@ -48,4 +49,31 @@ export async function getCurrentGroupIdsForTeacher(teacherId: string) {
 	return [...lastActionByGroup.entries()]
 		.filter(([, action]) => action === "ASSIGN")
 		.map(([groupId]) => groupId);
+}
+
+export async function isUserCurrentTeacherOfGroup(
+	authUser: AuthedUser,
+	groupId: string,
+) {
+	if (authUser.role !== "TEACHER") return false;
+	const teacher = await prisma.teacher.findUnique({
+		where: { userId: authUser.id },
+	});
+	if (!teacher) return false;
+	return (await getCurrentTeacherId(groupId)) === teacher.id;
+}
+
+export async function canUserAccessGroup(
+	authUser: AuthedUser,
+	groupId: string,
+) {
+	if (authUser.role === "ADMIN") return true;
+	if (authUser.role === "TEACHER") {
+		return isUserCurrentTeacherOfGroup(authUser, groupId);
+	}
+	const student = await prisma.student.findUnique({
+		where: { userId: authUser.id },
+	});
+	if (!student) return false;
+	return (await getCurrentStudentIds(groupId)).includes(student.id);
 }
