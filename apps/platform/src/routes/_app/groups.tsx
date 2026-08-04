@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ban, Pencil, PlusCircle, X } from "lucide-react";
+import { Ban, Calendar, Clock, Pencil, PlusCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
@@ -17,6 +17,35 @@ const DAY_OPTIONS = [
 	{ value: "saturday", label: "Saturday" },
 	{ value: "sunday", label: "Sunday" },
 ] as const;
+
+const DAY_ABBREV: Record<string, string> = {
+	monday: "Mon",
+	tuesday: "Tue",
+	wednesday: "Wed",
+	thursday: "Thu",
+	friday: "Fri",
+	saturday: "Sat",
+	sunday: "Sun",
+};
+
+function formatTime(time: string) {
+	const [h, m] = time.split(":").map(Number);
+	const period = h >= 12 ? "PM" : "AM";
+	const hour12 = h % 12 === 0 ? 12 : h % 12;
+	return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+function formatDate(iso: string) {
+	return new Date(iso).toLocaleDateString("en-US", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
+
+function formatDateRange(start: string, end: string | null) {
+	return `${formatDate(start)} → ${end ? formatDate(end) : "Ongoing"}`;
+}
 
 type PlannedSession = { dayOfWeek: string; time: string };
 
@@ -533,7 +562,7 @@ function RouteComponent() {
 				</div>
 			)}
 
-			<div className="grid grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
 				{groups
 					.filter(
 						(g) =>
@@ -554,41 +583,77 @@ function RouteComponent() {
 					rounded-2xl
 					text-white p-5 cursor-pointer
 					transition-all duration-200
-					hover:-translate-y-1 hover:scale-105
-					hover:shadow-xl flex flex-col gap-3
+					hover:-translate-y-1 hover:scale-[1.02]
+					hover:shadow-xl flex flex-col gap-4
 				${g.isActive === false ? "bg-stone-400" : "bg-green-700"}`}
 							style={{ animationDelay: `${i * 80}ms` }}
 						>
-							<div className="font-heading font-semibold">{g.groupName}</div>
-							<div className="text-sm text-green-100">
-								{g.teacherName ?? "No teacher assigned"}
-							</div>
-							<div className="flex flex-row gap-3 items-baseline">
-								<div className="text-4xl font-bold">{g.studentIds.length} </div>
-								<div>{g.studentIds.length === 1 ? "Student" : "Students"}</div>
-							</div>
-							{mockUser.role === "admin" && (
-								<div className="flex justify-end gap-3 text-green-100">
-									<Pencil
-										size="18"
-										className="hover:text-white cursor-pointer"
-										onClick={(e) => {
-											e.preventDefault();
-											e.stopPropagation();
-											setEditingGroup(g);
-										}}
-									/>
-									<Ban
-										size="18"
-										className="hover:text-white cursor-pointer"
-										onClick={(e) => {
-											e.preventDefault();
-											e.stopPropagation();
-											setDeletingGroupId(g.groupId);
-										}}
-									/>
+							<div>
+								<div className="font-heading font-semibold text-lg">
+									{g.groupName}
 								</div>
-							)}
+								<div className="text-sm text-green-100">
+									{g.subjectName ?? "No subject"} •{" "}
+									{g.teacherName ?? "No teacher assigned"}
+								</div>
+							</div>
+
+							<div className="flex items-center gap-2 text-xs text-green-100">
+								<Calendar size={14} />
+								<span>{formatDateRange(g.startDate, g.endDate)}</span>
+							</div>
+
+							<div className="flex flex-wrap gap-1.5">
+								{g.plannedSessions.length === 0 ? (
+									<span className="text-xs text-green-200 italic">
+										No planned sessions yet
+									</span>
+								) : (
+									g.plannedSessions.map((p) => (
+										<span
+											key={`${p.dayOfWeek}-${p.time}`}
+											className="flex items-center gap-1 bg-white/15 text-xs font-medium px-2 py-1 rounded-full"
+										>
+											<Clock size={11} />
+											{DAY_ABBREV[p.dayOfWeek] ?? p.dayOfWeek}{" "}
+											{formatTime(p.time)}
+										</span>
+									))
+								)}
+							</div>
+
+							<div className="flex items-center justify-between mt-auto pt-3 border-t border-white/20">
+								<div className="flex items-baseline gap-2">
+									<span className="text-3xl font-bold">
+										{g.studentIds.length}
+									</span>
+									<span className="text-sm">
+										{g.studentIds.length === 1 ? "Student" : "Students"}
+									</span>
+								</div>
+								{mockUser.role === "admin" && (
+									<div className="flex gap-3 text-green-100">
+										<Pencil
+											size="18"
+											className="hover:text-white cursor-pointer"
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												setEditingGroup(g);
+											}}
+										/>
+										<Ban
+											size="18"
+											className="hover:text-white cursor-pointer"
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												setDeletingGroupId(g.groupId);
+											}}
+										/>
+									</div>
+								)}
+							</div>
 						</Link>
 					))}
 			</div>
