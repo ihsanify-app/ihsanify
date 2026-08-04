@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Ban, Pencil, PlusCircle } from "lucide-react";
+import { Ban, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch } from "../../lib/apiClient";
-import { mockUser } from "../../lib/mockAuth";
+import { GroupTabs } from "../../../components/dashboard/GroupTabs";
+import { apiFetch } from "../../../lib/apiClient";
+import { mockUser } from "../../../lib/mockAuth";
 
-export const Route = createFileRoute("/dashboard/groups_/$groupId/sessions")({
+export const Route = createFileRoute("/_app/groups_/$groupId/sessions")({
 	component: RouteComponent,
 });
 
@@ -270,7 +271,7 @@ function ConfirmDeleteModal({
 
 function RouteComponent() {
 	const { groupId } = useParams({
-		from: "/dashboard/groups_/$groupId/sessions",
+		from: "/_app/groups_/$groupId/sessions",
 	});
 	const [loadState, setLoadState] = useState<"loading" | "ready" | "denied">(
 		"loading",
@@ -364,10 +365,7 @@ function RouteComponent() {
 		return (
 			<section className="p-6 text-center text-stone-500">
 				<p className="mb-3">{errorMessage}</p>
-				<Link
-					to="/dashboard/groups"
-					className="text-green-700 font-semibold underline"
-				>
+				<Link to="/groups" className="text-green-700 font-semibold underline">
 					Back to groups
 				</Link>
 			</section>
@@ -396,17 +394,7 @@ function RouteComponent() {
 					onClose={() => setDeletingSessionId(null)}
 				/>
 			)}
-			<div className="flex items-center gap-3 mb-4">
-				<Link
-					to="/dashboard/groups"
-					className="text-stone-500 hover:text-green-700 transition-colors"
-				>
-					<ArrowLeft size={20} />
-				</Link>
-				<h1 className="font-heading text-2xl font-bold text-green-800">
-					Sessions
-				</h1>
-			</div>
+			<GroupTabs groupId={groupId} active="sessions" />
 
 			{canManage && (
 				<div className="flex justify-items-start mb-4">
