@@ -225,17 +225,20 @@ async function main() {
 
 	for (const g of groupSeeds) {
 		const existing = await prisma.group.findFirst({ where: { name: g.name } });
-		const group =
-			existing ??
-			(await prisma.group.create({
-				data: {
-					name: g.name,
-					subjectId: subjects[g.subject].id,
-					isActive: g.isActive,
-					startDate: g.startDate,
-					endDate: g.endDate,
-				},
-			}));
+		const group = existing
+			? await prisma.group.update({
+					where: { id: existing.id },
+					data: { startDate: g.startDate, endDate: g.endDate },
+				})
+			: await prisma.group.create({
+					data: {
+						name: g.name,
+						subjectId: subjects[g.subject].id,
+						isActive: g.isActive,
+						startDate: g.startDate,
+						endDate: g.endDate,
+					},
+				});
 
 		const existingPlannedSessionCount = await prisma.plannedSession.count({
 			where: { groupId: group.id },
