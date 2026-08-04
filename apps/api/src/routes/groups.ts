@@ -10,11 +10,31 @@ import { prisma } from "../utils/prisma";
 
 export const groupsRouter = new Hono();
 
+const DAYS_OF_WEEK = [
+	"MONDAY",
+	"TUESDAY",
+	"WEDNESDAY",
+	"THURSDAY",
+	"FRIDAY",
+	"SATURDAY",
+	"SUNDAY",
+] as const;
+type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
+
+function isDayOfWeek(value: unknown): value is DayOfWeek {
+	return (
+		typeof value === "string" &&
+		(DAYS_OF_WEEK as readonly string[]).includes(value.toUpperCase())
+	);
+}
+
 async function serializeGroup(group: {
 	id: string;
 	name: string;
 	subjectId: string;
 	isActive: boolean;
+	startDate: Date;
+	endDate: Date | null;
 }) {
 	const subject = await prisma.subject.findUnique({
 		where: { id: group.subjectId },
@@ -31,6 +51,9 @@ async function serializeGroup(group: {
 		where: { id: { in: studentIds } },
 		include: { user: true },
 	});
+	const plannedSessions = await prisma.plannedSession.findMany({
+		where: { groupId: group.id },
+	});
 
 	return {
 		groupId: group.id,
@@ -40,9 +63,16 @@ async function serializeGroup(group: {
 		teacherId,
 		teacherName: teacher?.user.name ?? null,
 		isActive: group.isActive,
+		startDate: group.startDate.toISOString(),
+		endDate: group.endDate ? group.endDate.toISOString() : null,
 		studentIds: students.map((s) => ({
 			studentId: s.id,
 			studentName: s.user.name,
+		})),
+		plannedSessions: plannedSessions.map((p) => ({
+			plannedSessionId: p.id,
+			dayOfWeek: p.dayOfWeek.toLowerCase(),
+			time: p.time,
 		})),
 	};
 }
@@ -54,6 +84,8 @@ groupsRouter.get("/groups", requireAuth, async (c) => {
 		name: string;
 		subjectId: string;
 		isActive: boolean;
+		startDate: Date;
+		endDate: Date | null;
 	}[];
 
 	if (authUser.role === "ADMIN") {
@@ -86,17 +118,28 @@ groupsRouter.post("/groups", requireAuth, requireRole("ADMIN"), async (c) => {
 		subjectId?: string;
 		teacherId?: string;
 		studentIds?: string[];
+		startDate?: string;
+		endDate?: string | null;
+		plannedSessions?: { dayOfWeek: string; time: string }[];
 	};
 
-	if (!body.groupName || !body.subjectId) {
+	if (!body.groupName || !body.subjectId || !body.startDate) {
 		return c.json(
-			{ success: false, message: "groupName and subjectId are required." },
+			{
+				success: false,
+				message: "groupName, subjectId, and startDate are required.",
+			},
 			400,
 		);
 	}
 
 	const group = await prisma.group.create({
-		data: { name: body.groupName, subjectId: body.subjectId },
+		data: {
+			name: body.groupName,
+			subjectId: body.subjectId,
+			startDate: new Date(body.startDate),
+			endDate: body.endDate ? new Date(body.endDate) : null,
+		},
 	});
 
 	if (body.teacherId) {
@@ -107,6 +150,16 @@ groupsRouter.post("/groups", requireAuth, requireRole("ADMIN"), async (c) => {
 	for (const studentId of body.studentIds ?? []) {
 		await prisma.groupEnrollment.create({
 			data: { groupId: group.id, studentId, action: "JOIN" },
+		});
+	}
+	for (const planned of body.plannedSessions ?? []) {
+		if (!isDayOfWeek(planned.dayOfWeek) || !planned.time) continue;
+		await prisma.plannedSession.create({
+			data: {
+				groupId: group.id,
+				dayOfWeek: planned.dayOfWeek.toUpperCase() as DayOfWeek,
+				time: planned.time,
+			},
 		});
 	}
 
@@ -125,6 +178,9 @@ groupsRouter.patch(
 			isActive?: boolean;
 			teacherId?: string | null;
 			studentIds?: string[];
+			startDate?: string;
+			endDate?: string | null;
+			plannedSessions?: { dayOfWeek: string; time: string }[];
 		};
 
 		const existing = await prisma.group.findUnique({ where: { id: groupId } });
@@ -138,6 +194,12 @@ groupsRouter.patch(
 				...(body.groupName !== undefined && { name: body.groupName }),
 				...(body.subjectId !== undefined && { subjectId: body.subjectId }),
 				...(body.isActive !== undefined && { isActive: body.isActive }),
+				...(body.startDate !== undefined && {
+					startDate: new Date(body.startDate),
+				}),
+				...(body.endDate !== undefined && {
+					endDate: body.endDate ? new Date(body.endDate) : null,
+				}),
 			},
 		});
 
@@ -174,6 +236,20 @@ groupsRouter.patch(
 			for (const studentId of toAdd) {
 				await prisma.groupEnrollment.create({
 					data: { groupId, studentId, action: "JOIN" },
+				});
+			}
+		}
+
+		if (body.plannedSessions !== undefined) {
+			await prisma.plannedSession.deleteMany({ where: { groupId } });
+			for (const planned of body.plannedSessions) {
+				if (!isDayOfWeek(planned.dayOfWeek) || !planned.time) continue;
+				await prisma.plannedSession.create({
+					data: {
+						groupId,
+						dayOfWeek: planned.dayOfWeek.toUpperCase() as DayOfWeek,
+						time: planned.time,
+					},
 				});
 			}
 		}
