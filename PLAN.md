@@ -340,9 +340,9 @@
 - ✅ Hour 9 — Dashboard: Student View (completed 2026-05-01)
 
 **Phase 3 — Class & Enrollment UI**
-- ✅ Hour 10 — Groups List Page (fully complete — Create, Edit, Delete all working; Edit reuses CreateGroupModal with pre-filled data; Delete uses ConfirmModal with selection-slot pattern)
-- ❌ Hour 11 — Class Detail Page
-- 🔄 Hour 12 — User Management Page (in progress — table with role/status/subject badges done; Add User modal + Edit + Delete not yet implemented)
+- ✅ Hour 10 — Groups List Page (fully complete — Create, Edit, Delete all working; Edit reuses CreateGroupModal with pre-filled data; Delete uses ConfirmModal with selection-slot pattern) — extended 2026-08-05 with startDate/endDate/plannedSessions + redesigned card (see Post-Plan Additions)
+- 🔄 Hour 11 — Class Detail Page (superseded by GroupTabs: Sessions/Reports/Assignments/Invoices tabs per group, not the originally planned Students/Assignments/Progress Reports tabs — see Post-Plan Additions)
+- 🔄 Hour 12 — User Management Page (Create + Edit both wired via shared modal; avatar upload added 2026-08-05 with 300KB/type validation client + server; Delete button still has no handler — not implemented)
 - ❌ Hour 13 — Enrollment Flow UI
 
 **Phase 4 — Assignment UI**
@@ -362,16 +362,16 @@
 **Phase 6 — Backend APIs**
 - ✅ `GET /me` — current user profile
 - ❌ `PATCH /me` — update profile
-- ❌ Hour 24 — Users & Auth Endpoints (remaining)
-- ❌ Hour 25 — Classes & Enrollment Endpoints
-- ❌ Hour 26 — Assignment Endpoints
+- 🔄 Hour 24 — Users & Auth Endpoints (`GET`/`POST`/`PATCH /users` done, incl. `avatarUrl`; no `DELETE /users` yet — ties to Hour 12's unwired Delete button)
+- 🔄 Hour 25 — Classes & Enrollment Endpoints (`/groups` CRUD done with role-scoped `GET`, enrollment via `GroupEnrollment` JOIN/LEAVE log — not a separate `/enrollments` resource as originally sketched)
+- ❌ Hour 26 — Assignment Endpoints (the quiz-builder version — see Post-Plan Additions for what was actually built instead)
 - ❌ Hour 27 — Submission Endpoints
-- ❌ Hour 28 — Progress Report Endpoints
+- ❌ Hour 28 — Progress Report Endpoints (the criteria-rating version — see Post-Plan Additions)
 - ❌ Hour 29 — Notification Endpoints
-- ❌ Hour 30 — Dashboard Aggregate Endpoints
+- ❌ Hour 30 — Dashboard Aggregate Endpoints (dashboard went a different direction entirely — see Post-Plan Additions)
 - ❌ Hour 31 — Validation, Guards & Error Handling
 - ❌ Hour 32 — Monthly Report Aggregate Endpoint
-- ❌ Hour 33 — Seed Script
+- 🔄 Hour 33 — Seed Script (exists and actively maintained, but scoped to what's actually built — not assignments/submissions/reports as spec'd here)
 
 **Phase 7 — Connect UI to Real API**
 - ❌ Hour 34 — Auth + /me connection
@@ -386,8 +386,27 @@
 
 ---
 
+## Post-Plan Additions
+_Added 2026-08-05 — work that grew organically per-feature (schema → API → UI → verify, all in one pass) instead of following the Phase 1–5 mock-first / Phase 6 backend / Phase 7 connect ordering above. Recorded here so the plan doesn't silently go stale._
+
+- **Sessions CRUD** — `Session` + `SessionAttendance` models, full CRUD at `api/src/routes/sessions.ts` (admin + assigned-teacher only, via `canManageGroup`). Per-group Sessions page gained inline Edit (date/status/students/duration) and Delete (confirm modal) actions. `Session.attendanceRecorded` boolean added to distinguish "never edited" from "explicitly recorded 0 attendees" — fixes a real bug where those two cases collapsed together.
+- **Group detail tabs** — Sessions / Reports / Assignments / Invoices tabs (`GroupTabs.tsx`), same CRUD pattern reused for `Report` and `Assignment` models. **Note:** `Report`/`Assignment` as actually built are minimal placeholders (`id, groupId, title, description, status`) — not the rich quiz-builder (`AssignmentQuestion`/`AssignmentSubmission`/`AssignmentAnswer`, Hours 14–19) or criteria-rating Report (Hours 20–23) described earlier in this plan. Those richer specs remain fully unbuilt; Hours 14–23 above are stale against what actually exists under those tab names.
+- **Invoice model** — new, not in the original Core Entities list below. Same placeholder shape as Report/Assignment. **Does not implement rule 1 (billing formula)** — no `Payment` model, no PRESENT/expected calculation, no proof-of-transfer upload. Rule 1 is still a fully open gap. Invoices tab + all 4 endpoints are locked to `requireRole("ADMIN")` directly, no teacher/student access at all.
+- **"Tests" renamed to "Assignments"** across schema, routes, and UI (model, table, files) — pure rename, not the Hour 26 endpoint.
+- **Route restructure** — dropped the `/dashboard/*` URL prefix via a pathless `_app` layout route; per-group subpages use TanStack Router's trailing-underscore escape (`groups_/$groupId.sessions.tsx`) so they aren't swallowed as children of `groups.tsx`. Filenames normalized to match.
+- **Group scheduling** — `Group.startDate`/`endDate` (nullable end = ongoing) + new `PlannedSession` model (`groupId, dayOfWeek, time` — recurring weekly slot, distinct from `Session`'s after-the-fact log; no timezone field, single-locale WIB assumption). Group card redesigned to show the date range + planned-session pills.
+- **Dashboard rebuilt, diverges from Hours 7–9** — old mock-data Admin/Teacher/Student table views deleted entirely. Replaced with:
+  - `WeeklySchedule` — Mon–Sun bar chart driven by `PlannedSession` counts, today's bar/circles emphasized, live status dot on today only (amber "upcoming" → green "in session", assuming a 60min duration since `PlannedSession` has no duration field → gray "done").
+  - `TeacherGroupMindMap` ("Team Structure") — Teacher → Group → {Students, Planned Sessions} tree via nested indentation + dashed connector lines (not the Hour 7/8 attendance/progress tables).
+  - Role-scoping for both reuses `/groups`' existing per-role scoping (admin sees all, teacher/student see their own) rather than new dashboard-specific endpoints — Hour 30's `/dashboard/:role` aggregate endpoints were never built.
+- **User avatars** — `User.avatarUrl` (nullable String), upload wired into `/users` create/edit modal (client `FileReader` → base64 data URL, no cloud storage set up). 300KB size cap + png/jpeg/webp/gif type restriction enforced both client-side and server-side (`isValidAvatarDataUrl` in `users.ts`). Rendered as circles in the users table, `WeeklySchedule`, and `TeacherGroupMindMap`, falling back to initials when unset.
+
+---
+
 ## Data Model Decisions
 _Last updated: 2026-04-30_
+
+> This diagram predates the Post-Plan Additions above. It does not include `PlannedSession`, `User.avatarUrl`, or `Invoice`, and `Assignment`/`Report` here describe the rich Hour 14–23 versions — not the minimal placeholders actually built. See Post-Plan Additions for what's real today.
 
 ### Core Entities
 ```
