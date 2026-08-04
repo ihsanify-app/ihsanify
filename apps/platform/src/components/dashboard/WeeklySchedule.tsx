@@ -18,12 +18,16 @@ type PlannedSession = { dayOfWeek: string; time: string };
 type Group = {
 	groupId: string;
 	groupName: string;
+	teacherName: string | null;
+	teacherAvatarUrl: string | null;
 	plannedSessions: PlannedSession[];
 };
 
 type ScheduleEntry = {
 	groupId: string;
 	groupName: string;
+	teacherName: string | null;
+	teacherAvatarUrl: string | null;
 	time: string;
 };
 
@@ -71,14 +75,25 @@ function GroupCircle({
 }) {
 	const status = isToday ? getLiveStatus(now, entry.time) : null;
 	const size = isToday ? "h-12 w-12 text-sm" : "h-9 w-9 text-xs";
+	const title = `${entry.groupName}${entry.teacherName ? ` · ${entry.teacherName}` : ""} · ${formatTime(entry.time)}`;
 
 	return (
 		<Link
 			to="/groups"
-			title={`${entry.groupName} · ${formatTime(entry.time)}`}
+			title={title}
 			className={`relative flex ${size} shrink-0 items-center justify-center rounded-full border-2 border-green-600 bg-white font-heading font-bold text-green-700 shadow-sm transition-transform hover:scale-110`}
 		>
-			{initials(entry.groupName)}
+			<span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+				{entry.teacherAvatarUrl ? (
+					<img
+						src={entry.teacherAvatarUrl}
+						alt={entry.teacherName ?? entry.groupName}
+						className="h-full w-full object-cover"
+					/>
+				) : (
+					initials(entry.teacherName ?? entry.groupName)
+				)}
+			</span>
 			{status && (
 				<span
 					className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white ${STATUS_DOT_CLASS[status]}`}
@@ -131,6 +146,8 @@ export function WeeklySchedule() {
 			bucket.push({
 				groupId: group.groupId,
 				groupName: group.groupName,
+				teacherName: group.teacherName,
+				teacherAvatarUrl: group.teacherAvatarUrl,
 				time: planned.time,
 			});
 		}

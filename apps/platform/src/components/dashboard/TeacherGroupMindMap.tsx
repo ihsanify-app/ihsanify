@@ -1,4 +1,5 @@
 import { GraduationCap, Leaf, User, Users } from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 
@@ -39,10 +40,40 @@ type Group = {
 	groupName: string;
 	teacherId: string | null;
 	teacherName: string | null;
+	teacherAvatarUrl: string | null;
 	isActive: boolean;
-	studentIds: { studentId: string; studentName: string }[];
+	studentIds: {
+		studentId: string;
+		studentName: string;
+		avatarUrl: string | null;
+	}[];
 	plannedSessions: PlannedSession[];
 };
+
+function Avatar({
+	src,
+	name,
+	size,
+	fallback,
+}: {
+	src: string | null;
+	name: string;
+	size: number;
+	fallback: ReactNode;
+}) {
+	return (
+		<span
+			className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/30"
+			style={{ width: size, height: size }}
+		>
+			{src ? (
+				<img src={src} alt={name} className="h-full w-full object-cover" />
+			) : (
+				fallback
+			)}
+		</span>
+	);
+}
 
 type TeacherBucket = {
 	teacherId: string;
@@ -124,13 +155,18 @@ export function TeacherGroupMindMap() {
 							<div key={bucket.teacherId}>
 								<div className="flex items-center gap-2">
 									<div
-										className={`flex items-center gap-2 rounded-full px-4 py-2 font-heading font-semibold text-white shadow-sm ${
+										className={`flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4 font-heading font-semibold text-white shadow-sm ${
 											bucket.teacherId === "unassigned"
 												? "bg-stone-400"
 												: "bg-green-700"
 										}`}
 									>
-										<GraduationCap size={18} />
+										<Avatar
+											src={bucket.groups[0]?.teacherAvatarUrl ?? null}
+											name={bucket.teacherName}
+											size={28}
+											fallback={<GraduationCap size={16} />}
+										/>
 										{bucket.teacherName}
 									</div>
 									<span className="text-xs text-stone-400">
@@ -171,9 +207,14 @@ export function TeacherGroupMindMap() {
 															{group.studentIds.map((s) => (
 																<span
 																	key={s.studentId}
-																	className="flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800"
+																	className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 py-1 pl-1 pr-2.5 text-xs font-medium text-amber-800"
 																>
-																	<User size={12} />
+																	<Avatar
+																		src={s.avatarUrl}
+																		name={s.studentName}
+																		size={18}
+																		fallback={<User size={11} />}
+																	/>
 																	{s.studentName}
 																</span>
 															))}
