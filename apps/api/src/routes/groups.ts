@@ -51,6 +51,7 @@ async function serializeGroup(group: {
 		where: { id: { in: studentIds } },
 		include: { user: true },
 	});
+	const teacherAvatarUrl = teacher?.user.avatarUrl ?? null;
 	const plannedSessions = await prisma.plannedSession.findMany({
 		where: { groupId: group.id },
 	});
@@ -62,12 +63,14 @@ async function serializeGroup(group: {
 		subjectName: subject?.name ?? null,
 		teacherId,
 		teacherName: teacher?.user.name ?? null,
+		teacherAvatarUrl,
 		isActive: group.isActive,
 		startDate: group.startDate.toISOString(),
 		endDate: group.endDate ? group.endDate.toISOString() : null,
 		studentIds: students.map((s) => ({
 			studentId: s.id,
 			studentName: s.user.name,
+			avatarUrl: s.user.avatarUrl,
 		})),
 		plannedSessions: plannedSessions.map((p) => ({
 			plannedSessionId: p.id,
