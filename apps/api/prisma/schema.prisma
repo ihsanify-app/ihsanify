@@ -57,6 +57,7 @@ model User {
   role      Role
   gender    Gender?
   isActive  Boolean  @default(true)
+  avatarUrl String?
   createdAt DateTime @default(now())
 
   teacher Teacher?
