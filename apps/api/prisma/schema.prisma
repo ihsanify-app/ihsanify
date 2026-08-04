@@ -115,13 +115,14 @@ model GroupTeacher {
 }
 
 model Session {
-  id              String        @id @default(cuid())
-  groupId         String
-  date            DateTime
-  durationMinutes Int
-  status          SessionStatus @default(DRAFT)
-  createdAt       DateTime      @default(now())
-  group           Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id                String        @id @default(cuid())
+  groupId           String
+  date              DateTime
+  durationMinutes   Int
+  status            SessionStatus @default(DRAFT)
+  attendanceRecorded Boolean      @default(false)
+  createdAt         DateTime      @default(now())
+  group             Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   attendance SessionAttendance[]
 }

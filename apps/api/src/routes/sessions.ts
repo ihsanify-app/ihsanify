@@ -92,13 +92,12 @@ sessionsRouter.get("/groups/:id/sessions", requireAuth, async (c) => {
 	});
 
 	const data = sessions.map((s) => {
-		const attendees =
-			s.attendance.length > 0
-				? s.attendance.map((a) => ({
-						studentId: a.studentId,
-						studentName: a.student.user.name,
-					}))
-				: roster;
+		const attendees = s.attendanceRecorded
+			? s.attendance.map((a) => ({
+					studentId: a.studentId,
+					studentName: a.student.user.name,
+				}))
+			: roster;
 		return serializeSession(
 			s,
 			teacherId,
@@ -221,6 +220,7 @@ sessionsRouter.patch(
 				...(body.status !== undefined && {
 					status: body.status === "finished" ? "FINISHED" : "DRAFT",
 				}),
+				...(body.studentIds !== undefined && { attendanceRecorded: true }),
 			},
 		});
 
@@ -253,16 +253,15 @@ sessionsRouter.patch(
 			where: { id: { in: rosterStudentIds } },
 			include: { user: true },
 		});
-		const attendees =
-			attendance.length > 0
-				? attendance.map((a) => ({
-						studentId: a.studentId,
-						studentName: a.student.user.name,
-					}))
-				: rosterStudents.map((st) => ({
-						studentId: st.id,
-						studentName: st.user.name,
-					}));
+		const attendees = session.attendanceRecorded
+			? attendance.map((a) => ({
+					studentId: a.studentId,
+					studentName: a.student.user.name,
+				}))
+			: rosterStudents.map((st) => ({
+					studentId: st.id,
+					studentName: st.user.name,
+				}));
 
 		return c.json({
 			success: true,
