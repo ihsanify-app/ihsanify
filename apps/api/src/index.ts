@@ -4,8 +4,11 @@ import { cors } from "hono/cors";
 import { meRouter } from "../auth/me";
 import { authRouter } from "../auth/register";
 import { groupsRouter } from "./routes/groups";
+import { invoicesRouter } from "./routes/invoices";
 import { lookupsRouter } from "./routes/lookups";
+import { reportsRouter } from "./routes/reports";
 import { sessionsRouter } from "./routes/sessions";
+import { testsRouter } from "./routes/tests";
 import { usersRouter } from "./routes/users";
 
 const app = new Hono();
@@ -21,7 +24,10 @@ app
 	.route("/", usersRouter)
 	.route("/", groupsRouter)
 	.route("/", lookupsRouter)
-	.route("/", sessionsRouter);
+	.route("/", sessionsRouter)
+	.route("/", reportsRouter)
+	.route("/", testsRouter)
+	.route("/", invoicesRouter);
 
 serve(
 	{
