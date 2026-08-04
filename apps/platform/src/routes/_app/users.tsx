@@ -4,10 +4,12 @@ import {
 	CheckCircle,
 	Pencil,
 	PlusCircle,
+	Upload,
 	User,
 	UserCheck,
 	XCircle,
 } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
@@ -15,6 +17,30 @@ import { mockUser } from "../../lib/mockAuth";
 export const Route = createFileRoute("/_app/users")({
 	component: RouteComponent,
 });
+
+const MAX_AVATAR_BYTES = 300 * 1024;
+const ACCEPTED_AVATAR_TYPES = [
+	"image/png",
+	"image/jpeg",
+	"image/webp",
+	"image/gif",
+];
+
+function fileToDataUrl(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(reader.result as string);
+		reader.onerror = () => reject(reader.error);
+		reader.readAsDataURL(file);
+	});
+}
+
+function initials(name: string) {
+	const parts = name.trim().split(/\s+/);
+	if (parts.length === 0 || !parts[0]) return "?";
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+	return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
 type AppUser = {
 	userId: string;
@@ -26,6 +52,7 @@ type AppUser = {
 	studentId: string | null;
 	subjectIds: { subjectId: string; subjectName: string }[];
 	isActive: boolean;
+	avatarUrl: string | null;
 };
 
 function CreateUserModal({
@@ -41,6 +68,7 @@ function CreateUserModal({
 		password?: string;
 		role: "teacher" | "student";
 		gender: "male" | "female";
+		avatarUrl?: string | null;
 	}) => void;
 }) {
 	const [name, setName] = useState(initialData?.name ?? "");
@@ -48,6 +76,27 @@ function CreateUserModal({
 	const [password, setPassword] = useState("");
 	const [role, setRole] = useState(initialData?.role ?? "");
 	const [gender, setGender] = useState(initialData?.gender ?? "");
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(
+		initialData?.avatarUrl ?? null,
+	);
+	const [avatarError, setAvatarError] = useState("");
+
+	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file) return;
+
+		if (!ACCEPTED_AVATAR_TYPES.includes(file.type)) {
+			setAvatarError("Only PNG, JPEG, WEBP, or GIF images are allowed.");
+			return;
+		}
+		if (file.size > MAX_AVATAR_BYTES) {
+			setAvatarError("Image must be smaller than 300KB.");
+			return;
+		}
+		setAvatarError("");
+		setAvatarUrl(await fileToDataUrl(file));
+	}
 
 	return (
 		<div
@@ -66,6 +115,47 @@ function CreateUserModal({
 					{initialData ? "Edit User" : "Create User"}
 				</h2>
 				<form>
+					<div className="flex flex-col items-center gap-2 mb-3">
+						<div className="relative">
+							<div className="h-20 w-20 overflow-hidden rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center text-green-700 font-heading font-bold text-xl">
+								{avatarUrl ? (
+									<img
+										src={avatarUrl}
+										alt="Avatar preview"
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									initials(name || "?")
+								)}
+							</div>
+							<label className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-green-600 text-white shadow-sm hover:bg-green-700 transition-colors">
+								<Upload size={14} />
+								<input
+									type="file"
+									accept={ACCEPTED_AVATAR_TYPES.join(",")}
+									className="hidden"
+									onChange={handleAvatarChange}
+								/>
+							</label>
+						</div>
+						{avatarUrl && (
+							<button
+								type="button"
+								className="text-xs text-rose-500 hover:text-rose-600 cursor-pointer font-normal"
+								onClick={() => setAvatarUrl(null)}
+							>
+								Remove photo
+							</button>
+						)}
+						{avatarError && (
+							<span className="text-xs text-rose-500 font-normal">
+								{avatarError}
+							</span>
+						)}
+						<span className="text-xs text-stone-400 font-normal">
+							PNG, JPEG, WEBP, or GIF. Max 300KB.
+						</span>
+					</div>
 					<div className="flex flex-col gap-2">
 						<input
 							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
@@ -126,6 +216,7 @@ function CreateUserModal({
 								...(password ? { password } : {}),
 								role: role as "teacher" | "student",
 								gender: gender as "male" | "female",
+								avatarUrl,
 							})
 						}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
@@ -163,6 +254,7 @@ function RouteComponent() {
 		password?: string;
 		role: "teacher" | "student";
 		gender: "male" | "female";
+		avatarUrl?: string | null;
 	}) {
 		const { body } = await apiFetch("/users", {
 			method: "POST",
@@ -176,7 +268,12 @@ function RouteComponent() {
 
 	async function handleUpdate(
 		userId: string,
-		payload: { name: string; email: string; gender: "male" | "female" },
+		payload: {
+			name: string;
+			email: string;
+			gender: "male" | "female";
+			avatarUrl?: string | null;
+		},
 	) {
 		const { body } = await apiFetch(`/users/${userId}`, {
 			method: "PATCH",
@@ -264,7 +361,22 @@ function RouteComponent() {
 									key={u.userId}
 									className={u.isActive ? "hover:bg-green-50" : "bg-rose-50"}
 								>
-									<td className="px-4 py-3">{u.name}</td>
+									<td className="px-4 py-3">
+										<div className="flex items-center gap-2">
+											<div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-green-200 bg-green-50 flex items-center justify-center text-green-700 text-xs font-heading font-bold">
+												{u.avatarUrl ? (
+													<img
+														src={u.avatarUrl}
+														alt={u.name}
+														className="h-full w-full object-cover"
+													/>
+												) : (
+													initials(u.name)
+												)}
+											</div>
+											{u.name}
+										</div>
+									</td>
 									<td className="px-4 py-3">{u.email}</td>
 									<td className="px-4 py-3 capitalize">{u.role}</td>
 									<td className="px-4 py-3">

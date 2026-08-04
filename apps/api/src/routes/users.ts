@@ -6,6 +6,18 @@ import { prisma } from "../utils/prisma";
 
 export const usersRouter = new Hono();
 
+const MAX_AVATAR_BYTES = 300 * 1024;
+const AVATAR_DATA_URL_PATTERN =
+	/^data:image\/(png|jpe?g|webp|gif);base64,([a-zA-Z0-9+/]+=*)$/;
+
+function isValidAvatarDataUrl(value: string): boolean {
+	const match = AVATAR_DATA_URL_PATTERN.exec(value);
+	if (!match) return false;
+	const base64 = match[2];
+	const approxBytes = (base64.length * 3) / 4;
+	return approxBytes <= MAX_AVATAR_BYTES;
+}
+
 async function serializeUser(user: {
 	id: string;
 	name: string;
@@ -13,6 +25,7 @@ async function serializeUser(user: {
 	role: "ADMIN" | "TEACHER" | "STUDENT";
 	gender: "MALE" | "FEMALE" | null;
 	isActive: boolean;
+	avatarUrl: string | null;
 }) {
 	let teacherId: string | null = null;
 	let studentId: string | null = null;
@@ -65,6 +78,7 @@ async function serializeUser(user: {
 		studentId,
 		subjectIds,
 		isActive: user.isActive,
+		avatarUrl: user.avatarUrl,
 	};
 }
 
@@ -84,6 +98,7 @@ usersRouter.post("/users", requireAuth, requireRole("ADMIN"), async (c) => {
 		password?: string;
 		role?: "teacher" | "student";
 		gender?: "male" | "female";
+		avatarUrl?: string | null;
 	};
 
 	if (
@@ -102,6 +117,16 @@ usersRouter.post("/users", requireAuth, requireRole("ADMIN"), async (c) => {
 		);
 	}
 
+	if (body.avatarUrl && !isValidAvatarDataUrl(body.avatarUrl)) {
+		return c.json(
+			{
+				success: false,
+				message: "Avatar must be a PNG, JPEG, WEBP, or GIF under 300KB.",
+			},
+			400,
+		);
+	}
+
 	try {
 		const hashedPassword = await hash(body.password, 10);
 		const user = await prisma.user.create({
@@ -111,6 +136,7 @@ usersRouter.post("/users", requireAuth, requireRole("ADMIN"), async (c) => {
 				password: hashedPassword,
 				role: body.role.toUpperCase() as "TEACHER" | "STUDENT",
 				gender: body.gender.toUpperCase() as "MALE" | "FEMALE",
+				avatarUrl: body.avatarUrl ?? null,
 			},
 		});
 
@@ -143,7 +169,18 @@ usersRouter.patch(
 			email?: string;
 			gender?: "male" | "female";
 			isActive?: boolean;
+			avatarUrl?: string | null;
 		};
+
+		if (body.avatarUrl && !isValidAvatarDataUrl(body.avatarUrl)) {
+			return c.json(
+				{
+					success: false,
+					message: "Avatar must be a PNG, JPEG, WEBP, or GIF under 300KB.",
+				},
+				400,
+			);
+		}
 
 		try {
 			const user = await prisma.user.update({
@@ -155,6 +192,7 @@ usersRouter.patch(
 						gender: body.gender.toUpperCase() as "MALE" | "FEMALE",
 					}),
 					...(body.isActive !== undefined && { isActive: body.isActive }),
+					...(body.avatarUrl !== undefined && { avatarUrl: body.avatarUrl }),
 				},
 			});
 			return c.json({ success: true, data: await serializeUser(user) });
