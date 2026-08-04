@@ -12,30 +12,30 @@ import {
 
 const navItems = [
 	{ id: 1, icon: LayoutDashboard, title: "Dashboard", path: "/dashboard" },
-	{ id: 2, icon: BookOpen, title: "Groups", path: "/dashboard/groups" },
+	{ id: 2, icon: BookOpen, title: "Groups", path: "/groups" },
 	{
 		id: 3,
 		icon: ClipboardList,
 		title: "Assignments",
-		path: "/dashboard/assignments",
+		path: "/assignments",
 	},
 	{
 		id: 4,
 		icon: BarChart3,
 		title: "Reports",
-		path: "/dashboard/reports",
+		path: "/reports",
 	},
 	{
 		id: 5,
 		icon: User,
 		title: "Profile",
-		path: "/dashboard/profile",
+		path: "/profile",
 	},
 	{
 		id: 6,
 		icon: Users,
 		title: "Users",
-		path: "/dashboard/users",
+		path: "/users",
 	},
 	{
 		id: 7,
