@@ -171,6 +171,12 @@ async function main() {
 			teacher: "Ustadzah Lisna",
 			students: ["Maryam", "Ibrahim"],
 			isActive: true,
+			startDate: new Date("2026-01-05"),
+			endDate: null as Date | null,
+			plannedSessions: [
+				{ dayOfWeek: "MONDAY" as const, time: "16:00" },
+				{ dayOfWeek: "WEDNESDAY" as const, time: "16:00" },
+			],
 		},
 		{
 			name: "Tahfizh Dasar - 01",
@@ -178,6 +184,12 @@ async function main() {
 			teacher: "Ustadzah Siska",
 			students: ["Maryam", "Ibrahim"],
 			isActive: true,
+			startDate: new Date("2026-01-05"),
+			endDate: null as Date | null,
+			plannedSessions: [
+				{ dayOfWeek: "TUESDAY" as const, time: "20:00" },
+				{ dayOfWeek: "THURSDAY" as const, time: "21:00" },
+			],
 		},
 		{
 			name: "Bahasa Inggris Dasar - 01",
@@ -185,6 +197,9 @@ async function main() {
 			teacher: "Mister Mulki",
 			students: ["Ahmad"],
 			isActive: true,
+			startDate: new Date("2026-02-01"),
+			endDate: null as Date | null,
+			plannedSessions: [{ dayOfWeek: "WEDNESDAY" as const, time: "15:00" }],
 		},
 		{
 			name: "Bahasa Arab Dasar - 01",
@@ -192,6 +207,9 @@ async function main() {
 			teacher: "Ustadzah Afifah",
 			students: ["Dawud"],
 			isActive: true,
+			startDate: new Date("2026-02-01"),
+			endDate: null as Date | null,
+			plannedSessions: [{ dayOfWeek: "FRIDAY" as const, time: "16:00" }],
 		},
 		{
 			name: "Calistung Dasar - 01",
@@ -199,6 +217,9 @@ async function main() {
 			teacher: "Ustadzah Lisna",
 			students: ["Ilyas"],
 			isActive: false,
+			startDate: new Date("2026-01-05"),
+			endDate: new Date("2026-06-30") as Date | null,
+			plannedSessions: [{ dayOfWeek: "SATURDAY" as const, time: "10:00" }],
 		},
 	];
 
@@ -211,8 +232,25 @@ async function main() {
 					name: g.name,
 					subjectId: subjects[g.subject].id,
 					isActive: g.isActive,
+					startDate: g.startDate,
+					endDate: g.endDate,
 				},
 			}));
+
+		const existingPlannedSessionCount = await prisma.plannedSession.count({
+			where: { groupId: group.id },
+		});
+		if (existingPlannedSessionCount === 0) {
+			for (const planned of g.plannedSessions) {
+				await prisma.plannedSession.create({
+					data: {
+						groupId: group.id,
+						dayOfWeek: planned.dayOfWeek,
+						time: planned.time,
+					},
+				});
+			}
+		}
 
 		const teacherAssigned = await prisma.groupTeacher.findFirst({
 			where: { groupId: group.id, teacherId: teachers[g.teacher].id },
