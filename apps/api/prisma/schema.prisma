@@ -33,6 +33,16 @@ enum SessionStatus {
   FINISHED
 }
 
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 // Placeholder status shared by Report/Test/Invoice until their real shapes are decided.
 enum RecordStatus {
   DRAFT
@@ -89,11 +99,13 @@ model TeacherSubject {
 }
 
 model Group {
-  id        String  @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   subjectId String
-  isActive  Boolean @default(true)
-  subject   Subject @relation(fields: [subjectId], references: [id])
+  isActive  Boolean   @default(true)
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  subject   Subject   @relation(fields: [subjectId], references: [id])
 
   enrollmentHistory GroupEnrollment[]
   teacherHistory    GroupTeacher[]
@@ -101,6 +113,19 @@ model Group {
   reports           Report[]
   assignments       Assignment[]
   invoices          Invoice[]
+  plannedSessions   PlannedSession[]
+}
+
+// A group's recurring weekly meeting slots (e.g. "every Tuesday at 20:00 WIB").
+// Distinct from Session, which logs a meeting that actually happened — this is
+// the schedule, not the log. Times are plain "HH:mm" strings with no timezone
+// field, since the app is single-locale (WIB) throughout.
+model PlannedSession {
+  id        String    @id @default(cuid())
+  groupId   String
+  dayOfWeek DayOfWeek
+  time      String
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
 model GroupEnrollment {
