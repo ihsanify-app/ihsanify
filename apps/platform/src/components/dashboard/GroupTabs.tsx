@@ -1,22 +1,31 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { mockUser } from "../../lib/mockAuth";
 
 const TABS = [
 	{
 		key: "sessions",
 		label: "Sessions",
-		to: "/dashboard/groups/$groupId/sessions",
+		to: "/groups/$groupId/sessions",
+		adminOnly: false,
 	},
 	{
 		key: "reports",
 		label: "Reports",
-		to: "/dashboard/groups/$groupId/reports",
+		to: "/groups/$groupId/reports",
+		adminOnly: false,
 	},
-	{ key: "tests", label: "Tests", to: "/dashboard/groups/$groupId/tests" },
+	{
+		key: "assignments",
+		label: "Assignments",
+		to: "/groups/$groupId/assignments",
+		adminOnly: false,
+	},
 	{
 		key: "invoices",
 		label: "Invoices",
-		to: "/dashboard/groups/$groupId/invoices",
+		to: "/groups/$groupId/invoices",
+		adminOnly: true,
 	},
 ] as const;
 
@@ -25,31 +34,33 @@ export function GroupTabs({
 	active,
 }: {
 	groupId: string;
-	active: "sessions" | "reports" | "tests" | "invoices";
+	active: "sessions" | "reports" | "assignments" | "invoices";
 }) {
 	return (
 		<div className="flex items-center gap-3 mb-6">
 			<Link
-				to="/dashboard/groups"
+				to="/groups"
 				className="text-stone-500 hover:text-green-700 transition-colors"
 			>
 				<ArrowLeft size={20} />
 			</Link>
 			<div className="flex gap-1 border-b border-stone-200 flex-1">
-				{TABS.map((tab) => (
-					<Link
-						key={tab.key}
-						to={tab.to}
-						params={{ groupId }}
-						className={
-							active === tab.key
-								? "px-4 py-2 text-sm font-semibold text-green-700 border-b-2 border-green-600 -mb-px"
-								: "px-4 py-2 text-sm font-medium text-stone-500 hover:text-green-700 transition-colors"
-						}
-					>
-						{tab.label}
-					</Link>
-				))}
+				{TABS.filter((tab) => !tab.adminOnly || mockUser.role === "admin").map(
+					(tab) => (
+						<Link
+							key={tab.key}
+							to={tab.to}
+							params={{ groupId }}
+							className={
+								active === tab.key
+									? "px-4 py-2 text-sm font-semibold text-green-700 border-b-2 border-green-600 -mb-px"
+									: "px-4 py-2 text-sm font-medium text-stone-500 hover:text-green-700 transition-colors"
+							}
+						>
+							{tab.label}
+						</Link>
+					),
+				)}
 			</div>
 		</div>
 	);
