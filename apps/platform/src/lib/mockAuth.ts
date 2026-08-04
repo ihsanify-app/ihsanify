@@ -27,10 +27,10 @@ export function getAuthToken(): string | null {
 	return getStoredAuth()?.token ?? null;
 }
 
-// Falls back to a hardcoded admin identity when nobody is logged in, so the
-// still-mock-data-driven dashboard views (AdminView/TeacherView/StudentView)
-// keep working unchanged. Real API calls (groups, users) still get gated
-// server-side by the JWT, regardless of what this fallback claims.
+// Falls back to a hardcoded admin identity when nobody is logged in, so
+// role-gated UI (nav items, tabs) keeps working unchanged. Real API calls
+// (groups, users) still get gated server-side by the JWT, regardless of
+// what this fallback claims.
 export const mockUser: AuthUser = getStoredAuth()?.user ?? {
 	id: "",
 	teacherId: null,
