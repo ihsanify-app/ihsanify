@@ -99,7 +99,7 @@ model Group {
   teacherHistory    GroupTeacher[]
   sessions          Session[]
   reports           Report[]
-  tests             Test[]
+  assignments       Assignment[]
   invoices          Invoice[]
 }
 
@@ -157,8 +157,8 @@ model Report {
   group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
-// Placeholder shape — fields to be refined once the real Test design is discussed.
-model Test {
+// Placeholder shape — fields to be refined once the real Assignment design is discussed.
+model Assignment {
   id          String       @id @default(cuid())
   groupId     String
   title       String
