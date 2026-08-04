@@ -148,9 +148,10 @@ async function main() {
 
 	const students: Record<string, { id: string; userId: string }> = {};
 	for (const s of studentSeeds) {
+		const avatarUrl = `https://i.pravatar.cc/150?u=${s.email}`;
 		const user = await prisma.user.upsert({
 			where: { email: s.email },
-			update: {},
+			update: { avatarUrl },
 			create: {
 				email: s.email,
 				password,
@@ -158,6 +159,7 @@ async function main() {
 				role: "STUDENT",
 				gender: s.gender,
 				isActive: s.isActive,
+				avatarUrl,
 			},
 		});
 		const student = await prisma.student.upsert({
