@@ -33,6 +33,12 @@ enum SessionStatus {
   FINISHED
 }
 
+// Placeholder status shared by Report/Test/Invoice until their real shapes are decided.
+enum RecordStatus {
+  DRAFT
+  FINISHED
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -92,6 +98,9 @@ model Group {
   enrollmentHistory GroupEnrollment[]
   teacherHistory    GroupTeacher[]
   sessions          Session[]
+  reports           Report[]
+  tests             Test[]
+  invoices          Invoice[]
 }
 
 model GroupEnrollment {
@@ -135,6 +144,39 @@ model SessionAttendance {
   student   Student @relation(fields: [studentId], references: [id])
 
   @@unique([sessionId, studentId])
+}
+
+// Placeholder shape — fields to be refined once the real Report design is discussed.
+model Report {
+  id          String       @id @default(cuid())
+  groupId     String
+  title       String
+  description String
+  status      RecordStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+// Placeholder shape — fields to be refined once the real Test design is discussed.
+model Test {
+  id          String       @id @default(cuid())
+  groupId     String
+  title       String
+  description String
+  status      RecordStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+// Placeholder shape — fields to be refined once the real Invoice design is discussed.
+model Invoice {
+  id          String       @id @default(cuid())
+  groupId     String
+  title       String
+  description String
+  status      RecordStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
 
