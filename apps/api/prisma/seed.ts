@@ -22,14 +22,16 @@ async function main() {
 		});
 	}
 
+	const adminAvatarUrl = "https://i.pravatar.cc/150?u=admin@ihsanify.com";
 	await prisma.user.upsert({
 		where: { email: "admin@ihsanify.com" },
-		update: {},
+		update: { avatarUrl: adminAvatarUrl },
 		create: {
 			email: "admin@ihsanify.com",
 			password,
 			name: "Admin",
 			role: "ADMIN",
+			avatarUrl: adminAvatarUrl,
 		},
 	});
 
@@ -73,9 +75,10 @@ async function main() {
 
 	const teachers: Record<string, { id: string; userId: string }> = {};
 	for (const t of teacherSeeds) {
+		const avatarUrl = `https://i.pravatar.cc/150?u=${t.email}`;
 		const user = await prisma.user.upsert({
 			where: { email: t.email },
-			update: {},
+			update: { avatarUrl },
 			create: {
 				email: t.email,
 				password,
@@ -83,6 +86,7 @@ async function main() {
 				role: "TEACHER",
 				gender: t.gender,
 				isActive: t.isActive,
+				avatarUrl,
 			},
 		});
 		const teacher = await prisma.teacher.upsert({
