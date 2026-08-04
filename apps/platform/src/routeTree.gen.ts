@@ -10,23 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as DashboardUsersRouteImport } from './routes/dashboard/users'
-import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
-import { Route as DashboardGroupsRouteImport } from './routes/dashboard/groups'
-import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard/assignments'
-import { Route as DashboardGroupsGroupIdSessionsRouteImport } from './routes/dashboard/groups_.$groupId.sessions'
+import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppGroupsRouteImport } from './routes/_app/groups'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppGroupsGroupIdSessionsRouteImport } from './routes/_app/groups_/$groupId.sessions'
+import { Route as AppGroupsGroupIdReportsRouteImport } from './routes/_app/groups_/$groupId.reports'
+import { Route as AppGroupsGroupIdInvoicesRouteImport } from './routes/_app/groups_/$groupId.invoices'
+import { Route as AppGroupsGroupIdAssignmentsRouteImport } from './routes/_app/groups_/$groupId.assignments'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -34,109 +36,142 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardUsersRoute = DashboardUsersRouteImport.update({
+const AppUsersRoute = AppUsersRouteImport.update({
   id: '/users',
   path: '/users',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const DashboardProfileRoute = DashboardProfileRouteImport.update({
+const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const DashboardGroupsRoute = DashboardGroupsRouteImport.update({
+const AppGroupsRoute = AppGroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const DashboardAssignmentsRoute = DashboardAssignmentsRouteImport.update({
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
   id: '/assignments',
   path: '/assignments',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const DashboardGroupsGroupIdSessionsRoute =
-  DashboardGroupsGroupIdSessionsRouteImport.update({
+const AppGroupsGroupIdSessionsRoute =
+  AppGroupsGroupIdSessionsRouteImport.update({
     id: '/groups_/$groupId/sessions',
     path: '/groups/$groupId/sessions',
-    getParentRoute: () => DashboardRoute,
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppGroupsGroupIdReportsRoute = AppGroupsGroupIdReportsRouteImport.update({
+  id: '/groups_/$groupId/reports',
+  path: '/groups/$groupId/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGroupsGroupIdInvoicesRoute =
+  AppGroupsGroupIdInvoicesRouteImport.update({
+    id: '/groups_/$groupId/invoices',
+    path: '/groups/$groupId/invoices',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppGroupsGroupIdAssignmentsRoute =
+  AppGroupsGroupIdAssignmentsRouteImport.update({
+    id: '/groups_/$groupId/assignments',
+    path: '/groups/$groupId/assignments',
+    getParentRoute: () => AppRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
-  '/dashboard/assignments': typeof DashboardAssignmentsRoute
-  '/dashboard/groups': typeof DashboardGroupsRoute
-  '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/users': typeof DashboardUsersRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/groups/$groupId/sessions': typeof DashboardGroupsGroupIdSessionsRoute
+  '/assignments': typeof AppAssignmentsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/groups': typeof AppGroupsRoute
+  '/profile': typeof AppProfileRoute
+  '/users': typeof AppUsersRoute
+  '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
+  '/groups/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
+  '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
+  '/groups/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/dashboard/assignments': typeof DashboardAssignmentsRoute
-  '/dashboard/groups': typeof DashboardGroupsRoute
-  '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/users': typeof DashboardUsersRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/groups/$groupId/sessions': typeof DashboardGroupsGroupIdSessionsRoute
+  '/assignments': typeof AppAssignmentsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/groups': typeof AppGroupsRoute
+  '/profile': typeof AppProfileRoute
+  '/users': typeof AppUsersRoute
+  '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
+  '/groups/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
+  '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
+  '/groups/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteWithChildren
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/dashboard/assignments': typeof DashboardAssignmentsRoute
-  '/dashboard/groups': typeof DashboardGroupsRoute
-  '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/users': typeof DashboardUsersRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/groups_/$groupId/sessions': typeof DashboardGroupsGroupIdSessionsRoute
+  '/_app/assignments': typeof AppAssignmentsRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/groups': typeof AppGroupsRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/users': typeof AppUsersRoute
+  '/_app/groups_/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
+  '/_app/groups_/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
+  '/_app/groups_/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
+  '/_app/groups_/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/login'
-    | '/dashboard/assignments'
-    | '/dashboard/groups'
-    | '/dashboard/profile'
-    | '/dashboard/users'
-    | '/dashboard/'
-    | '/dashboard/groups/$groupId/sessions'
+    | '/assignments'
+    | '/dashboard'
+    | '/groups'
+    | '/profile'
+    | '/users'
+    | '/groups/$groupId/assignments'
+    | '/groups/$groupId/invoices'
+    | '/groups/$groupId/reports'
+    | '/groups/$groupId/sessions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/dashboard/assignments'
-    | '/dashboard/groups'
-    | '/dashboard/profile'
-    | '/dashboard/users'
+    | '/assignments'
     | '/dashboard'
-    | '/dashboard/groups/$groupId/sessions'
+    | '/groups'
+    | '/profile'
+    | '/users'
+    | '/groups/$groupId/assignments'
+    | '/groups/$groupId/invoices'
+    | '/groups/$groupId/reports'
+    | '/groups/$groupId/sessions'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
+    | '/_app'
     | '/login'
-    | '/dashboard/assignments'
-    | '/dashboard/groups'
-    | '/dashboard/profile'
-    | '/dashboard/users'
-    | '/dashboard/'
-    | '/dashboard/groups_/$groupId/sessions'
+    | '/_app/assignments'
+    | '/_app/dashboard'
+    | '/_app/groups'
+    | '/_app/profile'
+    | '/_app/users'
+    | '/_app/groups_/$groupId/assignments'
+    | '/_app/groups_/$groupId/invoices'
+    | '/_app/groups_/$groupId/reports'
+    | '/_app/groups_/$groupId/sessions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
 
@@ -149,11 +184,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -163,76 +198,101 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/users': {
-      id: '/dashboard/users'
+    '/_app/users': {
+      id: '/_app/users'
       path: '/users'
-      fullPath: '/dashboard/users'
-      preLoaderRoute: typeof DashboardUsersRouteImport
-      parentRoute: typeof DashboardRoute
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/dashboard/profile': {
-      id: '/dashboard/profile'
+    '/_app/profile': {
+      id: '/_app/profile'
       path: '/profile'
-      fullPath: '/dashboard/profile'
-      preLoaderRoute: typeof DashboardProfileRouteImport
-      parentRoute: typeof DashboardRoute
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/dashboard/groups': {
-      id: '/dashboard/groups'
+    '/_app/groups': {
+      id: '/_app/groups'
       path: '/groups'
-      fullPath: '/dashboard/groups'
-      preLoaderRoute: typeof DashboardGroupsRouteImport
-      parentRoute: typeof DashboardRoute
+      fullPath: '/groups'
+      preLoaderRoute: typeof AppGroupsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/dashboard/assignments': {
-      id: '/dashboard/assignments'
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assignments': {
+      id: '/_app/assignments'
       path: '/assignments'
-      fullPath: '/dashboard/assignments'
-      preLoaderRoute: typeof DashboardAssignmentsRouteImport
-      parentRoute: typeof DashboardRoute
+      fullPath: '/assignments'
+      preLoaderRoute: typeof AppAssignmentsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/dashboard/groups_/$groupId/sessions': {
-      id: '/dashboard/groups_/$groupId/sessions'
+    '/_app/groups_/$groupId/sessions': {
+      id: '/_app/groups_/$groupId/sessions'
       path: '/groups/$groupId/sessions'
-      fullPath: '/dashboard/groups/$groupId/sessions'
-      preLoaderRoute: typeof DashboardGroupsGroupIdSessionsRouteImport
-      parentRoute: typeof DashboardRoute
+      fullPath: '/groups/$groupId/sessions'
+      preLoaderRoute: typeof AppGroupsGroupIdSessionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/groups_/$groupId/reports': {
+      id: '/_app/groups_/$groupId/reports'
+      path: '/groups/$groupId/reports'
+      fullPath: '/groups/$groupId/reports'
+      preLoaderRoute: typeof AppGroupsGroupIdReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/groups_/$groupId/invoices': {
+      id: '/_app/groups_/$groupId/invoices'
+      path: '/groups/$groupId/invoices'
+      fullPath: '/groups/$groupId/invoices'
+      preLoaderRoute: typeof AppGroupsGroupIdInvoicesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/groups_/$groupId/assignments': {
+      id: '/_app/groups_/$groupId/assignments'
+      path: '/groups/$groupId/assignments'
+      fullPath: '/groups/$groupId/assignments'
+      preLoaderRoute: typeof AppGroupsGroupIdAssignmentsRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
-interface DashboardRouteChildren {
-  DashboardAssignmentsRoute: typeof DashboardAssignmentsRoute
-  DashboardGroupsRoute: typeof DashboardGroupsRoute
-  DashboardProfileRoute: typeof DashboardProfileRoute
-  DashboardUsersRoute: typeof DashboardUsersRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardGroupsGroupIdSessionsRoute: typeof DashboardGroupsGroupIdSessionsRoute
+interface AppRouteChildren {
+  AppAssignmentsRoute: typeof AppAssignmentsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppGroupsRoute: typeof AppGroupsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppUsersRoute: typeof AppUsersRoute
+  AppGroupsGroupIdAssignmentsRoute: typeof AppGroupsGroupIdAssignmentsRoute
+  AppGroupsGroupIdInvoicesRoute: typeof AppGroupsGroupIdInvoicesRoute
+  AppGroupsGroupIdReportsRoute: typeof AppGroupsGroupIdReportsRoute
+  AppGroupsGroupIdSessionsRoute: typeof AppGroupsGroupIdSessionsRoute
 }
 
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardAssignmentsRoute: DashboardAssignmentsRoute,
-  DashboardGroupsRoute: DashboardGroupsRoute,
-  DashboardProfileRoute: DashboardProfileRoute,
-  DashboardUsersRoute: DashboardUsersRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-  DashboardGroupsGroupIdSessionsRoute: DashboardGroupsGroupIdSessionsRoute,
+const AppRouteChildren: AppRouteChildren = {
+  AppAssignmentsRoute: AppAssignmentsRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppGroupsRoute: AppGroupsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppUsersRoute: AppUsersRoute,
+  AppGroupsGroupIdAssignmentsRoute: AppGroupsGroupIdAssignmentsRoute,
+  AppGroupsGroupIdInvoicesRoute: AppGroupsGroupIdInvoicesRoute,
+  AppGroupsGroupIdReportsRoute: AppGroupsGroupIdReportsRoute,
+  AppGroupsGroupIdSessionsRoute: AppGroupsGroupIdSessionsRoute,
 }
 
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
