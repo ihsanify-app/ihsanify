@@ -3,12 +3,12 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { meRouter } from "../auth/me";
 import { authRouter } from "../auth/register";
+import { assignmentsRouter } from "./routes/assignments";
 import { groupsRouter } from "./routes/groups";
 import { invoicesRouter } from "./routes/invoices";
 import { lookupsRouter } from "./routes/lookups";
 import { reportsRouter } from "./routes/reports";
 import { sessionsRouter } from "./routes/sessions";
-import { testsRouter } from "./routes/tests";
 import { usersRouter } from "./routes/users";
 
 const app = new Hono();
@@ -26,7 +26,7 @@ app
 	.route("/", lookupsRouter)
 	.route("/", sessionsRouter)
 	.route("/", reportsRouter)
-	.route("/", testsRouter)
+	.route("/", assignmentsRouter)
 	.route("/", invoicesRouter);
 
 serve(
