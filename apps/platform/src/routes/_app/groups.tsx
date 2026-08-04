@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ban, Pencil, PlusCircle } from "lucide-react";
+import { Ban, Pencil, PlusCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
@@ -7,6 +7,18 @@ import { mockUser } from "../../lib/mockAuth";
 export const Route = createFileRoute("/_app/groups")({
 	component: RouteComponent,
 });
+
+const DAY_OPTIONS = [
+	{ value: "monday", label: "Monday" },
+	{ value: "tuesday", label: "Tuesday" },
+	{ value: "wednesday", label: "Wednesday" },
+	{ value: "thursday", label: "Thursday" },
+	{ value: "friday", label: "Friday" },
+	{ value: "saturday", label: "Saturday" },
+	{ value: "sunday", label: "Sunday" },
+] as const;
+
+type PlannedSession = { dayOfWeek: string; time: string };
 
 type Group = {
 	groupId: string;
@@ -16,7 +28,10 @@ type Group = {
 	teacherId: string | null;
 	teacherName: string | null;
 	isActive: boolean;
+	startDate: string;
+	endDate: string | null;
 	studentIds: { studentId: string; studentName: string }[];
+	plannedSessions: PlannedSession[];
 };
 type Option = { id: string; name: string };
 
@@ -84,6 +99,9 @@ function CreateGroupModal({
 		subjectId: string;
 		teacherId: string;
 		studentIds: string[];
+		startDate: string;
+		endDate: string | null;
+		plannedSessions: PlannedSession[];
 	}) => void;
 }) {
 	const [groupName, setGroupName] = useState(initialData?.groupName ?? "");
@@ -91,6 +109,18 @@ function CreateGroupModal({
 	const [teacherId, setTeacherId] = useState(initialData?.teacherId ?? "");
 	const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>(
 		initialData?.studentIds.map((s) => s.studentId) ?? [],
+	);
+	const [startDate, setStartDate] = useState(
+		initialData?.startDate.slice(0, 10) ?? "",
+	);
+	const [endDate, setEndDate] = useState(
+		initialData?.endDate?.slice(0, 10) ?? "",
+	);
+	const [plannedSessions, setPlannedSessions] = useState<PlannedSession[]>(
+		initialData?.plannedSessions.map((p) => ({
+			dayOfWeek: p.dayOfWeek,
+			time: p.time,
+		})) ?? [],
 	);
 	const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState<
 		true | false
@@ -101,6 +131,23 @@ function CreateGroupModal({
 		setSelectedStudentIds((prev) =>
 			prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
 		);
+	}
+
+	function addPlannedSession() {
+		setPlannedSessions((prev) => [
+			...prev,
+			{ dayOfWeek: "monday", time: "16:00" },
+		]);
+	}
+
+	function updatePlannedSession(index: number, patch: Partial<PlannedSession>) {
+		setPlannedSessions((prev) =>
+			prev.map((p, i) => (i === index ? { ...p, ...patch } : p)),
+		);
+	}
+
+	function removePlannedSession(index: number) {
+		setPlannedSessions((prev) => prev.filter((_, i) => i !== index));
 	}
 
 	useEffect(() => {
@@ -128,7 +175,7 @@ function CreateGroupModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-md shadow-xl max-h-[90vh] overflow-y-auto"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -203,6 +250,75 @@ function CreateGroupModal({
 								</div>
 							)}
 						</div>
+
+						<div className="flex gap-2">
+							<div className="flex-1">
+								<p className="text-xs text-stone-500 mb-1">Start date</p>
+								<input
+									type="date"
+									className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors w-full"
+									value={startDate}
+									onChange={(e) => setStartDate(e.target.value)}
+								/>
+							</div>
+							<div className="flex-1">
+								<p className="text-xs text-stone-500 mb-1">
+									End date (blank = ongoing)
+								</p>
+								<input
+									type="date"
+									className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors w-full"
+									value={endDate}
+									onChange={(e) => setEndDate(e.target.value)}
+								/>
+							</div>
+						</div>
+
+						<div className="border border-stone-200 rounded-xl p-2">
+							<p className="text-xs text-stone-500 mb-1">Planned sessions</p>
+							<div className="flex flex-col gap-2">
+								{plannedSessions.map((p, i) => (
+									// biome-ignore lint/suspicious/noArrayIndexKey: rows are only ever appended/removed by index, no stable id yet
+									<div key={i} className="flex items-center gap-2">
+										<select
+											className="border border-stone-300 rounded-lg p-1.5 text-sm outline-none flex-1"
+											value={p.dayOfWeek}
+											onChange={(e) =>
+												updatePlannedSession(i, { dayOfWeek: e.target.value })
+											}
+										>
+											{DAY_OPTIONS.map((d) => (
+												<option key={d.value} value={d.value}>
+													{d.label}
+												</option>
+											))}
+										</select>
+										<input
+											type="time"
+											className="border border-stone-300 rounded-lg p-1.5 text-sm outline-none"
+											value={p.time}
+											onChange={(e) =>
+												updatePlannedSession(i, { time: e.target.value })
+											}
+										/>
+										<button
+											type="button"
+											onClick={() => removePlannedSession(i)}
+											className="text-rose-500 hover:text-rose-600 cursor-pointer"
+										>
+											<X size={16} />
+										</button>
+									</div>
+								))}
+								<button
+									type="button"
+									onClick={addPlannedSession}
+									className="text-sm text-green-700 hover:text-green-800 cursor-pointer text-left"
+								>
+									+ Add planned session
+								</button>
+							</div>
+						</div>
 					</div>
 				</form>
 				<div className="flex justify-end gap-2 mt-4">
@@ -221,6 +337,9 @@ function CreateGroupModal({
 								subjectId,
 								teacherId,
 								studentIds: selectedStudentIds,
+								startDate,
+								endDate: endDate || null,
+								plannedSessions,
 							})
 						}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
@@ -304,6 +423,9 @@ function RouteComponent() {
 		subjectId: string;
 		teacherId: string;
 		studentIds: string[];
+		startDate: string;
+		endDate: string | null;
+		plannedSessions: PlannedSession[];
 	}) {
 		const { body } = await apiFetch("/groups", {
 			method: "POST",
@@ -322,6 +444,9 @@ function RouteComponent() {
 			subjectId: string;
 			teacherId: string;
 			studentIds: string[];
+			startDate: string;
+			endDate: string | null;
+			plannedSessions: PlannedSession[];
 		},
 	) {
 		const { body } = await apiFetch(`/groups/${groupId}`, {
