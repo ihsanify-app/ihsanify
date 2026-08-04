@@ -77,3 +77,8 @@ export async function canUserAccessGroup(
 	if (!student) return false;
 	return (await getCurrentStudentIds(groupId)).includes(student.id);
 }
+
+export async function canManageGroup(authUser: AuthedUser, groupId: string) {
+	if (authUser.role === "ADMIN") return true;
+	return isUserCurrentTeacherOfGroup(authUser, groupId);
+}

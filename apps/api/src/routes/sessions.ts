@@ -1,22 +1,14 @@
 import { Hono } from "hono";
 import { requireAuth } from "../utils/auth";
 import {
+	canManageGroup,
 	canUserAccessGroup,
 	getCurrentStudentIds,
 	getCurrentTeacherId,
-	isUserCurrentTeacherOfGroup,
 } from "../utils/groupState";
 import { prisma } from "../utils/prisma";
 
 export const sessionsRouter = new Hono();
-
-async function canManageGroupSessions(
-	authUser: Parameters<typeof isUserCurrentTeacherOfGroup>[0],
-	groupId: string,
-) {
-	if (authUser.role === "ADMIN") return true;
-	return isUserCurrentTeacherOfGroup(authUser, groupId);
-}
 
 function serializeSession(
 	session: {
@@ -120,7 +112,7 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 		return c.json({ success: false, message: "Group not found." }, 404);
 	}
 
-	if (!(await canManageGroupSessions(authUser, groupId))) {
+	if (!(await canManageGroup(authUser, groupId))) {
 		return c.json(
 			{
 				success: false,
@@ -192,7 +184,7 @@ sessionsRouter.patch(
 			return c.json({ success: false, message: "Session not found." }, 404);
 		}
 
-		if (!(await canManageGroupSessions(authUser, groupId))) {
+		if (!(await canManageGroup(authUser, groupId))) {
 			return c.json(
 				{
 					success: false,
@@ -292,7 +284,7 @@ sessionsRouter.delete(
 			return c.json({ success: false, message: "Session not found." }, 404);
 		}
 
-		if (!(await canManageGroupSessions(authUser, groupId))) {
+		if (!(await canManageGroup(authUser, groupId))) {
 			return c.json(
 				{
 					success: false,
