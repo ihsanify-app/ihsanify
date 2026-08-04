@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, PlusCircle } from "lucide-react";
+import { ArrowLeft, Ban, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
@@ -8,14 +8,17 @@ export const Route = createFileRoute("/dashboard/groups_/$groupId/sessions")({
 	component: RouteComponent,
 });
 
+type Option = { studentId: string; studentName: string };
+
 type SessionRow = {
 	sessionId: string;
 	year: number;
 	month: number;
 	day: number;
+	date: string;
 	teacherName: string | null;
 	subjectName: string | null;
-	studentIds: { studentId: string; studentName: string }[];
+	studentIds: Option[];
 	status: "draft" | "finished";
 	durationMinutes: number;
 };
@@ -100,6 +103,171 @@ function CreateSessionModal({
 	);
 }
 
+function EditSessionModal({
+	session,
+	roster,
+	onClose,
+	onSubmit,
+}: {
+	session: SessionRow;
+	roster: Option[];
+	onClose: () => void;
+	onSubmit: (payload: {
+		date: string;
+		durationMinutes: number;
+		status: "draft" | "finished";
+		studentIds: string[];
+	}) => void;
+}) {
+	const [date, setDate] = useState(session.date.slice(0, 10));
+	const [durationMinutes, setDurationMinutes] = useState(
+		session.durationMinutes,
+	);
+	const [status, setStatus] = useState<"draft" | "finished">(session.status);
+	const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>(
+		session.studentIds.map((s) => s.studentId),
+	);
+
+	function toggleStudent(id: string) {
+		setSelectedStudentIds((prev) =>
+			prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
+		);
+	}
+
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="font-heading text-lg text-green-800 mb-3">
+					Edit Session
+				</h2>
+				<form>
+					<div className="flex flex-col gap-2">
+						<input
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							type="date"
+							value={date}
+							onChange={(e) => setDate(e.target.value)}
+						/>
+						<input
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							type="number"
+							min={1}
+							placeholder="Duration (minutes)"
+							value={durationMinutes}
+							onChange={(e) => setDurationMinutes(Number(e.target.value))}
+						/>
+						<select
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							value={status}
+							onChange={(e) =>
+								setStatus(e.target.value as "draft" | "finished")
+							}
+						>
+							<option value="draft">Draft</option>
+							<option value="finished">Finished</option>
+						</select>
+						<div className="border border-stone-200 rounded-xl p-2">
+							<p className="text-xs text-stone-500 mb-1">Students present</p>
+							<div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
+								{roster.map((s) => (
+									<label
+										key={s.studentId}
+										className="flex items-center gap-2 text-sm cursor-pointer text-stone-600 hover:text-green-700"
+									>
+										<input
+											type="checkbox"
+											checked={selectedStudentIds.includes(s.studentId)}
+											onChange={() => toggleStudent(s.studentId)}
+										/>
+										{s.studentName}
+									</label>
+								))}
+							</div>
+						</div>
+					</div>
+				</form>
+				<div className="flex justify-end gap-2 mt-4">
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						onClick={() =>
+							onSubmit({
+								date,
+								durationMinutes,
+								status,
+								studentIds: selectedStudentIds,
+							})
+						}
+						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
+					>
+						Save Changes
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function ConfirmDeleteModal({
+	onConfirm,
+	onClose,
+}: {
+	onConfirm: () => void;
+	onClose: () => void;
+}) {
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="text-stone-800">
+					Are you sure you want to delete this record?
+				</h2>
+				<div className="flex flex-col gap-2">
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl bg-rose-600 text-white p-2 hover:bg-rose-700 transition-colors"
+						onClick={onConfirm}
+					>
+						Confirm
+					</button>
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 p-2 hover:bg-stone-50 transition-colors"
+						onClick={onClose}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function RouteComponent() {
 	const { groupId } = useParams({
 		from: "/dashboard/groups_/$groupId/sessions",
@@ -109,7 +277,14 @@ function RouteComponent() {
 	);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [sessions, setSessions] = useState<SessionRow[]>([]);
+	const [roster, setRoster] = useState<Option[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [editingSession, setEditingSession] = useState<SessionRow | null>(null);
+	const [deletingSessionId, setDeletingSessionId] = useState<string | null>(
+		null,
+	);
+
+	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
 
 	const loadSessions = useCallback(async () => {
 		const { status, body } = await apiFetch(`/groups/${groupId}/sessions`);
@@ -119,6 +294,7 @@ function RouteComponent() {
 			return;
 		}
 		setSessions(body?.data ?? []);
+		setRoster(body?.roster ?? []);
 		setLoadState("ready");
 	}, [groupId]);
 
@@ -140,6 +316,47 @@ function RouteComponent() {
 			loadSessions();
 		} else {
 			setErrorMessage(body?.message ?? "Could not create session.");
+		}
+	}
+
+	async function handleEdit(
+		sessionId: string,
+		payload: {
+			date: string;
+			durationMinutes: number;
+			status: "draft" | "finished";
+			studentIds: string[];
+		},
+	) {
+		const { body } = await apiFetch(
+			`/groups/${groupId}/sessions/${sessionId}`,
+			{
+				method: "PATCH",
+				body: JSON.stringify(payload),
+			},
+		);
+		if (body?.success) {
+			setSessions((prev) =>
+				prev.map((s) => (s.sessionId === sessionId ? body.data : s)),
+			);
+			setEditingSession(null);
+		} else {
+			setErrorMessage(body?.message ?? "Could not update session.");
+		}
+	}
+
+	async function handleDelete(sessionId: string) {
+		const { body } = await apiFetch(
+			`/groups/${groupId}/sessions/${sessionId}`,
+			{
+				method: "DELETE",
+			},
+		);
+		if (body?.success) {
+			setSessions((prev) => prev.filter((s) => s.sessionId !== sessionId));
+			setDeletingSessionId(null);
+		} else {
+			setErrorMessage(body?.message ?? "Could not delete session.");
 		}
 	}
 
@@ -165,6 +382,20 @@ function RouteComponent() {
 					onSubmit={handleCreate}
 				/>
 			)}
+			{editingSession && (
+				<EditSessionModal
+					session={editingSession}
+					roster={roster}
+					onClose={() => setEditingSession(null)}
+					onSubmit={(payload) => handleEdit(editingSession.sessionId, payload)}
+				/>
+			)}
+			{deletingSessionId && (
+				<ConfirmDeleteModal
+					onConfirm={() => handleDelete(deletingSessionId)}
+					onClose={() => setDeletingSessionId(null)}
+				/>
+			)}
 			<div className="flex items-center gap-3 mb-4">
 				<Link
 					to="/dashboard/groups"
@@ -177,7 +408,7 @@ function RouteComponent() {
 				</h1>
 			</div>
 
-			{(mockUser.role === "admin" || mockUser.role === "teacher") && (
+			{canManage && (
 				<div className="flex justify-items-start mb-4">
 					<button
 						type="button"
@@ -208,13 +439,14 @@ function RouteComponent() {
 							<th className="px-4 py-3 text-left">Subject</th>
 							<th className="px-4 py-3 text-left">Status</th>
 							<th className="px-4 py-3 text-left">Duration</th>
+							{canManage && <th className="px-4 py-3 text-left">Action</th>}
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-stone-100">
 						{sessions.length === 0 && (
 							<tr>
 								<td
-									colSpan={8}
+									colSpan={canManage ? 9 : 8}
 									className="px-4 py-6 text-center text-stone-400 italic"
 								>
 									No sessions logged yet.
@@ -243,6 +475,26 @@ function RouteComponent() {
 									</span>
 								</td>
 								<td className="px-4 py-3">{s.durationMinutes} min</td>
+								{canManage && (
+									<td className="px-4 py-3">
+										<div className="flex flex-row gap-3">
+											<button
+												type="button"
+												className="text-green-700 hover:text-green-800 cursor-pointer"
+												onClick={() => setEditingSession(s)}
+											>
+												<Pencil size={16} />
+											</button>
+											<button
+												type="button"
+												className="text-rose-500 hover:text-rose-600 cursor-pointer"
+												onClick={() => setDeletingSessionId(s.sessionId)}
+											>
+												<Ban size={16} />
+											</button>
+										</div>
+									</td>
+								)}
 							</tr>
 						))}
 					</tbody>
