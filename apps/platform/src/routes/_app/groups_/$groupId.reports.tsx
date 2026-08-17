@@ -36,11 +36,24 @@ type ReportRow = {
 	month: number;
 	year: number;
 	title: string;
-	description: string;
+	progress: string;
+	advice: string;
+	score: number;
+	scoreDenominator: number;
 	statusKind: "draft" | "submitted" | "read";
 	statusLabel: string;
 	submittedAt: string | null;
 	readAt: string | null;
+};
+
+type ReportFormPayload = {
+	studentId: string;
+	month: number;
+	year: number;
+	title: string;
+	progress: string;
+	advice: string;
+	score: number;
 };
 
 const STATUS_BADGE_CLASS: Record<ReportRow["statusKind"], string> = {
@@ -65,20 +78,8 @@ function ReportFormModal({
 	subjectName: string;
 	teacherName: string;
 	onClose: () => void;
-	onSaveDraft: (payload: {
-		studentId: string;
-		month: number;
-		year: number;
-		title: string;
-		description: string;
-	}) => void;
-	onSubmitReport: (payload: {
-		studentId: string;
-		month: number;
-		year: number;
-		title: string;
-		description: string;
-	}) => void;
+	onSaveDraft: (payload: ReportFormPayload) => void;
+	onSubmitReport: (payload: ReportFormPayload) => void;
 }) {
 	const now = new Date();
 	const [studentId, setStudentId] = useState(
@@ -87,11 +88,11 @@ function ReportFormModal({
 	const [month, setMonth] = useState(initialData?.month ?? now.getMonth() + 1);
 	const [year, setYear] = useState(initialData?.year ?? now.getFullYear());
 	const [title, setTitle] = useState(initialData?.title ?? "");
-	const [description, setDescription] = useState(
-		initialData?.description ?? "",
-	);
+	const [progress, setProgress] = useState(initialData?.progress ?? "");
+	const [advice, setAdvice] = useState(initialData?.advice ?? "");
+	const [score, setScore] = useState(initialData?.score ?? 0);
 
-	const payload = { studentId, month, year, title, description };
+	const payload = { studentId, month, year, title, progress, advice, score };
 	const canSubmitAction = !initialData || initialData.statusKind === "draft";
 
 	return (
@@ -179,11 +180,37 @@ function ReportFormModal({
 							onChange={(e) => setTitle(e.target.value)}
 						/>
 						<textarea
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-24"
-							placeholder="Description"
-							value={description}
-							onChange={(e) => setDescription(e.target.value)}
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-20"
+							placeholder="Progress"
+							value={progress}
+							onChange={(e) => setProgress(e.target.value)}
 						/>
+						<textarea
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-20"
+							placeholder="Advice"
+							value={advice}
+							onChange={(e) => setAdvice(e.target.value)}
+						/>
+						<label className="text-xs font-normal text-stone-500">
+							Score
+							<div className="mt-1 flex items-center gap-2">
+								<input
+									className="w-20 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+									type="number"
+									min={0}
+									max={100}
+									value={score}
+									onChange={(e) => setScore(Number(e.target.value))}
+								/>
+								<span className="font-semibold text-stone-500">/</span>
+								<input
+									className="w-20 border border-stone-200 bg-stone-100 rounded-xl p-2 text-sm text-stone-500 font-normal"
+									type="number"
+									value={100}
+									readOnly
+								/>
+							</div>
+						</label>
 					</div>
 				</form>
 				<div className="flex justify-end gap-2 mt-4">
@@ -259,20 +286,32 @@ function ViewReportModal({
 							</div>
 						</div>
 					</div>
-					<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
-						Subject
-						<div className="text-stone-700 font-semibold">{subjectName}</div>
+					<div className="flex gap-2">
+						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+							Subject
+							<div className="text-stone-700 font-semibold">{subjectName}</div>
+						</div>
+						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+							Score
+							<div className="text-stone-700 font-semibold">
+								{report.score}/{report.scoreDenominator}
+							</div>
+						</div>
 					</div>
 					<div className="border border-stone-200 rounded-xl p-2">
 						<p className="text-xs font-normal text-stone-500 mb-1">Title</p>
 						<p className="font-normal text-stone-700">{report.title}</p>
 					</div>
 					<div className="border border-stone-200 rounded-xl p-2">
-						<p className="text-xs font-normal text-stone-500 mb-1">
-							Description
-						</p>
+						<p className="text-xs font-normal text-stone-500 mb-1">Progress</p>
 						<p className="font-normal text-stone-700 whitespace-pre-wrap">
-							{report.description}
+							{report.progress}
+						</p>
+					</div>
+					<div className="border border-stone-200 rounded-xl p-2">
+						<p className="text-xs font-normal text-stone-500 mb-1">Advice</p>
+						<p className="font-normal text-stone-700 whitespace-pre-wrap">
+							{report.advice}
 						</p>
 					</div>
 				</div>
@@ -381,16 +420,7 @@ function RouteComponent() {
 		loadReports();
 	}, [loadReports]);
 
-	async function handleCreate(
-		payload: {
-			studentId: string;
-			month: number;
-			year: number;
-			title: string;
-			description: string;
-		},
-		submit: boolean,
-	) {
+	async function handleCreate(payload: ReportFormPayload, submit: boolean) {
 		const { body } = await apiFetch(`/groups/${groupId}/reports`, {
 			method: "POST",
 			body: JSON.stringify({ ...payload, submit }),
@@ -403,16 +433,7 @@ function RouteComponent() {
 		}
 	}
 
-	async function handleEdit(
-		reportId: string,
-		payload: {
-			studentId: string;
-			month: number;
-			year: number;
-			title: string;
-			description: string;
-		},
-	) {
+	async function handleEdit(reportId: string, payload: ReportFormPayload) {
 		const { body } = await apiFetch(`/groups/${groupId}/reports/${reportId}`, {
 			method: "PATCH",
 			body: JSON.stringify(payload),
@@ -429,13 +450,7 @@ function RouteComponent() {
 
 	async function handleSubmitFromEdit(
 		reportId: string,
-		payload: {
-			studentId: string;
-			month: number;
-			year: number;
-			title: string;
-			description: string;
-		},
+		payload: ReportFormPayload,
 	) {
 		const { body: patchBody } = await apiFetch(
 			`/groups/${groupId}/reports/${reportId}`,
@@ -568,6 +583,7 @@ function RouteComponent() {
 							<th className="px-4 py-3 text-left">Period</th>
 							<th className="px-4 py-3 text-left">Student</th>
 							<th className="px-4 py-3 text-left">Title</th>
+							<th className="px-4 py-3 text-left">Score</th>
 							<th className="px-4 py-3 text-left">Status</th>
 							<th className="px-4 py-3 text-left">Action</th>
 						</tr>
@@ -576,7 +592,7 @@ function RouteComponent() {
 						{reports.length === 0 && (
 							<tr>
 								<td
-									colSpan={5}
+									colSpan={6}
 									className="px-4 py-6 text-center text-stone-400 italic"
 								>
 									No reports yet.
@@ -590,6 +606,9 @@ function RouteComponent() {
 								</td>
 								<td className="px-4 py-3">{r.studentName ?? "-"}</td>
 								<td className="px-4 py-3">{r.title}</td>
+								<td className="px-4 py-3">
+									{r.score}/{r.scoreDenominator}
+								</td>
 								<td className="px-4 py-3">
 									<span
 										className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[r.statusKind]}`}
