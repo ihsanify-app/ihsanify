@@ -189,7 +189,9 @@ model Report {
   month       Int
   year        Int
   title       String
-  description String
+  progress    String
+  advice      String
+  score       Int
   submittedAt DateTime?
   readAt      DateTime?
   createdAt   DateTime  @default(now())
