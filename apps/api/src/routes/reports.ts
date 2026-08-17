@@ -10,6 +10,8 @@ import { prisma } from "../utils/prisma";
 
 export const reportsRouter = new Hono();
 
+const SCORE_DENOMINATOR = 100;
+
 type ReportRecord = {
 	id: string;
 	groupId: string;
@@ -18,7 +20,9 @@ type ReportRecord = {
 	month: number;
 	year: number;
 	title: string;
-	description: string;
+	progress: string;
+	advice: string;
+	score: number;
 	submittedAt: Date | null;
 	readAt: Date | null;
 	createdAt: Date;
@@ -58,7 +62,10 @@ async function serializeReport(report: ReportRecord) {
 		month: report.month,
 		year: report.year,
 		title: report.title,
-		description: report.description,
+		progress: report.progress,
+		advice: report.advice,
+		score: report.score,
+		scoreDenominator: SCORE_DENOMINATOR,
 		statusKind,
 		statusLabel,
 		submittedAt: report.submittedAt ? report.submittedAt.toISOString() : null,
@@ -137,7 +144,9 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 		month?: number;
 		year?: number;
 		title?: string;
-		description?: string;
+		progress?: string;
+		advice?: string;
+		score?: number;
 		submit?: boolean;
 	};
 
@@ -146,12 +155,15 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 		!body.month ||
 		!body.year ||
 		!body.title ||
-		!body.description
+		!body.progress ||
+		!body.advice ||
+		body.score === undefined
 	) {
 		return c.json(
 			{
 				success: false,
-				message: "studentId, month, year, title, and description are required.",
+				message:
+					"studentId, month, year, title, progress, advice, and score are required.",
 			},
 			400,
 		);
@@ -159,6 +171,15 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 	if (body.month < 1 || body.month > 12) {
 		return c.json(
 			{ success: false, message: "month must be between 1 and 12." },
+			400,
+		);
+	}
+	if (body.score < 0 || body.score > SCORE_DENOMINATOR) {
+		return c.json(
+			{
+				success: false,
+				message: `score must be between 0 and ${SCORE_DENOMINATOR}.`,
+			},
 			400,
 		);
 	}
@@ -190,7 +211,9 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 			month: body.month,
 			year: body.year,
 			title: body.title,
-			description: body.description,
+			progress: body.progress,
+			advice: body.advice,
+			score: body.score,
 			submittedAt: body.submit ? new Date() : null,
 		},
 	});
@@ -222,7 +245,9 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 		month?: number;
 		year?: number;
 		title?: string;
-		description?: string;
+		progress?: string;
+		advice?: string;
+		score?: number;
 	};
 
 	if (body.studentId !== undefined) {
@@ -240,6 +265,18 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 			400,
 		);
 	}
+	if (
+		body.score !== undefined &&
+		(body.score < 0 || body.score > SCORE_DENOMINATOR)
+	) {
+		return c.json(
+			{
+				success: false,
+				message: `score must be between 0 and ${SCORE_DENOMINATOR}.`,
+			},
+			400,
+		);
+	}
 
 	const retargetingStudent =
 		body.studentId !== undefined && body.studentId !== existing.studentId;
@@ -251,7 +288,9 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 			...(body.month !== undefined && { month: body.month }),
 			...(body.year !== undefined && { year: body.year }),
 			...(body.title !== undefined && { title: body.title }),
-			...(body.description !== undefined && { description: body.description }),
+			...(body.progress !== undefined && { progress: body.progress }),
+			...(body.advice !== undefined && { advice: body.advice }),
+			...(body.score !== undefined && { score: body.score }),
 			// Re-targeting to a different student invalidates any existing
 			// submitted/read state, which described the old student.
 			...(retargetingStudent && { submittedAt: null, readAt: null }),
