@@ -71,6 +71,7 @@ model Teacher {
 
   subjects     TeacherSubject[]
   groupHistory GroupTeacher[]
+  reports      Report[]
 }
 
 model Student {
@@ -80,6 +81,7 @@ model Student {
 
   enrollmentHistory GroupEnrollment[]
   sessionAttendance SessionAttendance[]
+  reports           Report[]
 }
 
 model Subject {
@@ -172,15 +174,28 @@ model SessionAttendance {
   @@unique([sessionId, studentId])
 }
 
-// Placeholder shape — fields to be refined once the real Report design is discussed.
+// Monthly progress report, written by a group's teacher for one student.
+// submittedAt/readAt double as the visibility + status gate:
+//   null / null      -> draft, only visible to admin/teacher
+//   set  / null      -> "Submitted by {teacher}", visible to the assigned student
+//   set  / set       -> "Read by {student}"
+// Teacher/student names are looked up at render time via teacherId/studentId,
+// never denormalized onto this row.
 model Report {
-  id          String       @id @default(cuid())
+  id          String    @id @default(cuid())
   groupId     String
+  studentId   String
+  teacherId   String
+  month       Int
+  year        Int
   title       String
   description String
-  status      RecordStatus @default(DRAFT)
-  createdAt   DateTime     @default(now())
-  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  submittedAt DateTime?
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student     Student   @relation(fields: [studentId], references: [id])
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
 }
 
 // Placeholder shape — fields to be refined once the real Assignment design is discussed.
