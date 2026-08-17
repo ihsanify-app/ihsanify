@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { Ban, Pencil, PlusCircle } from "lucide-react";
+import { Ban, Eye, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { GroupTabs } from "../../../components/dashboard/GroupTabs";
 import { apiFetch } from "../../../lib/apiClient";
@@ -9,33 +9,90 @@ export const Route = createFileRoute("/_app/groups_/$groupId/reports")({
 	component: RouteComponent,
 });
 
+const MONTH_NAMES = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December",
+];
+
+type Option = { studentId: string; studentName: string };
+
 type ReportRow = {
 	reportId: string;
+	groupId: string;
+	studentId: string;
+	studentName: string | null;
+	teacherId: string;
+	teacherName: string | null;
+	month: number;
+	year: number;
 	title: string;
 	description: string;
-	status: "draft" | "finished";
+	statusKind: "draft" | "submitted" | "read";
+	statusLabel: string;
+	submittedAt: string | null;
+	readAt: string | null;
 };
 
-function ReportModal({
+const STATUS_BADGE_CLASS: Record<ReportRow["statusKind"], string> = {
+	draft: "bg-amber-100 text-amber-700",
+	submitted: "bg-sky-100 text-sky-700",
+	read: "bg-green-100 text-green-700",
+};
+
+function ReportFormModal({
+	title: modalTitle,
 	initialData,
+	roster,
+	subjectName,
+	teacherName,
 	onClose,
-	onSubmit,
+	onSaveDraft,
+	onSubmitReport,
 }: {
+	title: string;
 	initialData: ReportRow | null;
+	roster: Option[];
+	subjectName: string;
+	teacherName: string;
 	onClose: () => void;
-	onSubmit: (payload: {
+	onSaveDraft: (payload: {
+		studentId: string;
+		month: number;
+		year: number;
 		title: string;
 		description: string;
-		status: "draft" | "finished";
+	}) => void;
+	onSubmitReport: (payload: {
+		studentId: string;
+		month: number;
+		year: number;
+		title: string;
+		description: string;
 	}) => void;
 }) {
+	const now = new Date();
+	const [studentId, setStudentId] = useState(
+		initialData?.studentId ?? roster[0]?.studentId ?? "",
+	);
+	const [month, setMonth] = useState(initialData?.month ?? now.getMonth() + 1);
+	const [year, setYear] = useState(initialData?.year ?? now.getFullYear());
 	const [title, setTitle] = useState(initialData?.title ?? "");
 	const [description, setDescription] = useState(
 		initialData?.description ?? "",
 	);
-	const [status, setStatus] = useState<"draft" | "finished">(
-		initialData?.status ?? "draft",
-	);
+
+	const payload = { studentId, month, year, title, description };
+	const canSubmitAction = !initialData || initialData.statusKind === "draft";
 
 	return (
 		<div
@@ -50,11 +107,71 @@ function ReportModal({
 				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<h2 className="font-heading text-lg text-green-800 mb-3">
-					{initialData ? "Edit Report" : "Add Report"}
+				<h2 className="font-heading text-lg text-green-800 mb-1">
+					{modalTitle}
 				</h2>
+				{initialData && (
+					<span
+						className={`inline-block mb-2 text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[initialData.statusKind]}`}
+					>
+						{initialData.statusLabel}
+					</span>
+				)}
 				<form>
 					<div className="flex flex-col gap-2">
+						<label className="text-xs font-normal text-stone-500">
+							Student
+							<select
+								className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+								value={studentId}
+								onChange={(e) => setStudentId(e.target.value)}
+							>
+								{roster.map((s) => (
+									<option key={s.studentId} value={s.studentId}>
+										{s.studentName}
+									</option>
+								))}
+							</select>
+						</label>
+						<div className="flex gap-2">
+							<label className="text-xs font-normal text-stone-500 flex-1">
+								Month
+								<select
+									className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+									value={month}
+									onChange={(e) => setMonth(Number(e.target.value))}
+								>
+									{MONTH_NAMES.map((name, i) => (
+										<option key={name} value={i + 1}>
+											{name}
+										</option>
+									))}
+								</select>
+							</label>
+							<label className="text-xs font-normal text-stone-500 w-24">
+								Year
+								<input
+									className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+									type="number"
+									value={year}
+									onChange={(e) => setYear(Number(e.target.value))}
+								/>
+							</label>
+						</div>
+						<div className="flex gap-2 text-xs font-normal text-stone-500">
+							<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2">
+								Teacher
+								<div className="text-stone-700 font-semibold">
+									{teacherName}
+								</div>
+							</div>
+							<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2">
+								Subject
+								<div className="text-stone-700 font-semibold">
+									{subjectName}
+								</div>
+							</div>
+						</div>
 						<input
 							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							placeholder="Title"
@@ -67,16 +184,6 @@ function ReportModal({
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
 						/>
-						<select
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-							value={status}
-							onChange={(e) =>
-								setStatus(e.target.value as "draft" | "finished")
-							}
-						>
-							<option value="draft">Draft</option>
-							<option value="finished">Finished</option>
-						</select>
 					</div>
 				</form>
 				<div className="flex justify-end gap-2 mt-4">
@@ -89,10 +196,93 @@ function ReportModal({
 					</button>
 					<button
 						type="button"
-						onClick={() => onSubmit({ title, description, status })}
-						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
+						onClick={() => onSaveDraft(payload)}
+						className="cursor-pointer rounded-xl border border-green-600 text-green-700 px-4 py-2 hover:bg-green-50 transition-colors"
 					>
-						{initialData ? "Save Changes" : "Create"}
+						Save Draft
+					</button>
+					{canSubmitAction && (
+						<button
+							type="button"
+							onClick={() => onSubmitReport(payload)}
+							className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
+						>
+							Submit
+						</button>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function ViewReportModal({
+	report,
+	subjectName,
+	onClose,
+}: {
+	report: ReportRow;
+	subjectName: string;
+	onClose: () => void;
+}) {
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="font-heading text-lg text-green-800 mb-1">Report</h2>
+				<span
+					className={`inline-block mb-3 text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[report.statusKind]}`}
+				>
+					{report.statusLabel}
+				</span>
+				<div className="flex flex-col gap-2 text-sm">
+					<div className="flex gap-2">
+						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+							Period
+							<div className="text-stone-700 font-semibold">
+								{MONTH_NAMES[report.month - 1]} {report.year}
+							</div>
+						</div>
+						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+							Teacher
+							<div className="text-stone-700 font-semibold">
+								{report.teacherName ?? "-"}
+							</div>
+						</div>
+					</div>
+					<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+						Subject
+						<div className="text-stone-700 font-semibold">{subjectName}</div>
+					</div>
+					<div className="border border-stone-200 rounded-xl p-2">
+						<p className="text-xs font-normal text-stone-500 mb-1">Title</p>
+						<p className="font-normal text-stone-700">{report.title}</p>
+					</div>
+					<div className="border border-stone-200 rounded-xl p-2">
+						<p className="text-xs font-normal text-stone-500 mb-1">
+							Description
+						</p>
+						<p className="font-normal text-stone-700 whitespace-pre-wrap">
+							{report.description}
+						</p>
+					</div>
+				</div>
+				<div className="flex justify-end mt-4">
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+					>
+						Close
 					</button>
 				</div>
 			</div>
@@ -153,20 +343,37 @@ function RouteComponent() {
 	);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [reports, setReports] = useState<ReportRow[]>([]);
+	const [roster, setRoster] = useState<Option[]>([]);
+	const [subjectName, setSubjectName] = useState("");
+	const [teacherName, setTeacherName] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingReport, setEditingReport] = useState<ReportRow | null>(null);
+	const [viewingReport, setViewingReport] = useState<ReportRow | null>(null);
 	const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
 
 	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
 
 	const loadReports = useCallback(async () => {
-		const { status, body } = await apiFetch(`/groups/${groupId}/reports`);
-		if (status === 401 || status === 403 || status === 404) {
+		const [reportsRes, groupsRes] = await Promise.all([
+			apiFetch(`/groups/${groupId}/reports`),
+			apiFetch("/groups"),
+		]);
+		if (
+			reportsRes.status === 401 ||
+			reportsRes.status === 403 ||
+			reportsRes.status === 404
+		) {
 			setLoadState("denied");
-			setErrorMessage(body?.message ?? "Unable to load reports.");
+			setErrorMessage(reportsRes.body?.message ?? "Unable to load reports.");
 			return;
 		}
-		setReports(body?.data ?? []);
+		setReports(reportsRes.body?.data ?? []);
+		setRoster(reportsRes.body?.roster ?? []);
+		const group = (groupsRes.body?.data ?? []).find(
+			(g: { groupId: string }) => g.groupId === groupId,
+		);
+		setSubjectName(group?.subjectName ?? "No subject");
+		setTeacherName(group?.teacherName ?? "No teacher assigned");
 		setLoadState("ready");
 	}, [groupId]);
 
@@ -174,14 +381,19 @@ function RouteComponent() {
 		loadReports();
 	}, [loadReports]);
 
-	async function handleCreate(payload: {
-		title: string;
-		description: string;
-		status: "draft" | "finished";
-	}) {
+	async function handleCreate(
+		payload: {
+			studentId: string;
+			month: number;
+			year: number;
+			title: string;
+			description: string;
+		},
+		submit: boolean,
+	) {
 		const { body } = await apiFetch(`/groups/${groupId}/reports`, {
 			method: "POST",
-			body: JSON.stringify(payload),
+			body: JSON.stringify({ ...payload, submit }),
 		});
 		if (body?.success) {
 			setReports((prev) => [body.data, ...prev]);
@@ -194,9 +406,11 @@ function RouteComponent() {
 	async function handleEdit(
 		reportId: string,
 		payload: {
+			studentId: string;
+			month: number;
+			year: number;
 			title: string;
 			description: string;
-			status: "draft" | "finished";
 		},
 	) {
 		const { body } = await apiFetch(`/groups/${groupId}/reports/${reportId}`, {
@@ -213,6 +427,38 @@ function RouteComponent() {
 		}
 	}
 
+	async function handleSubmitFromEdit(
+		reportId: string,
+		payload: {
+			studentId: string;
+			month: number;
+			year: number;
+			title: string;
+			description: string;
+		},
+	) {
+		const { body: patchBody } = await apiFetch(
+			`/groups/${groupId}/reports/${reportId}`,
+			{ method: "PATCH", body: JSON.stringify(payload) },
+		);
+		if (!patchBody?.success) {
+			setErrorMessage(patchBody?.message ?? "Could not update report.");
+			return;
+		}
+		const { body: submitBody } = await apiFetch(
+			`/groups/${groupId}/reports/${reportId}/submit`,
+			{ method: "POST" },
+		);
+		if (submitBody?.success) {
+			setReports((prev) =>
+				prev.map((r) => (r.reportId === reportId ? submitBody.data : r)),
+			);
+			setEditingReport(null);
+		} else {
+			setErrorMessage(submitBody?.message ?? "Could not submit report.");
+		}
+	}
+
 	async function handleDelete(reportId: string) {
 		const { body } = await apiFetch(`/groups/${groupId}/reports/${reportId}`, {
 			method: "DELETE",
@@ -222,6 +468,22 @@ function RouteComponent() {
 			setDeletingReportId(null);
 		} else {
 			setErrorMessage(body?.message ?? "Could not delete report.");
+		}
+	}
+
+	async function handleView(report: ReportRow) {
+		setViewingReport(report);
+		if (report.statusKind === "submitted" && mockUser.role === "student") {
+			const { body } = await apiFetch(
+				`/groups/${groupId}/reports/${report.reportId}/read`,
+				{ method: "POST" },
+			);
+			if (body?.success) {
+				setReports((prev) =>
+					prev.map((r) => (r.reportId === report.reportId ? body.data : r)),
+				);
+				setViewingReport(body.data);
+			}
 		}
 	}
 
@@ -239,17 +501,36 @@ function RouteComponent() {
 	return (
 		<section className="p-6">
 			{isModalOpen && (
-				<ReportModal
+				<ReportFormModal
+					title="Add Report"
 					initialData={null}
+					roster={roster}
+					subjectName={subjectName}
+					teacherName={teacherName}
 					onClose={() => setIsModalOpen(false)}
-					onSubmit={handleCreate}
+					onSaveDraft={(payload) => handleCreate(payload, false)}
+					onSubmitReport={(payload) => handleCreate(payload, true)}
 				/>
 			)}
 			{editingReport && (
-				<ReportModal
+				<ReportFormModal
+					title="Edit Report"
 					initialData={editingReport}
+					roster={roster}
+					subjectName={subjectName}
+					teacherName={teacherName}
 					onClose={() => setEditingReport(null)}
-					onSubmit={(payload) => handleEdit(editingReport.reportId, payload)}
+					onSaveDraft={(payload) => handleEdit(editingReport.reportId, payload)}
+					onSubmitReport={(payload) =>
+						handleSubmitFromEdit(editingReport.reportId, payload)
+					}
+				/>
+			)}
+			{viewingReport && (
+				<ViewReportModal
+					report={viewingReport}
+					subjectName={subjectName}
+					onClose={() => setViewingReport(null)}
 				/>
 			)}
 			{deletingReportId && (
@@ -284,17 +565,18 @@ function RouteComponent() {
 				<table className="w-full">
 					<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 						<tr>
+							<th className="px-4 py-3 text-left">Period</th>
+							<th className="px-4 py-3 text-left">Student</th>
 							<th className="px-4 py-3 text-left">Title</th>
-							<th className="px-4 py-3 text-left">Description</th>
 							<th className="px-4 py-3 text-left">Status</th>
-							{canManage && <th className="px-4 py-3 text-left">Action</th>}
+							<th className="px-4 py-3 text-left">Action</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-stone-100">
 						{reports.length === 0 && (
 							<tr>
 								<td
-									colSpan={canManage ? 4 : 3}
+									colSpan={5}
 									className="px-4 py-6 text-center text-stone-400 italic"
 								>
 									No reports yet.
@@ -303,39 +585,47 @@ function RouteComponent() {
 						)}
 						{reports.map((r) => (
 							<tr key={r.reportId} className="hover:bg-green-50">
+								<td className="px-4 py-3">
+									{MONTH_NAMES[r.month - 1]} {r.year}
+								</td>
+								<td className="px-4 py-3">{r.studentName ?? "-"}</td>
 								<td className="px-4 py-3">{r.title}</td>
-								<td className="px-4 py-3 text-stone-600">{r.description}</td>
 								<td className="px-4 py-3">
 									<span
-										className={
-											r.status === "finished"
-												? "bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full"
-												: "bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full"
-										}
+										className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[r.statusKind]}`}
 									>
-										{r.status === "finished" ? "Finished" : "Draft"}
+										{r.statusLabel}
 									</span>
 								</td>
-								{canManage && (
-									<td className="px-4 py-3">
-										<div className="flex flex-row gap-3">
-											<button
-												type="button"
-												className="text-green-700 hover:text-green-800 cursor-pointer"
-												onClick={() => setEditingReport(r)}
-											>
-												<Pencil size={16} />
-											</button>
-											<button
-												type="button"
-												className="text-rose-500 hover:text-rose-600 cursor-pointer"
-												onClick={() => setDeletingReportId(r.reportId)}
-											>
-												<Ban size={16} />
-											</button>
-										</div>
-									</td>
-								)}
+								<td className="px-4 py-3">
+									<div className="flex flex-row gap-3">
+										<button
+											type="button"
+											className="text-sky-600 hover:text-sky-700 cursor-pointer"
+											onClick={() => handleView(r)}
+										>
+											<Eye size={16} />
+										</button>
+										{canManage && (
+											<>
+												<button
+													type="button"
+													className="text-green-700 hover:text-green-800 cursor-pointer"
+													onClick={() => setEditingReport(r)}
+												>
+													<Pencil size={16} />
+												</button>
+												<button
+													type="button"
+													className="text-rose-500 hover:text-rose-600 cursor-pointer"
+													onClick={() => setDeletingReportId(r.reportId)}
+												>
+													<Ban size={16} />
+												</button>
+											</>
+										)}
+									</div>
+								</td>
 							</tr>
 						))}
 					</tbody>
