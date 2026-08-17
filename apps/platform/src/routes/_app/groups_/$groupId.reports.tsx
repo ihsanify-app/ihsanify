@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { Ban, Eye, Pencil, PlusCircle } from "lucide-react";
+import { Ban, Download, Eye, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { GroupTabs } from "../../../components/dashboard/GroupTabs";
 import { apiFetch } from "../../../lib/apiClient";
@@ -315,7 +315,16 @@ function ViewReportModal({
 						</p>
 					</div>
 				</div>
-				<div className="flex justify-end mt-4">
+				<div className="flex justify-between items-center mt-4">
+					<button
+						type="button"
+						disabled
+						title="PDF export coming soon"
+						className="flex items-center gap-2 rounded-xl border border-stone-200 text-stone-400 px-4 py-2 cursor-not-allowed"
+					>
+						<Download size={16} />
+						Download PDF
+					</button>
 					<button
 						type="button"
 						onClick={onClose}
