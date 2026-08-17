@@ -163,7 +163,7 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 			{
 				success: false,
 				message:
-					"studentId, month, year, title, progress, advice, and score are required.",
+					"StudentId, Month, Year, Title, Progress, Advice, and Score are required.",
 			},
 			400,
 		);
