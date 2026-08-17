@@ -8,7 +8,7 @@
 **Rule reference:**
 1. Billing formula (`Bill = PRESENT/expected × price`) + edge cases (mid-month join, teacher never logs session, mid-month price change)
 2. Enrollment audit log (`GroupEnrollment`/`GroupTeacher` as JOIN/LEAVE events, not plain FKs)
-3. Report visibility (draft invisible to students, only `published` visible) — must be enforced server-side
+3. Report visibility (draft invisible to students; visible once explicitly submitted, not on creation — see Post-Plan Additions for the actual `submittedAt`/`readAt` implementation, which replaced the `published` framing) — enforced server-side
 4. Role-based scoping on every list endpoint (data-leak risk surface)
 5. Monthly aggregate rules (published-only? zero-report handling?)
 6. Report render-time joins (no denormalized duplication)
@@ -354,10 +354,10 @@
 - ❌ Hour 19 — Assignment Results Page
 
 **Phase 5 — Progress Report UI**
-- ❌ Hour 20 — Progress Report List
-- ❌ Hour 21 — Progress Report Builder (Teacher)
-- ❌ Hour 22 — Progress Report View (Student)
-- ❌ Hour 23 — Progress Report: Admin Overview
+- 🔄 Hour 20 — Progress Report List (superseded by the Reports tab's table — per-group, not cross-group; see Post-Plan Additions)
+- 🔄 Hour 21 — Progress Report Builder (Teacher) (built with Month/Year/Student/Progress/Advice/Score fields instead of the criteria-rating scale spec'd here; no "Enhance with AI" button — see Post-Plan Additions)
+- 🔄 Hour 22 — Progress Report View (Student) (built as a read-only popup with a Submitted→Read receipt instead of a dedicated page; Download PDF button placed but not wired — see Post-Plan Additions)
+- ❌ Hour 23 — Progress Report: Admin Overview (no cross-group/class-level aggregate view exists — admin sees the same per-group table as everyone with manage rights)
 
 **Phase 6 — Backend APIs**
 - ✅ `GET /me` — current user profile
@@ -366,7 +366,7 @@
 - 🔄 Hour 25 — Classes & Enrollment Endpoints (`/groups` CRUD done with role-scoped `GET`, enrollment via `GroupEnrollment` JOIN/LEAVE log — not a separate `/enrollments` resource as originally sketched)
 - ❌ Hour 26 — Assignment Endpoints (the quiz-builder version — see Post-Plan Additions for what was actually built instead)
 - ❌ Hour 27 — Submission Endpoints
-- ❌ Hour 28 — Progress Report Endpoints (the criteria-rating version — see Post-Plan Additions)
+- 🔄 Hour 28 — Progress Report Endpoints (`/groups/:id/reports` CRUD + `/submit` + `/read` action endpoints exist, but shaped around Month/Year/Student/Progress/Advice/Score + a submitted/read receipt, not the criteria-rating version spec'd here — see Post-Plan Additions)
 - ❌ Hour 29 — Notification Endpoints
 - ❌ Hour 30 — Dashboard Aggregate Endpoints (dashboard went a different direction entirely — see Post-Plan Additions)
 - ❌ Hour 31 — Validation, Guards & Error Handling
@@ -390,7 +390,7 @@
 _Added 2026-08-05 — work that grew organically per-feature (schema → API → UI → verify, all in one pass) instead of following the Phase 1–5 mock-first / Phase 6 backend / Phase 7 connect ordering above. Recorded here so the plan doesn't silently go stale._
 
 - **Sessions CRUD** — `Session` + `SessionAttendance` models, full CRUD at `api/src/routes/sessions.ts` (admin + assigned-teacher only, via `canManageGroup`). Per-group Sessions page gained inline Edit (date/status/students/duration) and Delete (confirm modal) actions. `Session.attendanceRecorded` boolean added to distinguish "never edited" from "explicitly recorded 0 attendees" — fixes a real bug where those two cases collapsed together.
-- **Group detail tabs** — Sessions / Reports / Assignments / Invoices tabs (`GroupTabs.tsx`), same CRUD pattern reused for `Report` and `Assignment` models. **Note:** `Report`/`Assignment` as actually built are minimal placeholders (`id, groupId, title, description, status`) — not the rich quiz-builder (`AssignmentQuestion`/`AssignmentSubmission`/`AssignmentAnswer`, Hours 14–19) or criteria-rating Report (Hours 20–23) described earlier in this plan. Those richer specs remain fully unbuilt; Hours 14–23 above are stale against what actually exists under those tab names.
+- **Group detail tabs** — Sessions / Reports / Assignments / Invoices tabs (`GroupTabs.tsx`), same CRUD pattern reused for `Report` and `Assignment` models. **Note:** `Assignment`/`Invoice` as actually built are still minimal placeholders (`id, groupId, title, description, status`) — not the rich quiz-builder (`AssignmentQuestion`/`AssignmentSubmission`/`AssignmentAnswer`, Hours 14–19) described earlier in this plan. `Report` has since been fully redesigned away from that placeholder shape — see below.
 - **Invoice model** — new, not in the original Core Entities list below. Same placeholder shape as Report/Assignment. **Does not implement rule 1 (billing formula)** — no `Payment` model, no PRESENT/expected calculation, no proof-of-transfer upload. Rule 1 is still a fully open gap. Invoices tab + all 4 endpoints are locked to `requireRole("ADMIN")` directly, no teacher/student access at all.
 - **"Tests" renamed to "Assignments"** across schema, routes, and UI (model, table, files) — pure rename, not the Hour 26 endpoint.
 - **Route restructure** — dropped the `/dashboard/*` URL prefix via a pathless `_app` layout route; per-group subpages use TanStack Router's trailing-underscore escape (`groups_/$groupId.sessions.tsx`) so they aren't swallowed as children of `groups.tsx`. Filenames normalized to match.
@@ -400,13 +400,20 @@ _Added 2026-08-05 — work that grew organically per-feature (schema → API →
   - `TeacherGroupMindMap` ("Team Structure") — Teacher → Group → {Students, Planned Sessions} tree via nested indentation + dashed connector lines (not the Hour 7/8 attendance/progress tables).
   - Role-scoping for both reuses `/groups`' existing per-role scoping (admin sees all, teacher/student see their own) rather than new dashboard-specific endpoints — Hour 30's `/dashboard/:role` aggregate endpoints were never built.
 - **User avatars** — `User.avatarUrl` (nullable String), upload wired into `/users` create/edit modal (client `FileReader` → base64 data URL, no cloud storage set up). 300KB size cap + png/jpeg/webp/gif type restriction enforced both client-side and server-side (`isValidAvatarDataUrl` in `users.ts`). Rendered as circles in the users table, `WeeklySchedule`, and `TeacherGroupMindMap`, falling back to initials when unset.
+- **`Report` fully redesigned** (2026-08-17/18) — replaces the placeholder shape and implements rule 3 for real, in a different way than originally framed:
+  - Per-student now (`studentId` FK), not shared across the group — one report per student per period.
+  - `title`/`description` replaced with `title`, `progress`, `advice`, and `score` (Int numerator, validated 0–100 both create and edit; UI shows it next to a disabled, permanently-`100` denominator input rather than a stored second field).
+  - `month`/`year` added; `teacherId` is always stamped from the group's *current* teacher (`getCurrentTeacherId`) regardless of whether an Admin or the Teacher clicked Add Report — there's no path where it's null or an Admin's own id.
+  - Status is no longer a `RecordStatus` enum — replaced with two nullable timestamps, `submittedAt`/`readAt`, that double as both the workflow state and the visibility gate: `null/null` = Draft (admin/current-teacher only, via a separate "Save Draft" action), `set/null` = "Submitted by {teacher}" (now visible to that one student, via a separate "Submit" action — deliberately two-step, not visible the instant Create is clicked), `set/set` = "Read by {student}" (set only when that specific student opens it, never by a teacher/admin preview).
+  - Enforced server-side in `GET /groups/:id/reports`: students only ever receive their own `submittedAt`-not-null reports; drafts and other students' reports are invisible at the query level, not just hidden in the UI. Re-targeting a report to a different student resets `submittedAt`/`readAt` (old submitted/read state described the wrong person). Names still resolved at render time from `teacherId`/`studentId`, never denormalized — rule 6 holds.
+  - Download PDF button placed in the view popup (disabled, `Download` icon, "coming soon" tooltip) as a placeholder — no template or export logic built yet, matching Hour 22/23's "(placeholder)" framing.
 
 ---
 
 ## Data Model Decisions
 _Last updated: 2026-04-30_
 
-> This diagram predates the Post-Plan Additions above. It does not include `PlannedSession`, `User.avatarUrl`, or `Invoice`, and `Assignment`/`Report` here describe the rich Hour 14–23 versions — not the minimal placeholders actually built. See Post-Plan Additions for what's real today.
+> This diagram predates the Post-Plan Additions above. It does not include `PlannedSession`, `User.avatarUrl`, or `Invoice`. `Assignment` here describes the rich Hour 14–19 quiz-builder version — the actual model is still a minimal placeholder. `Report` here describes the Hour 20–23 criteria-rating version — the actual model was fully redesigned (Month/Year/Student/Progress/Advice/Score + a submitted/read receipt) and is neither this nor the placeholder anymore. See Post-Plan Additions for what's real today.
 
 ### Core Entities
 ```
