@@ -8,7 +8,9 @@ import { groupsRouter } from "./routes/groups";
 import { invoicesRouter } from "./routes/invoices";
 import { lookupsRouter } from "./routes/lookups";
 import { reportsRouter } from "./routes/reports";
+import { reportThemesRouter } from "./routes/reportThemes";
 import { sessionsRouter } from "./routes/sessions";
+import { subjectsRouter } from "./routes/subjects";
 import { usersRouter } from "./routes/users";
 
 const app = new Hono();
@@ -27,7 +29,9 @@ app
 	.route("/", sessionsRouter)
 	.route("/", reportsRouter)
 	.route("/", assignmentsRouter)
-	.route("/", invoicesRouter);
+	.route("/", invoicesRouter)
+	.route("/", subjectsRouter)
+	.route("/", reportThemesRouter);
 
 serve(
 	{
