@@ -35,7 +35,6 @@ type ReportRow = {
 	teacherName: string | null;
 	month: number;
 	year: number;
-	title: string;
 	progress: string;
 	advice: string;
 	score: number;
@@ -50,7 +49,6 @@ type ReportFormPayload = {
 	studentId: string;
 	month: number;
 	year: number;
-	title: string;
 	progress: string;
 	advice: string;
 	score: number;
@@ -87,12 +85,11 @@ function ReportFormModal({
 	);
 	const [month, setMonth] = useState(initialData?.month ?? now.getMonth() + 1);
 	const [year, setYear] = useState(initialData?.year ?? now.getFullYear());
-	const [title, setTitle] = useState(initialData?.title ?? "");
 	const [progress, setProgress] = useState(initialData?.progress ?? "");
 	const [advice, setAdvice] = useState(initialData?.advice ?? "");
 	const [score, setScore] = useState(initialData?.score ?? 0);
 
-	const payload = { studentId, month, year, title, progress, advice, score };
+	const payload = { studentId, month, year, progress, advice, score };
 	const canSubmitAction = !initialData || initialData.statusKind === "draft";
 
 	return (
@@ -173,12 +170,6 @@ function ReportFormModal({
 								</div>
 							</div>
 						</div>
-						<input
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-							placeholder="Title"
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-						/>
 						<textarea
 							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-20"
 							placeholder="Progress"
@@ -312,10 +303,6 @@ function ViewReportModal({
 								{report.score}/{report.scoreDenominator}
 							</div>
 						</div>
-					</div>
-					<div className="border border-stone-200 rounded-xl p-2">
-						<p className="text-xs font-normal text-stone-500 mb-1">Title</p>
-						<p className="font-normal text-stone-700">{report.title}</p>
 					</div>
 					<div className="border border-stone-200 rounded-xl p-2">
 						<p className="text-xs font-normal text-stone-500 mb-1">Progress</p>
@@ -611,7 +598,6 @@ function RouteComponent() {
 						<tr>
 							<th className="px-4 py-3 text-left">Period</th>
 							<th className="px-4 py-3 text-left">Student</th>
-							<th className="px-4 py-3 text-left">Title</th>
 							<th className="px-4 py-3 text-left">Score</th>
 							<th className="px-4 py-3 text-left">Status</th>
 							<th className="px-4 py-3 text-left">Action</th>
@@ -621,7 +607,7 @@ function RouteComponent() {
 						{reports.length === 0 && (
 							<tr>
 								<td
-									colSpan={6}
+									colSpan={5}
 									className="px-4 py-6 text-center text-stone-400 italic"
 								>
 									No reports yet.
@@ -634,7 +620,6 @@ function RouteComponent() {
 									{MONTH_NAMES[r.month - 1]} {r.year}
 								</td>
 								<td className="px-4 py-3">{r.studentName ?? "-"}</td>
-								<td className="px-4 py-3">{r.title}</td>
 								<td className="px-4 py-3">
 									{r.score}/{r.scoreDenominator}
 								</td>
