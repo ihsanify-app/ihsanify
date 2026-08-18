@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PlusCircle } from "lucide-react";
+import { Ban, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { SettingsTabs } from "../../../components/dashboard/SettingsTabs";
 import { apiFetch } from "../../../lib/apiClient";
@@ -93,6 +93,50 @@ function AddSubjectModal({
 	);
 }
 
+function ConfirmDeleteModal({
+	onConfirm,
+	onClose,
+}: {
+	onConfirm: () => void;
+	onClose: () => void;
+}) {
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="text-stone-800">
+					Are you sure you want to delete this record?
+				</h2>
+				<div className="flex flex-col gap-2">
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl bg-rose-600 text-white p-2 hover:bg-rose-700 transition-colors"
+						onClick={onConfirm}
+					>
+						Confirm
+					</button>
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 p-2 hover:bg-stone-50 transition-colors"
+						onClick={onClose}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function RouteComponent() {
 	const [loadState, setLoadState] = useState<
 		"loading" | "ready" | "unauthorized"
@@ -101,6 +145,9 @@ function RouteComponent() {
 	const [themes, setThemes] = useState<ReportTheme[]>([]);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [deletingSubjectId, setDeletingSubjectId] = useState<string | null>(
+		null,
+	);
 
 	const load = useCallback(async () => {
 		const [subjectsRes, themesRes] = await Promise.all([
@@ -152,6 +199,20 @@ function RouteComponent() {
 		}
 	}
 
+	async function handleDelete(subjectId: string) {
+		const { body } = await apiFetch(`/subjects/${subjectId}`, {
+			method: "DELETE",
+		});
+		if (body?.success) {
+			setSubjects((prev) => prev.filter((s) => s.subjectId !== subjectId));
+			setDeletingSubjectId(null);
+			setErrorMessage("");
+		} else {
+			setErrorMessage(body?.message ?? "Could not delete subject.");
+			setDeletingSubjectId(null);
+		}
+	}
+
 	if (loadState === "unauthorized") {
 		return (
 			<section className="m-10 text-center text-stone-500">
@@ -172,6 +233,12 @@ function RouteComponent() {
 					themes={themes}
 					onClose={() => setIsModalOpen(false)}
 					onSubmit={handleCreate}
+				/>
+			)}
+			{deletingSubjectId && (
+				<ConfirmDeleteModal
+					onConfirm={() => handleDelete(deletingSubjectId)}
+					onClose={() => setDeletingSubjectId(null)}
 				/>
 			)}
 
@@ -210,13 +277,14 @@ function RouteComponent() {
 							<tr>
 								<th className="px-4 py-3 text-left">Subject</th>
 								<th className="px-4 py-3 text-left">Report Theme</th>
+								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-stone-100">
 							{subjects.length === 0 && (
 								<tr>
 									<td
-										colSpan={2}
+										colSpan={3}
 										className="px-4 py-6 text-center text-stone-400 italic"
 									>
 										No subjects yet.
@@ -252,6 +320,15 @@ function RouteComponent() {
 												))}
 											</select>
 										</div>
+									</td>
+									<td className="px-4 py-3">
+										<button
+											type="button"
+											className="text-rose-500 hover:text-rose-600 cursor-pointer"
+											onClick={() => setDeletingSubjectId(s.subjectId)}
+										>
+											<Ban size={16} />
+										</button>
 									</td>
 								</tr>
 							))}
