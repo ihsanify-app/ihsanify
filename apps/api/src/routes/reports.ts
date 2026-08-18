@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { DEFAULT_THEME_COLOR, renderReportPdf } from "../pdf/ReportDocument";
 import { requireAuth } from "../utils/auth";
 import {
 	canManageGroup,
@@ -11,6 +12,34 @@ import { prisma } from "../utils/prisma";
 export const reportsRouter = new Hono();
 
 const SCORE_DENOMINATOR = 100;
+
+type ReportGrade = "MUMTAZ" | "JAYYID_JIDDAN" | "JAYYID" | "MAQBUL" | "DHAIF";
+
+// score is the persisted source of truth (kept for future progress-over-time
+// graphing); grade is a pure function of it, derived here rather than stored,
+// so it can never drift out of sync with the number it's based on.
+function deriveGrade(score: number): ReportGrade {
+	if (score >= 90) return "MUMTAZ";
+	if (score >= 80) return "JAYYID_JIDDAN";
+	if (score >= 70) return "JAYYID";
+	if (score >= 60) return "MAQBUL";
+	return "DHAIF";
+}
+
+const GRADE_LABEL: Record<ReportGrade, { male: string; female: string }> = {
+	MUMTAZ: { male: "Mumtaz", female: "Mumtaazah" },
+	JAYYID_JIDDAN: { male: "Jayyid Jiddan", female: "Jayyidah Jiddan" },
+	JAYYID: { male: "Jayyid", female: "Jayyidah" },
+	MAQBUL: { male: "Maqbul", female: "Maqbulah" },
+	DHAIF: { male: "Dhaif", female: "Dhaifah" },
+};
+
+function deriveGradeLabel(
+	grade: ReportGrade,
+	gender: "MALE" | "FEMALE" | null,
+) {
+	return GRADE_LABEL[grade][gender === "FEMALE" ? "female" : "male"];
+}
 
 type ReportRecord = {
 	id: string;
@@ -52,6 +81,8 @@ async function serializeReport(report: ReportRecord) {
 				? `Submitted by ${teacher?.user.name ?? "teacher"}`
 				: "Draft";
 
+	const grade = deriveGrade(report.score);
+
 	return {
 		reportId: report.id,
 		groupId: report.groupId,
@@ -66,6 +97,8 @@ async function serializeReport(report: ReportRecord) {
 		advice: report.advice,
 		score: report.score,
 		scoreDenominator: SCORE_DENOMINATOR,
+		grade,
+		gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
 		statusKind,
 		statusLabel,
 		submittedAt: report.submittedAt ? report.submittedAt.toISOString() : null,
@@ -414,5 +447,86 @@ reportsRouter.delete(
 
 		await prisma.report.delete({ where: { id: reportId } });
 		return c.json({ success: true });
+	},
+);
+
+function genderLabel(gender: "MALE" | "FEMALE" | null) {
+	if (gender === "FEMALE") return "Akhawat";
+	if (gender === "MALE") return "Ikhwan";
+	return "-";
+}
+
+reportsRouter.get(
+	"/groups/:id/reports/:reportId/pdf",
+	requireAuth,
+	async (c) => {
+		const authUser = c.get("authUser");
+		const groupId = c.req.param("id");
+		const reportId = c.req.param("reportId");
+
+		const report = await prisma.report.findUnique({ where: { id: reportId } });
+		if (!report || report.groupId !== groupId) {
+			return c.json({ success: false, message: "Report not found." }, 404);
+		}
+
+		const canManage = await canManageGroup(authUser, groupId);
+		if (!canManage) {
+			const student = await prisma.student.findUnique({
+				where: { userId: authUser.id },
+			});
+			const isOwnSubmittedReport =
+				!!student &&
+				report.studentId === student.id &&
+				report.submittedAt !== null;
+			if (!isOwnSubmittedReport) {
+				return c.json(
+					{ success: false, message: "You don't have access to this report." },
+					403,
+				);
+			}
+		}
+
+		const [group, student, teacher] = await Promise.all([
+			prisma.group.findUnique({
+				where: { id: report.groupId },
+				include: { subject: { include: { reportTheme: true } } },
+			}),
+			prisma.student.findUnique({
+				where: { id: report.studentId },
+				include: { user: true },
+			}),
+			prisma.teacher.findUnique({
+				where: { id: report.teacherId },
+				include: { user: true },
+			}),
+		]);
+
+		const grade = deriveGrade(report.score);
+		const buffer = await renderReportPdf({
+			studentName: student?.user.name ?? "-",
+			studentGenderLabel: genderLabel(student?.user.gender ?? null),
+			subjectName: group?.subject.name ?? "-",
+			teacherName: teacher?.user.name ?? "-",
+			month: report.month,
+			year: report.year,
+			title: report.title,
+			progress: report.progress,
+			advice: report.advice,
+			gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
+			submittedAtLabel: report.submittedAt
+				? report.submittedAt.toLocaleDateString("en-GB", {
+						day: "numeric",
+						month: "long",
+						year: "numeric",
+					})
+				: null,
+			primaryColor:
+				group?.subject.reportTheme?.primaryColor ?? DEFAULT_THEME_COLOR,
+		});
+
+		return c.body(new Uint8Array(buffer), 200, {
+			"Content-Type": "application/pdf",
+			"Content-Disposition": `attachment; filename="report-${report.year}-${report.month}-${student?.user.name ?? reportId}.pdf"`,
+		});
 	},
 );
