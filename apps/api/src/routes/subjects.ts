@@ -111,3 +111,32 @@ subjectsRouter.patch(
 		}
 	},
 );
+
+subjectsRouter.delete(
+	"/subjects/:id",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const subjectId = c.req.param("id");
+
+		try {
+			await prisma.subject.delete({ where: { id: subjectId } });
+			return c.json({ success: true });
+		} catch (error: any) {
+			if (error.code === "P2025") {
+				return c.json({ success: false, message: "Subject not found." }, 404);
+			}
+			if (error.code === "P2003") {
+				return c.json(
+					{
+						success: false,
+						message:
+							"This subject is still used by one or more groups or teacher assignments — remove those first.",
+					},
+					400,
+				);
+			}
+			return c.json({ success: false, message: "Internal server error." }, 500);
+		}
+	},
+);
