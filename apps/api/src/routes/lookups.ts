@@ -5,10 +5,18 @@ import { prisma } from "../utils/prisma";
 export const lookupsRouter = new Hono();
 
 lookupsRouter.get("/subjects", requireAuth, requireRole("ADMIN"), async (c) => {
-	const subjects = await prisma.subject.findMany({ orderBy: { name: "asc" } });
+	const subjects = await prisma.subject.findMany({
+		orderBy: { name: "asc" },
+		include: { reportTheme: true },
+	});
 	return c.json({
 		success: true,
-		data: subjects.map((s) => ({ subjectId: s.id, subjectName: s.name })),
+		data: subjects.map((s) => ({
+			subjectId: s.id,
+			subjectName: s.name,
+			reportThemeId: s.reportThemeId,
+			reportThemeName: s.reportTheme?.name ?? null,
+		})),
 	});
 });
 
