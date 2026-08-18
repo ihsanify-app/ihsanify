@@ -103,15 +103,17 @@ enum ReportFont {
 // per-subject, color only): title/footer/font/cover are institution-wide,
 // not something that should vary by subject.
 model ReportSettings {
-  id              String              @id @default(cuid())
-  title           String              @default("Laporan Belajar")
-  organizationName String             @default("Ihsanify")
-  footerPhone     String?
-  footerEmail     String?
-  footerInstagram String?
-  font            ReportFont          @default(HELVETICA)
-  headerPattern   ReportHeaderPattern @default(NONE)
-  coverImageUrl   String?
+  id               String              @id @default(cuid())
+  title            String              @default("Laporan Belajar")
+  organizationName String              @default("Ihsanify")
+  logoUrl          String?
+  websiteUrl       String?
+  footerPhone      String?
+  footerEmail      String?
+  footerInstagram  String?
+  font             ReportFont          @default(HELVETICA)
+  headerPattern    ReportHeaderPattern @default(NONE)
+  coverImageUrl    String?
 }
 
 model Subject {
@@ -234,7 +236,6 @@ model Report {
   teacherId   String
   month       Int
   year        Int
-  title       String
   progress    String
   advice      String
   score       Int
