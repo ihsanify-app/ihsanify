@@ -356,7 +356,7 @@
 **Phase 5 — Progress Report UI**
 - 🔄 Hour 20 — Progress Report List (superseded by the Reports tab's table — per-group, not cross-group; see Post-Plan Additions)
 - 🔄 Hour 21 — Progress Report Builder (Teacher) (built with Month/Year/Student/Progress/Advice/Score fields instead of the criteria-rating scale spec'd here; no "Enhance with AI" button — see Post-Plan Additions)
-- 🔄 Hour 22 — Progress Report View (Student) (built as a read-only popup with a Submitted→Read receipt instead of a dedicated page; Download PDF button placed but not wired — see Post-Plan Additions)
+- 🔄 Hour 22 — Progress Report View (Student) (built as a read-only popup with a Submitted→Read receipt instead of a dedicated page; Download PDF is now functional — real `@react-pdf/renderer` PDF, themed, role-gated — but is a simplified v1, not the cover-page/Arabic-decorated design from the real example reports — see Post-Plan Additions)
 - ❌ Hour 23 — Progress Report: Admin Overview (no cross-group/class-level aggregate view exists — admin sees the same per-group table as everyone with manage rights)
 
 **Phase 6 — Backend APIs**
@@ -406,14 +406,22 @@ _Added 2026-08-05 — work that grew organically per-feature (schema → API →
   - `month`/`year` added; `teacherId` is always stamped from the group's *current* teacher (`getCurrentTeacherId`) regardless of whether an Admin or the Teacher clicked Add Report — there's no path where it's null or an Admin's own id.
   - Status is no longer a `RecordStatus` enum — replaced with two nullable timestamps, `submittedAt`/`readAt`, that double as both the workflow state and the visibility gate: `null/null` = Draft (admin/current-teacher only, via a separate "Save Draft" action), `set/null` = "Submitted by {teacher}" (now visible to that one student, via a separate "Submit" action — deliberately two-step, not visible the instant Create is clicked), `set/set` = "Read by {student}" (set only when that specific student opens it, never by a teacher/admin preview).
   - Enforced server-side in `GET /groups/:id/reports`: students only ever receive their own `submittedAt`-not-null reports; drafts and other students' reports are invisible at the query level, not just hidden in the UI. Re-targeting a report to a different student resets `submittedAt`/`readAt` (old submitted/read state described the wrong person). Names still resolved at render time from `teacherId`/`studentId`, never denormalized — rule 6 holds.
-  - Download PDF button placed in the view popup (disabled, `Download` icon, "coming soon" tooltip) as a placeholder — no template or export logic built yet, matching Hour 22/23's "(placeholder)" framing.
+- **Report PDF generation + color themes** (2026-08-18) — the Download PDF button (placeholder as of the entry above) is now real:
+  - New `ReportTheme` model (`name`, `primaryColor`) with a nullable `Subject.reportThemeId` FK — one accent color per subject, reused across every report PDF for that subject. Falls back to a hardcoded default green when a subject has none assigned.
+  - `Report.score` stays the only persisted number (kept for future progress-over-time graphing); the qualitative grade label (Mumtaz 90-100 / Jayyid Jiddan 80-89 / Jayyid 70-79 / Maqbul 60-69 / Dhaif <60, gender-agreed per the student — e.g. "Mumtaazah" for a female student) is derived at read time in `reports.ts`, never stored — same no-denormalization approach as everything else on this model.
+  - `GET /groups/:id/reports/:reportId/pdf` — new endpoint, reuses the exact same visibility rule as the report itself (teacher/admin see any report including drafts; a student only their own submitted-or-later report). Renders via `@react-pdf/renderer` (chosen over an HTML+Puppeteer approach to avoid a headless-Chromium runtime dependency) into a themed one-page PDF and streams it back.
+  - Scope note: this is a functional v1, not a redesign of the real example report PDFs supplied — no cover page, no Arabic Bismillah text/floral decorations (would need proper Arabic-script font embedding, deferred), no per-report cover photo (deferred, agreed to use the theme color instead).
+- **Settings page redesigned into tabs** (2026-08-18) — `/settings` now redirects to `/settings/report`, with a shared `SettingsTabs` bar (same pattern as `GroupTabs`) across six sub-routes: Report, Subject, User, Group, Invoice, Assignment.
+  - `/settings/report` — the report-theme-per-subject table above.
+  - `/settings/subject` — new, real: `POST /subjects` + an Add Subject modal, not a placeholder.
+  - `/settings/user`, `/settings/group`, `/settings/invoice`, `/settings/assignment` — placeholder pages only ("coming soon" / "not planned yet"), reserving the destinations for later: a Group-card color theme system (mirroring `ReportTheme` but for the Groups list), Invoice header/footer config, and User settings, none of which have been designed yet.
 
 ---
 
 ## Data Model Decisions
 _Last updated: 2026-04-30_
 
-> This diagram predates the Post-Plan Additions above. It does not include `PlannedSession`, `User.avatarUrl`, or `Invoice`. `Assignment` here describes the rich Hour 14–19 quiz-builder version — the actual model is still a minimal placeholder. `Report` here describes the Hour 20–23 criteria-rating version — the actual model was fully redesigned (Month/Year/Student/Progress/Advice/Score + a submitted/read receipt) and is neither this nor the placeholder anymore. See Post-Plan Additions for what's real today.
+> This diagram predates the Post-Plan Additions above. It does not include `PlannedSession`, `User.avatarUrl`, `Invoice`, or `ReportTheme`/`Subject.reportThemeId`. `Assignment` here describes the rich Hour 14–19 quiz-builder version — the actual model is still a minimal placeholder. `Report` here describes the Hour 20–23 criteria-rating version — the actual model was fully redesigned (Month/Year/Student/Progress/Advice/Score + a submitted/read receipt + a themed PDF export) and is neither this nor the placeholder anymore. See Post-Plan Additions for what's real today.
 
 ### Core Entities
 ```
