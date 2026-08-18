@@ -85,11 +85,23 @@ model Student {
 }
 
 model Subject {
-  id   String @id @default(cuid())
-  name String @unique
+  id            String       @id @default(cuid())
+  name          String       @unique
+  reportThemeId String?
+  reportTheme   ReportTheme? @relation(fields: [reportThemeId], references: [id])
 
   groups   Group[]
   teachers TeacherSubject[]
+}
+
+// A named color preset for Report PDF covers/banners/footers. One primary
+// color, always paired with white text — presets are curated to guarantee
+// contrast rather than allowing an arbitrary/unsafe color combination.
+model ReportTheme {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  primaryColor String
+  subjects     Subject[]
 }
 
 model TeacherSubject {
@@ -181,6 +193,10 @@ model SessionAttendance {
 //   set  / set       -> "Read by {student}"
 // Teacher/student names are looked up at render time via teacherId/studentId,
 // never denormalized onto this row.
+// score stays the single source of truth (kept for future progress-over-time
+// graphing); the qualitative grade label (Mumtaz/Jayyid Jiddan/Jayyid/Maqbul/
+// Dhaif) is a pure function of score, derived at read time in reports.ts —
+// never stored, so it can't drift out of sync with the number it's based on.
 model Report {
   id          String    @id @default(cuid())
   groupId     String
