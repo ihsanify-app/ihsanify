@@ -8,6 +8,7 @@ import {
 	Image,
 	Line,
 	Page,
+	Path,
 	pdf,
 	Rect,
 	StyleSheet,
@@ -51,6 +52,9 @@ const MONTH_NAMES = [
 
 export const DEFAULT_THEME_COLOR = "#166534";
 
+const COVER_IMAGE_DIAMETER = 300;
+const COVER_RING_WIDTH = 16;
+
 export type ReportFont = "HELVETICA" | "POPPINS" | "PT_SERIF";
 export type ReportHeaderPattern =
 	| "NONE"
@@ -72,7 +76,6 @@ export type ReportDocumentProps = {
 	teacherName: string;
 	month: number;
 	year: number;
-	reportTitle: string;
 	progress: string;
 	advice: string;
 	gradeLabel: string;
@@ -80,6 +83,8 @@ export type ReportDocumentProps = {
 	primaryColor: string;
 	documentTitle: string;
 	organizationName: string;
+	logoUrl: string | null;
+	websiteUrl: string | null;
 	footerPhone: string | null;
 	footerEmail: string | null;
 	footerInstagram: string | null;
@@ -251,6 +256,64 @@ function HeaderPatternOverlay({ pattern }: { pattern: ReportHeaderPattern }) {
 	);
 }
 
+// Simple icon glyphs for the footer, redrawn from lucide's (ISC-licensed)
+// 24x24 stroke path data so the PDF's footer icons match the ones used
+// throughout the rest of the app.
+function FooterIcon({
+	kind,
+	size,
+	color,
+}: {
+	kind: "phone" | "mail" | "instagram" | "globe";
+	size: number;
+	color: string;
+}) {
+	const common = {
+		stroke: color,
+		strokeWidth: 2,
+		strokeLinecap: "round" as const,
+		strokeLinejoin: "round" as const,
+		fill: "none",
+	};
+
+	return (
+		<Svg viewBox="0 0 24 24" style={{ width: size, height: size }}>
+			{kind === "phone" && (
+				<Path
+					d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
+					{...common}
+				/>
+			)}
+			{kind === "mail" && (
+				<>
+					<Path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" {...common} />
+					<Rect x={2} y={4} width={20} height={16} rx={2} {...common} />
+				</>
+			)}
+			{kind === "instagram" && (
+				<>
+					<Rect x={2} y={2} width={20} height={20} rx={5} ry={5} {...common} />
+					<Path
+						d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+						{...common}
+					/>
+					<Line x1={17.5} y1={6.5} x2={17.51} y2={6.5} {...common} />
+				</>
+			)}
+			{kind === "globe" && (
+				<>
+					<Circle cx={12} cy={12} r={10} {...common} />
+					<Path
+						d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
+						{...common}
+					/>
+					<Path d="M2 12h20" {...common} />
+				</>
+			)}
+		</Svg>
+	);
+}
+
 function buildStyles(fontFamily: string) {
 	return StyleSheet.create({
 		page: {
@@ -260,54 +323,76 @@ function buildStyles(fontFamily: string) {
 		},
 		coverPage: {
 			fontFamily,
-		},
-		coverBackground: {
-			position: "absolute",
-			top: 0,
-			left: 0,
-			right: 0,
-			bottom: 0,
-		},
-		coverTint: {
-			position: "absolute",
-			top: 0,
-			left: 0,
-			right: 0,
-			bottom: 0,
-			opacity: 0.55,
+			backgroundColor: "#ffffff",
 		},
 		coverContent: {
 			flex: 1,
-			justifyContent: "space-between",
 			padding: 48,
 		},
+		coverOrgRow: {
+			flexDirection: "row",
+			alignItems: "center",
+			gap: 12,
+		},
+		coverLogo: {
+			width: 40,
+			height: 40,
+			borderRadius: 8,
+		},
 		coverOrg: {
-			fontSize: 13,
-			color: "#ffffff",
+			fontSize: 22,
+			color: "#292524",
 			fontWeight: 700,
 			letterSpacing: 1,
 		},
-		coverTitle: {
-			fontSize: 30,
-			color: "#ffffff",
-			fontWeight: 700,
+		coverImageSection: {
+			flex: 1,
+			alignItems: "center",
+			justifyContent: "center",
+		},
+		coverRing: {
+			width: COVER_IMAGE_DIAMETER + COVER_RING_WIDTH * 2,
+			height: COVER_IMAGE_DIAMETER + COVER_RING_WIDTH * 2,
+			borderRadius: (COVER_IMAGE_DIAMETER + COVER_RING_WIDTH * 2) / 2,
+			borderWidth: COVER_RING_WIDTH,
+			alignItems: "center",
+			justifyContent: "center",
+		},
+		coverImageCircle: {
+			width: COVER_IMAGE_DIAMETER,
+			height: COVER_IMAGE_DIAMETER,
+			borderRadius: COVER_IMAGE_DIAMETER / 2,
+			objectFit: "cover",
 		},
 		coverStudentName: {
-			fontSize: 22,
-			color: "#ffffff",
+			fontSize: 28,
+			color: "#292524",
 			fontWeight: 700,
-			marginTop: 8,
+		},
+		coverTitle: {
+			fontSize: 15,
+			color: "#57534e",
+			letterSpacing: 3,
+			marginTop: 6,
 		},
 		coverMeta: {
 			fontSize: 13,
-			color: "#ffffff",
-			marginTop: 4,
+			color: "#78716c",
+			marginTop: 10,
 		},
 		header: {
 			position: "relative",
 			paddingVertical: 28,
 			paddingHorizontal: 36,
 			overflow: "hidden",
+		},
+		headerLogo: {
+			position: "absolute",
+			top: 28,
+			right: 36,
+			width: 40,
+			height: 40,
+			borderRadius: 8,
 		},
 		headerTitle: {
 			fontSize: 22,
@@ -394,6 +479,11 @@ function buildStyles(fontFamily: string) {
 			justifyContent: "center",
 			gap: 16,
 		},
+		bottomBarItem: {
+			flexDirection: "row",
+			alignItems: "center",
+			gap: 5,
+		},
 		bottomBarText: {
 			fontSize: 9,
 			color: "#ffffff",
@@ -408,7 +498,6 @@ export function ReportDocument({
 	teacherName,
 	month,
 	year,
-	reportTitle,
 	progress,
 	advice,
 	gradeLabel,
@@ -416,6 +505,8 @@ export function ReportDocument({
 	primaryColor,
 	documentTitle,
 	organizationName,
+	logoUrl,
+	websiteUrl,
 	footerPhone,
 	footerEmail,
 	footerInstagram,
@@ -425,30 +516,45 @@ export function ReportDocument({
 }: ReportDocumentProps) {
 	const period = `${MONTH_NAMES[month - 1] ?? month} ${year}`;
 	const styles = buildStyles(FONT_FAMILY[font]);
-	const footerParts = [
-		footerPhone && `P: ${footerPhone}`,
-		footerEmail && `E: ${footerEmail}`,
-		footerInstagram && `IG: ${footerInstagram}`,
-	].filter(Boolean);
+	const footerParts: {
+		kind: "phone" | "mail" | "instagram" | "globe";
+		value: string;
+	}[] = [];
+	if (footerPhone) footerParts.push({ kind: "phone", value: footerPhone });
+	if (footerEmail) footerParts.push({ kind: "mail", value: footerEmail });
+	if (footerInstagram)
+		footerParts.push({ kind: "instagram", value: footerInstagram });
+	if (websiteUrl) footerParts.push({ kind: "globe", value: websiteUrl });
 
 	return (
 		<Document>
 			<Page size="A4" style={styles.coverPage}>
-				{coverImageUrl ? (
-					<Image src={coverImageUrl} style={styles.coverBackground} />
-				) : (
-					<View
-						style={[styles.coverBackground, { backgroundColor: primaryColor }]}
-					/>
-				)}
-				{coverImageUrl && (
-					<View style={[styles.coverTint, { backgroundColor: primaryColor }]} />
-				)}
 				<View style={styles.coverContent}>
-					<Text style={styles.coverOrg}>{organizationName.toUpperCase()}</Text>
+					<View style={styles.coverOrgRow}>
+						{logoUrl && <Image src={logoUrl} style={styles.coverLogo} />}
+						<Text style={styles.coverOrg}>
+							{organizationName.toUpperCase()}
+						</Text>
+					</View>
+
+					<View style={styles.coverImageSection}>
+						<View style={[styles.coverRing, { borderColor: primaryColor }]}>
+							{coverImageUrl ? (
+								<Image src={coverImageUrl} style={styles.coverImageCircle} />
+							) : (
+								<View
+									style={[
+										styles.coverImageCircle,
+										{ backgroundColor: primaryColor },
+									]}
+								/>
+							)}
+						</View>
+					</View>
+
 					<View>
-						<Text style={styles.coverTitle}>{documentTitle}</Text>
 						<Text style={styles.coverStudentName}>{studentName}</Text>
+						<Text style={styles.coverTitle}>{documentTitle.toUpperCase()}</Text>
 						<Text style={styles.coverMeta}>{subjectName}</Text>
 						<Text style={styles.coverMeta}>{period}</Text>
 					</View>
@@ -458,6 +564,7 @@ export function ReportDocument({
 			<Page size="A4" style={styles.page}>
 				<View style={[styles.header, { backgroundColor: primaryColor }]}>
 					<HeaderPatternOverlay pattern={headerPattern} />
+					{logoUrl && <Image src={logoUrl} style={styles.headerLogo} />}
 					<Text style={styles.headerTitle}>{documentTitle}</Text>
 					<Text style={styles.headerSubtitle}>{period}</Text>
 
@@ -478,10 +585,6 @@ export function ReportDocument({
 				</View>
 
 				<View style={styles.body}>
-					<View style={styles.section}>
-						<Text style={styles.sectionLabel}>{reportTitle}</Text>
-					</View>
-
 					<View style={styles.section}>
 						<Text style={styles.sectionLabel}>Progress</Text>
 						<Text style={styles.sectionText}>{progress}</Text>
@@ -516,9 +619,10 @@ export function ReportDocument({
 				{footerParts.length > 0 && (
 					<View style={[styles.bottomBar, { backgroundColor: primaryColor }]}>
 						{footerParts.map((part) => (
-							<Text key={part} style={styles.bottomBarText}>
-								{part}
-							</Text>
+							<View key={part.kind} style={styles.bottomBarItem}>
+								<FooterIcon kind={part.kind} size={10} color="#ffffff" />
+								<Text style={styles.bottomBarText}>{part.value}</Text>
+							</View>
 						))}
 					</View>
 				)}
