@@ -48,7 +48,6 @@ type ReportRecord = {
 	teacherId: string;
 	month: number;
 	year: number;
-	title: string;
 	progress: string;
 	advice: string;
 	score: number;
@@ -92,7 +91,6 @@ async function serializeReport(report: ReportRecord) {
 		teacherName: teacher?.user.name ?? null,
 		month: report.month,
 		year: report.year,
-		title: report.title,
 		progress: report.progress,
 		advice: report.advice,
 		score: report.score,
@@ -176,7 +174,6 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 		studentId?: string;
 		month?: number;
 		year?: number;
-		title?: string;
 		progress?: string;
 		advice?: string;
 		score?: number;
@@ -187,7 +184,6 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 		!body.studentId ||
 		!body.month ||
 		!body.year ||
-		!body.title ||
 		!body.progress ||
 		!body.advice ||
 		body.score === undefined
@@ -196,7 +192,7 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 			{
 				success: false,
 				message:
-					"StudentId, Month, Year, Title, Progress, Advice, and Score are required.",
+					"StudentId, Month, Year, Progress, Advice, and Score are required.",
 			},
 			400,
 		);
@@ -243,7 +239,6 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 			teacherId,
 			month: body.month,
 			year: body.year,
-			title: body.title,
 			progress: body.progress,
 			advice: body.advice,
 			score: body.score,
@@ -277,7 +272,6 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 		studentId?: string;
 		month?: number;
 		year?: number;
-		title?: string;
 		progress?: string;
 		advice?: string;
 		score?: number;
@@ -320,7 +314,6 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 			...(body.studentId !== undefined && { studentId: body.studentId }),
 			...(body.month !== undefined && { month: body.month }),
 			...(body.year !== undefined && { year: body.year }),
-			...(body.title !== undefined && { title: body.title }),
 			...(body.progress !== undefined && { progress: body.progress }),
 			...(body.advice !== undefined && { advice: body.advice }),
 			...(body.score !== undefined && { score: body.score }),
@@ -510,7 +503,6 @@ reportsRouter.get(
 			teacherName: teacher?.user.name ?? "-",
 			month: report.month,
 			year: report.year,
-			reportTitle: report.title,
 			progress: report.progress,
 			advice: report.advice,
 			gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
@@ -525,6 +517,8 @@ reportsRouter.get(
 				group?.subject.reportTheme?.primaryColor ?? DEFAULT_THEME_COLOR,
 			documentTitle: reportSettings?.title ?? "Laporan Belajar",
 			organizationName: reportSettings?.organizationName ?? "Ihsanify",
+			logoUrl: reportSettings?.logoUrl ?? null,
+			websiteUrl: reportSettings?.websiteUrl ?? null,
 			footerPhone: reportSettings?.footerPhone ?? null,
 			footerEmail: reportSettings?.footerEmail ?? null,
 			footerInstagram: reportSettings?.footerInstagram ?? null,
