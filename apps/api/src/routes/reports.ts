@@ -486,7 +486,7 @@ reportsRouter.get(
 			}
 		}
 
-		const [group, student, teacher] = await Promise.all([
+		const [group, student, teacher, reportSettings] = await Promise.all([
 			prisma.group.findUnique({
 				where: { id: report.groupId },
 				include: { subject: { include: { reportTheme: true } } },
@@ -499,6 +499,7 @@ reportsRouter.get(
 				where: { id: report.teacherId },
 				include: { user: true },
 			}),
+			prisma.reportSettings.findFirst(),
 		]);
 
 		const grade = deriveGrade(report.score);
@@ -509,7 +510,7 @@ reportsRouter.get(
 			teacherName: teacher?.user.name ?? "-",
 			month: report.month,
 			year: report.year,
-			title: report.title,
+			reportTitle: report.title,
 			progress: report.progress,
 			advice: report.advice,
 			gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
@@ -522,6 +523,14 @@ reportsRouter.get(
 				: null,
 			primaryColor:
 				group?.subject.reportTheme?.primaryColor ?? DEFAULT_THEME_COLOR,
+			documentTitle: reportSettings?.title ?? "Laporan Belajar",
+			organizationName: reportSettings?.organizationName ?? "Ihsanify",
+			footerPhone: reportSettings?.footerPhone ?? null,
+			footerEmail: reportSettings?.footerEmail ?? null,
+			footerInstagram: reportSettings?.footerInstagram ?? null,
+			font: reportSettings?.font ?? "HELVETICA",
+			headerPattern: reportSettings?.headerPattern ?? "NONE",
+			coverImageUrl: reportSettings?.coverImageUrl ?? null,
 		});
 
 		return c.body(new Uint8Array(buffer), 200, {
