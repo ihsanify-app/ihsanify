@@ -84,6 +84,36 @@ model Student {
   reports           Report[]
 }
 
+enum ReportHeaderPattern {
+  NONE
+  LINES
+  DOTS
+  BLOCKS
+  SWIRL
+}
+
+enum ReportFont {
+  HELVETICA
+  POPPINS
+  PT_SERIF
+}
+
+// Global report PDF template config — one row, applies to every report
+// regardless of subject. Deliberately separate from ReportTheme (which is
+// per-subject, color only): title/footer/font/cover are institution-wide,
+// not something that should vary by subject.
+model ReportSettings {
+  id              String              @id @default(cuid())
+  title           String              @default("Laporan Belajar")
+  organizationName String             @default("Ihsanify")
+  footerPhone     String?
+  footerEmail     String?
+  footerInstagram String?
+  font            ReportFont          @default(HELVETICA)
+  headerPattern   ReportHeaderPattern @default(NONE)
+  coverImageUrl   String?
+}
+
 model Subject {
   id            String       @id @default(cuid())
   name          String       @unique
