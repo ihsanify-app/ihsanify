@@ -18,6 +18,12 @@ import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppSettingsUserRouteImport } from './routes/_app/settings_/user'
+import { Route as AppSettingsSubjectRouteImport } from './routes/_app/settings_/subject'
+import { Route as AppSettingsReportRouteImport } from './routes/_app/settings_/report'
+import { Route as AppSettingsInvoiceRouteImport } from './routes/_app/settings_/invoice'
+import { Route as AppSettingsGroupRouteImport } from './routes/_app/settings_/group'
+import { Route as AppSettingsAssignmentRouteImport } from './routes/_app/settings_/assignment'
 import { Route as AppGroupsGroupIdSessionsRouteImport } from './routes/_app/groups_/$groupId.sessions'
 import { Route as AppGroupsGroupIdReportsRouteImport } from './routes/_app/groups_/$groupId.reports'
 import { Route as AppGroupsGroupIdInvoicesRouteImport } from './routes/_app/groups_/$groupId.invoices'
@@ -67,6 +73,36 @@ const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
   path: '/assignments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSettingsUserRoute = AppSettingsUserRouteImport.update({
+  id: '/settings_/user',
+  path: '/settings/user',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsSubjectRoute = AppSettingsSubjectRouteImport.update({
+  id: '/settings_/subject',
+  path: '/settings/subject',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsReportRoute = AppSettingsReportRouteImport.update({
+  id: '/settings_/report',
+  path: '/settings/report',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsInvoiceRoute = AppSettingsInvoiceRouteImport.update({
+  id: '/settings_/invoice',
+  path: '/settings/invoice',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsGroupRoute = AppSettingsGroupRouteImport.update({
+  id: '/settings_/group',
+  path: '/settings/group',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsAssignmentRoute = AppSettingsAssignmentRouteImport.update({
+  id: '/settings_/assignment',
+  path: '/settings/assignment',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGroupsGroupIdSessionsRoute =
   AppGroupsGroupIdSessionsRouteImport.update({
     id: '/groups_/$groupId/sessions',
@@ -100,6 +136,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AppProfileRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
+  '/settings/assignment': typeof AppSettingsAssignmentRoute
+  '/settings/group': typeof AppSettingsGroupRoute
+  '/settings/invoice': typeof AppSettingsInvoiceRoute
+  '/settings/report': typeof AppSettingsReportRoute
+  '/settings/subject': typeof AppSettingsSubjectRoute
+  '/settings/user': typeof AppSettingsUserRoute
   '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
   '/groups/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
   '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
@@ -114,6 +156,12 @@ export interface FileRoutesByTo {
   '/profile': typeof AppProfileRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
+  '/settings/assignment': typeof AppSettingsAssignmentRoute
+  '/settings/group': typeof AppSettingsGroupRoute
+  '/settings/invoice': typeof AppSettingsInvoiceRoute
+  '/settings/report': typeof AppSettingsReportRoute
+  '/settings/subject': typeof AppSettingsSubjectRoute
+  '/settings/user': typeof AppSettingsUserRoute
   '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
   '/groups/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
   '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
@@ -130,6 +178,12 @@ export interface FileRoutesById {
   '/_app/profile': typeof AppProfileRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
+  '/_app/settings_/assignment': typeof AppSettingsAssignmentRoute
+  '/_app/settings_/group': typeof AppSettingsGroupRoute
+  '/_app/settings_/invoice': typeof AppSettingsInvoiceRoute
+  '/_app/settings_/report': typeof AppSettingsReportRoute
+  '/_app/settings_/subject': typeof AppSettingsSubjectRoute
+  '/_app/settings_/user': typeof AppSettingsUserRoute
   '/_app/groups_/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
   '/_app/groups_/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
   '/_app/groups_/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
@@ -146,6 +200,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/users'
+    | '/settings/assignment'
+    | '/settings/group'
+    | '/settings/invoice'
+    | '/settings/report'
+    | '/settings/subject'
+    | '/settings/user'
     | '/groups/$groupId/assignments'
     | '/groups/$groupId/invoices'
     | '/groups/$groupId/reports'
@@ -160,6 +220,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/users'
+    | '/settings/assignment'
+    | '/settings/group'
+    | '/settings/invoice'
+    | '/settings/report'
+    | '/settings/subject'
+    | '/settings/user'
     | '/groups/$groupId/assignments'
     | '/groups/$groupId/invoices'
     | '/groups/$groupId/reports'
@@ -175,6 +241,12 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/settings'
     | '/_app/users'
+    | '/_app/settings_/assignment'
+    | '/_app/settings_/group'
+    | '/_app/settings_/invoice'
+    | '/_app/settings_/report'
+    | '/_app/settings_/subject'
+    | '/_app/settings_/user'
     | '/_app/groups_/$groupId/assignments'
     | '/_app/groups_/$groupId/invoices'
     | '/_app/groups_/$groupId/reports'
@@ -252,6 +324,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssignmentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/settings_/user': {
+      id: '/_app/settings_/user'
+      path: '/settings/user'
+      fullPath: '/settings/user'
+      preLoaderRoute: typeof AppSettingsUserRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings_/subject': {
+      id: '/_app/settings_/subject'
+      path: '/settings/subject'
+      fullPath: '/settings/subject'
+      preLoaderRoute: typeof AppSettingsSubjectRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings_/report': {
+      id: '/_app/settings_/report'
+      path: '/settings/report'
+      fullPath: '/settings/report'
+      preLoaderRoute: typeof AppSettingsReportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings_/invoice': {
+      id: '/_app/settings_/invoice'
+      path: '/settings/invoice'
+      fullPath: '/settings/invoice'
+      preLoaderRoute: typeof AppSettingsInvoiceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings_/group': {
+      id: '/_app/settings_/group'
+      path: '/settings/group'
+      fullPath: '/settings/group'
+      preLoaderRoute: typeof AppSettingsGroupRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings_/assignment': {
+      id: '/_app/settings_/assignment'
+      path: '/settings/assignment'
+      fullPath: '/settings/assignment'
+      preLoaderRoute: typeof AppSettingsAssignmentRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/groups_/$groupId/sessions': {
       id: '/_app/groups_/$groupId/sessions'
       path: '/groups/$groupId/sessions'
@@ -290,6 +404,12 @@ interface AppRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
+  AppSettingsAssignmentRoute: typeof AppSettingsAssignmentRoute
+  AppSettingsGroupRoute: typeof AppSettingsGroupRoute
+  AppSettingsInvoiceRoute: typeof AppSettingsInvoiceRoute
+  AppSettingsReportRoute: typeof AppSettingsReportRoute
+  AppSettingsSubjectRoute: typeof AppSettingsSubjectRoute
+  AppSettingsUserRoute: typeof AppSettingsUserRoute
   AppGroupsGroupIdAssignmentsRoute: typeof AppGroupsGroupIdAssignmentsRoute
   AppGroupsGroupIdInvoicesRoute: typeof AppGroupsGroupIdInvoicesRoute
   AppGroupsGroupIdReportsRoute: typeof AppGroupsGroupIdReportsRoute
@@ -303,6 +423,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
+  AppSettingsAssignmentRoute: AppSettingsAssignmentRoute,
+  AppSettingsGroupRoute: AppSettingsGroupRoute,
+  AppSettingsInvoiceRoute: AppSettingsInvoiceRoute,
+  AppSettingsReportRoute: AppSettingsReportRoute,
+  AppSettingsSubjectRoute: AppSettingsSubjectRoute,
+  AppSettingsUserRoute: AppSettingsUserRoute,
   AppGroupsGroupIdAssignmentsRoute: AppGroupsGroupIdAssignmentsRoute,
   AppGroupsGroupIdInvoicesRoute: AppGroupsGroupIdInvoicesRoute,
   AppGroupsGroupIdReportsRoute: AppGroupsGroupIdReportsRoute,
