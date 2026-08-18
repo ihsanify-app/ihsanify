@@ -2,7 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { Ban, Download, Eye, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { GroupTabs } from "../../../components/dashboard/GroupTabs";
-import { apiFetch } from "../../../lib/apiClient";
+import { apiFetch, downloadFile } from "../../../lib/apiClient";
 import { mockUser } from "../../../lib/mockAuth";
 
 export const Route = createFileRoute("/_app/groups_/$groupId/reports")({
@@ -244,14 +244,29 @@ function ReportFormModal({
 }
 
 function ViewReportModal({
+	groupId,
 	report,
 	subjectName,
 	onClose,
 }: {
+	groupId: string;
 	report: ReportRow;
 	subjectName: string;
 	onClose: () => void;
 }) {
+	const [downloadError, setDownloadError] = useState("");
+
+	async function handleDownload() {
+		setDownloadError("");
+		const result = await downloadFile(
+			`/groups/${groupId}/reports/${report.reportId}/pdf`,
+			`report-${report.year}-${String(report.month).padStart(2, "0")}-${report.studentName ?? report.reportId}.pdf`,
+		);
+		if (!result.ok) {
+			setDownloadError(result.message ?? "Could not download PDF.");
+		}
+	}
+
 	return (
 		<div
 			role="dialog"
@@ -315,12 +330,16 @@ function ViewReportModal({
 						</p>
 					</div>
 				</div>
+				{downloadError && (
+					<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mt-3">
+						{downloadError}
+					</p>
+				)}
 				<div className="flex justify-between items-center mt-4">
 					<button
 						type="button"
-						disabled
-						title="PDF export coming soon"
-						className="flex items-center gap-2 rounded-xl border border-stone-200 text-stone-400 px-4 py-2 cursor-not-allowed"
+						onClick={handleDownload}
+						className="flex items-center gap-2 cursor-pointer rounded-xl border border-green-600 text-green-700 px-4 py-2 hover:bg-green-50 transition-colors"
 					>
 						<Download size={16} />
 						Download PDF
@@ -552,6 +571,7 @@ function RouteComponent() {
 			)}
 			{viewingReport && (
 				<ViewReportModal
+					groupId={groupId}
 					report={viewingReport}
 					subjectName={subjectName}
 					onClose={() => setViewingReport(null)}
