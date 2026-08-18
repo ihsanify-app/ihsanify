@@ -14,14 +14,17 @@
 		"@hono/node-server": "^1.19.9",
 		"@prisma/adapter-pg": "^7.4.0",
 		"@prisma/client": "^7.4.0",
+		"@react-pdf/renderer": "^4.6.1",
 		"bcryptjs": "^3.0.3",
 		"dotenv": "^17.3.1",
 		"hono": "^4.11.9",
 		"jsonwebtoken": "^9.0.3",
-		"prisma": "^7.4.0"
+		"prisma": "^7.4.0",
+		"react": "^19.2.8"
 	},
 	"devDependencies": {
 		"@types/node": "^20.11.17",
+		"@types/react": "^19.2.18",
 		"tsx": "^4.7.1",
 		"typescript": "^5.8.3"
 	}
