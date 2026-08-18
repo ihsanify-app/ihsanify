@@ -6,19 +6,38 @@ const SEED_PASSWORD = "password123";
 async function main() {
 	const password = await hash(SEED_PASSWORD, 10);
 
+	const reportThemeSeeds = [
+		{ name: "Teal", primaryColor: "#2F6659" },
+		{ name: "Slate", primaryColor: "#474747" },
+		{ name: "Olive", primaryColor: "#22300B" },
+	];
+	const reportThemes: Record<string, { id: string }> = {};
+	for (const t of reportThemeSeeds) {
+		reportThemes[t.name] = await prisma.reportTheme.upsert({
+			where: { name: t.name },
+			update: { primaryColor: t.primaryColor },
+			create: t,
+		});
+	}
+
 	const subjectNames = [
-		"Tahsin",
-		"Tahfizh",
-		"Bahasa Inggris",
-		"Bahasa Arab",
-		"Calistung",
+		{ name: "Tahsin", reportTheme: "Teal" },
+		{ name: "Tahfizh", reportTheme: "Teal" },
+		{ name: "Bahasa Inggris", reportTheme: "Slate" },
+		{ name: "Bahasa Arab", reportTheme: "Olive" },
+		{ name: "Calistung", reportTheme: null },
 	];
 	const subjects: Record<string, { id: string }> = {};
-	for (const name of subjectNames) {
-		subjects[name] = await prisma.subject.upsert({
-			where: { name },
-			update: {},
-			create: { name },
+	for (const s of subjectNames) {
+		subjects[s.name] = await prisma.subject.upsert({
+			where: { name: s.name },
+			update: {
+				reportThemeId: s.reportTheme ? reportThemes[s.reportTheme].id : null,
+			},
+			create: {
+				name: s.name,
+				reportThemeId: s.reportTheme ? reportThemes[s.reportTheme].id : null,
+			},
 		});
 	}
 
