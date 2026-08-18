@@ -334,6 +334,18 @@ async function main() {
 		}
 	}
 
+	const existingReportSettings = await prisma.reportSettings.findFirst();
+	if (!existingReportSettings) {
+		await prisma.reportSettings.create({
+			data: {
+				title: "Laporan Belajar",
+				organizationName: "Ihsanify",
+				font: "HELVETICA",
+				headerPattern: "NONE",
+			},
+		});
+	}
+
 	console.log(
 		`Seed complete. All seeded users share the password: ${SEED_PASSWORD}`,
 	);
