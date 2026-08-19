@@ -102,7 +102,7 @@ function ReportFormModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-1">
@@ -110,51 +110,53 @@ function ReportFormModal({
 				</h2>
 				{initialData && (
 					<span
-						className={`inline-block mb-2 text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[initialData.statusKind]}`}
+						className={`inline-block mb-2 text-xs font-semibold px-3 py-1 rounded-full w-fit ${STATUS_BADGE_CLASS[initialData.statusKind]}`}
 					>
 						{initialData.statusLabel}
 					</span>
 				)}
-				<form>
+				<form className="overflow-y-auto pr-1">
 					<div className="flex flex-col gap-2">
-						<label className="text-xs font-normal text-stone-500">
-							Student
-							<select
-								className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
-								value={studentId}
-								onChange={(e) => setStudentId(e.target.value)}
-							>
-								{roster.map((s) => (
-									<option key={s.studentId} value={s.studentId}>
-										{s.studentName}
-									</option>
-								))}
-							</select>
-						</label>
-						<div className="flex gap-2">
-							<label className="text-xs font-normal text-stone-500 flex-1">
-								Month
+						<div className="grid grid-cols-2 gap-2">
+							<label className="text-xs font-normal text-stone-500">
+								Student
 								<select
 									className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
-									value={month}
-									onChange={(e) => setMonth(Number(e.target.value))}
+									value={studentId}
+									onChange={(e) => setStudentId(e.target.value)}
 								>
-									{MONTH_NAMES.map((name, i) => (
-										<option key={name} value={i + 1}>
-											{name}
+									{roster.map((s) => (
+										<option key={s.studentId} value={s.studentId}>
+											{s.studentName}
 										</option>
 									))}
 								</select>
 							</label>
-							<label className="text-xs font-normal text-stone-500 w-24">
-								Year
-								<input
-									className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
-									type="number"
-									value={year}
-									onChange={(e) => setYear(Number(e.target.value))}
-								/>
-							</label>
+							<div className="flex gap-2">
+								<label className="text-xs font-normal text-stone-500 flex-1">
+									Month
+									<select
+										className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+										value={month}
+										onChange={(e) => setMonth(Number(e.target.value))}
+									>
+										{MONTH_NAMES.map((name, i) => (
+											<option key={name} value={i + 1}>
+												{name}
+											</option>
+										))}
+									</select>
+								</label>
+								<label className="text-xs font-normal text-stone-500 w-24">
+									Year
+									<input
+										className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+										type="number"
+										value={year}
+										onChange={(e) => setYear(Number(e.target.value))}
+									/>
+								</label>
+							</div>
 						</div>
 						<div className="flex gap-2 text-xs font-normal text-stone-500">
 							<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2">
@@ -170,18 +172,20 @@ function ReportFormModal({
 								</div>
 							</div>
 						</div>
-						<textarea
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-20"
-							placeholder="Progress"
-							value={progress}
-							onChange={(e) => setProgress(e.target.value)}
-						/>
-						<textarea
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-20"
-							placeholder="Advice"
-							value={advice}
-							onChange={(e) => setAdvice(e.target.value)}
-						/>
+						<div className="grid grid-cols-2 gap-2">
+							<textarea
+								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-32"
+								placeholder="Progress"
+								value={progress}
+								onChange={(e) => setProgress(e.target.value)}
+							/>
+							<textarea
+								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-32"
+								placeholder="Advice"
+								value={advice}
+								onChange={(e) => setAdvice(e.target.value)}
+							/>
+						</div>
 						<label className="text-xs font-normal text-stone-500">
 							Score
 							<div className="mt-1 flex items-center gap-2">
@@ -204,7 +208,7 @@ function ReportFormModal({
 						</label>
 					</div>
 				</form>
-				<div className="flex justify-end gap-2 mt-4">
+				<div className="flex justify-end gap-2 mt-4 shrink-0">
 					<button
 						type="button"
 						onClick={onClose}
@@ -268,61 +272,63 @@ function ViewReportModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-1">Report</h2>
 				<span
-					className={`inline-block mb-3 text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[report.statusKind]}`}
+					className={`inline-block mb-3 text-xs font-semibold px-3 py-1 rounded-full w-fit ${STATUS_BADGE_CLASS[report.statusKind]}`}
 				>
 					{report.statusLabel}
 				</span>
-				<div className="flex flex-col gap-2 text-sm">
-					<div className="flex gap-2">
-						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+				<div className="flex flex-col gap-2 text-sm overflow-y-auto pr-1">
+					<div className="grid grid-cols-4 gap-2">
+						<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
 							Period
 							<div className="text-stone-700 font-semibold">
 								{MONTH_NAMES[report.month - 1]} {report.year}
 							</div>
 						</div>
-						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+						<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
 							Teacher
 							<div className="text-stone-700 font-semibold">
 								{report.teacherName ?? "-"}
 							</div>
 						</div>
-					</div>
-					<div className="flex gap-2">
-						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+						<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
 							Subject
 							<div className="text-stone-700 font-semibold">{subjectName}</div>
 						</div>
-						<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
+						<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
 							Score
 							<div className="text-stone-700 font-semibold">
 								{report.score}/{report.scoreDenominator}
 							</div>
 						</div>
 					</div>
-					<div className="border border-stone-200 rounded-xl p-2">
-						<p className="text-xs font-normal text-stone-500 mb-1">Progress</p>
-						<p className="font-normal text-stone-700 whitespace-pre-wrap">
-							{report.progress}
-						</p>
-					</div>
-					<div className="border border-stone-200 rounded-xl p-2">
-						<p className="text-xs font-normal text-stone-500 mb-1">Advice</p>
-						<p className="font-normal text-stone-700 whitespace-pre-wrap">
-							{report.advice}
-						</p>
+					<div className="grid grid-cols-2 gap-2">
+						<div className="border border-stone-200 rounded-xl p-2">
+							<p className="text-xs font-normal text-stone-500 mb-1">
+								Progress
+							</p>
+							<p className="font-normal text-stone-700 whitespace-pre-wrap">
+								{report.progress}
+							</p>
+						</div>
+						<div className="border border-stone-200 rounded-xl p-2">
+							<p className="text-xs font-normal text-stone-500 mb-1">Advice</p>
+							<p className="font-normal text-stone-700 whitespace-pre-wrap">
+								{report.advice}
+							</p>
+						</div>
 					</div>
 				</div>
 				{downloadError && (
-					<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mt-3">
+					<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mt-3 shrink-0">
 						{downloadError}
 					</p>
 				)}
-				<div className="flex justify-between items-center mt-4">
+				<div className="flex justify-between items-center mt-4 shrink-0">
 					<button
 						type="button"
 						onClick={handleDownload}
