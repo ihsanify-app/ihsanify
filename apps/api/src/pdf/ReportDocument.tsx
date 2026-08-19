@@ -19,6 +19,8 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = path.join(__dirname, "fonts");
+const ASSETS_DIR = path.join(__dirname, "assets");
+const COVER_WREATH_IMAGE = path.join(ASSETS_DIR, "circular-leaves.png");
 
 Font.register({
 	family: "Poppins",
@@ -32,6 +34,17 @@ Font.register({
 	fonts: [
 		{ src: path.join(FONTS_DIR, "PTSerif-Regular.ttf") },
 		{ src: path.join(FONTS_DIR, "PTSerif-Bold.ttf"), fontWeight: 700 },
+	],
+});
+// Amiri is a classical Naskh typeface with proper Arabic shaping (GSUB
+// contextual forms/ligatures) — none of the Latin fonts above have Arabic
+// glyphs at all, so free-text fields need to route Arabic runs through
+// this font explicitly (see splitMixedScriptRuns/MixedScriptText below).
+Font.register({
+	family: "Amiri",
+	fonts: [
+		{ src: path.join(FONTS_DIR, "Amiri-Regular.ttf") },
+		{ src: path.join(FONTS_DIR, "Amiri-Bold.ttf"), fontWeight: 700 },
 	],
 });
 
@@ -52,8 +65,14 @@ const MONTH_NAMES = [
 
 export const DEFAULT_THEME_COLOR = "#166534";
 
-const COVER_IMAGE_DIAMETER = 300;
-const COVER_RING_WIDTH = 16;
+const COVER_IMAGE_DIAMETER = 260;
+const COVER_RING_WIDTH = 8;
+// The wreath artwork's native size (see circular-leaves.png) is 635x597 —
+// scaled while preserving that aspect ratio so the leaves aren't stretched
+// out of shape. Kept small enough (together with the cover's other sizes/
+// margins) that everything still fits on one page even with a logo.
+const COVER_WREATH_WIDTH = 400;
+const COVER_WREATH_HEIGHT = Math.round(COVER_WREATH_WIDTH * (537 / 575));
 
 export type ReportFont = "HELVETICA" | "POPPINS" | "PT_SERIF";
 export type ReportHeaderPattern =
@@ -78,6 +97,8 @@ export type ReportDocumentProps = {
 	year: number;
 	progress: string;
 	advice: string;
+	score: number;
+	scoreDenominator: number;
 	gradeLabel: string;
 	submittedAtLabel: string | null;
 	primaryColor: string;
@@ -314,6 +335,64 @@ function FooterIcon({
 	);
 }
 
+// Arabic (plus its Supplement/Extended-A/Presentation Forms blocks) — none
+// of Helvetica/Poppins/PT Serif have these glyphs, so any Arabic substring
+// inside a free-text field (teachers do write mixed Indonesian/Arabic, e.g.
+// listing huruf like "خ ص ض غ") needs to be routed to the Amiri font.
+// Interior spaces between Arabic letters/words are swallowed into the same
+// run (not split into their own base-font segment) — isolating a single
+// space between two single-character font switches produced stray glyph
+// artifacts in react-pdf's text layout, and a plain space renders fine in
+// Amiri anyway.
+const ARABIC_CHARS = "؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿";
+const ARABIC_RUN_PATTERN = new RegExp(
+	`[${ARABIC_CHARS}]+(?:[ \\t]+[${ARABIC_CHARS}]+)*`,
+	"g",
+);
+
+function splitMixedScriptRuns(
+	text: string,
+): { text: string; arabic: boolean }[] {
+	const segments: { text: string; arabic: boolean }[] = [];
+	let lastIndex = 0;
+	for (const match of text.matchAll(ARABIC_RUN_PATTERN)) {
+		const start = match.index ?? 0;
+		if (start > lastIndex) {
+			segments.push({ text: text.slice(lastIndex, start), arabic: false });
+		}
+		segments.push({ text: match[0], arabic: true });
+		lastIndex = start + match[0].length;
+	}
+	if (lastIndex < text.length) {
+		segments.push({ text: text.slice(lastIndex), arabic: false });
+	}
+	return segments;
+}
+
+function MixedScriptText({
+	text,
+	style,
+	baseFontFamily,
+}: {
+	text: string;
+	style: ReturnType<typeof StyleSheet.create>[string];
+	baseFontFamily: string;
+}) {
+	const segments = splitMixedScriptRuns(text);
+	return (
+		<Text style={style}>
+			{segments.map((seg, i) => (
+				<Text
+					key={`${i}-${seg.text.slice(0, 8)}`}
+					style={{ fontFamily: seg.arabic ? "Amiri" : baseFontFamily }}
+				>
+					{seg.text}
+				</Text>
+			))}
+		</Text>
+	);
+}
+
 function buildStyles(fontFamily: string) {
 	return StyleSheet.create({
 		page: {
@@ -327,20 +406,22 @@ function buildStyles(fontFamily: string) {
 		},
 		coverContent: {
 			flex: 1,
-			padding: 48,
+			paddingTop: 12,
+			paddingHorizontal: 48,
+			paddingBottom: 28,
 		},
 		coverOrgRow: {
-			flexDirection: "row",
+			flexDirection: "column",
 			alignItems: "center",
-			gap: 12,
+			gap: 4,
 		},
 		coverLogo: {
-			width: 40,
-			height: 40,
+			width: 110,
+			height: 110,
 			borderRadius: 8,
 		},
 		coverOrg: {
-			fontSize: 22,
+			fontSize: 30,
 			color: "#292524",
 			fontWeight: 700,
 			letterSpacing: 1,
@@ -349,6 +430,20 @@ function buildStyles(fontFamily: string) {
 			flex: 1,
 			alignItems: "center",
 			justifyContent: "center",
+		},
+		coverWreathBox: {
+			position: "relative",
+			width: COVER_WREATH_WIDTH,
+			height: COVER_WREATH_HEIGHT,
+			alignItems: "center",
+			justifyContent: "center",
+		},
+		coverWreathImage: {
+			position: "absolute",
+			top: -6,
+			left: -16,
+			width: COVER_WREATH_WIDTH,
+			height: COVER_WREATH_HEIGHT,
 		},
 		coverRing: {
 			width: COVER_IMAGE_DIAMETER + COVER_RING_WIDTH * 2,
@@ -370,7 +465,7 @@ function buildStyles(fontFamily: string) {
 			fontWeight: 700,
 		},
 		coverTitle: {
-			fontSize: 15,
+			fontSize: 16,
 			color: "#57534e",
 			letterSpacing: 3,
 			marginTop: 6,
@@ -390,17 +485,17 @@ function buildStyles(fontFamily: string) {
 			position: "absolute",
 			top: 28,
 			right: 36,
-			width: 40,
-			height: 40,
+			width: 80,
+			height: 80,
 			borderRadius: 8,
 		},
 		headerTitle: {
-			fontSize: 22,
+			fontSize: 28,
 			fontWeight: 700,
 			color: "#ffffff",
 		},
 		headerSubtitle: {
-			fontSize: 13,
+			fontSize: 15,
 			color: "#ffffff",
 			marginTop: 2,
 		},
@@ -425,22 +520,38 @@ function buildStyles(fontFamily: string) {
 			fontWeight: 700,
 		},
 		body: {
+			flex: 1,
 			padding: 36,
 		},
 		section: {
-			marginBottom: 18,
+			// marginTop (rather than relying on the parent's padding) so this
+			// still applies when the section lands at the top of an overflow
+			// page — react-pdf doesn't replay a fragmented container's own
+			// top padding on continuation pages, but a child's own margin
+			// still applies wherever it's placed.
+			marginTop: 20,
+			marginBottom: 16,
+			borderWidth: 1,
+			borderColor: "#d6d3d1",
+			borderRadius: 10,
+			padding: 14,
 		},
 		sectionLabel: {
-			fontSize: 10,
+			fontSize: 18,
 			fontWeight: 700,
 			textTransform: "uppercase",
 			color: "#57534e",
 			marginBottom: 6,
 		},
 		sectionText: {
-			fontSize: 11,
+			fontSize: 17,
 			lineHeight: 1.5,
 			color: "#292524",
+		},
+		gradeRow: {
+			flexDirection: "row",
+			alignItems: "center",
+			gap: 14,
 		},
 		gradeBox: {
 			borderWidth: 1,
@@ -456,8 +567,13 @@ function buildStyles(fontFamily: string) {
 			fontWeight: 700,
 			textTransform: "uppercase",
 		},
+		scoreText: {
+			fontSize: 14,
+			fontWeight: 700,
+			color: "#57534e",
+		},
 		footerRow: {
-			marginTop: 30,
+			marginTop: "auto",
 			flexDirection: "row",
 			justifyContent: "space-between",
 			alignItems: "flex-end",
@@ -500,6 +616,8 @@ export function ReportDocument({
 	year,
 	progress,
 	advice,
+	score,
+	scoreDenominator,
 	gradeLabel,
 	submittedAtLabel,
 	primaryColor,
@@ -538,17 +656,20 @@ export function ReportDocument({
 					</View>
 
 					<View style={styles.coverImageSection}>
-						<View style={[styles.coverRing, { borderColor: primaryColor }]}>
-							{coverImageUrl ? (
-								<Image src={coverImageUrl} style={styles.coverImageCircle} />
-							) : (
-								<View
-									style={[
-										styles.coverImageCircle,
-										{ backgroundColor: primaryColor },
-									]}
-								/>
-							)}
+						<View style={styles.coverWreathBox}>
+							<Image src={COVER_WREATH_IMAGE} style={styles.coverWreathImage} />
+							<View style={[styles.coverRing, { borderColor: primaryColor }]}>
+								{coverImageUrl ? (
+									<Image src={coverImageUrl} style={styles.coverImageCircle} />
+								) : (
+									<View
+										style={[
+											styles.coverImageCircle,
+											{ backgroundColor: primaryColor },
+										]}
+									/>
+								)}
+							</View>
 						</View>
 					</View>
 
@@ -585,20 +706,33 @@ export function ReportDocument({
 				</View>
 
 				<View style={styles.body}>
-					<View style={styles.section}>
+					<View style={styles.section} wrap={false}>
 						<Text style={styles.sectionLabel}>Progress</Text>
-						<Text style={styles.sectionText}>{progress}</Text>
+						<MixedScriptText
+							text={progress}
+							style={styles.sectionText}
+							baseFontFamily={FONT_FAMILY[font]}
+						/>
 					</View>
 
-					<View style={styles.section}>
+					<View style={styles.section} wrap={false}>
 						<Text style={styles.sectionLabel}>Saran</Text>
-						<Text style={styles.sectionText}>{advice}</Text>
+						<MixedScriptText
+							text={advice}
+							style={styles.sectionText}
+							baseFontFamily={FONT_FAMILY[font]}
+						/>
 					</View>
 
-					<View style={styles.section}>
+					<View style={styles.section} wrap={false}>
 						<Text style={styles.sectionLabel}>Grade Bulanan</Text>
-						<View style={styles.gradeBox}>
-							<Text style={styles.gradeText}>{gradeLabel}</Text>
+						<View style={styles.gradeRow}>
+							<View style={styles.gradeBox}>
+								<Text style={styles.gradeText}>{gradeLabel}</Text>
+							</View>
+							<Text style={styles.scoreText}>
+								{score}/{scoreDenominator}
+							</Text>
 						</View>
 					</View>
 
