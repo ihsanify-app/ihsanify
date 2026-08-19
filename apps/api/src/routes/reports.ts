@@ -505,6 +505,8 @@ reportsRouter.get(
 			year: report.year,
 			progress: report.progress,
 			advice: report.advice,
+			score: report.score,
+			scoreDenominator: SCORE_DENOMINATOR,
 			gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
 			submittedAtLabel: report.submittedAt
 				? report.submittedAt.toLocaleDateString("en-GB", {
