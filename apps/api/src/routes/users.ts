@@ -29,6 +29,7 @@ async function serializeUser(user: {
 }) {
 	let teacherId: string | null = null;
 	let studentId: string | null = null;
+	let studentNumber: number | null = null;
 	let subjectIds: { subjectId: string; subjectName: string }[] = [];
 
 	if (user.role === "TEACHER") {
@@ -49,6 +50,7 @@ async function serializeUser(user: {
 			where: { userId: user.id },
 		});
 		studentId = student?.id ?? null;
+		studentNumber = student?.studentNumber ?? null;
 		if (student) {
 			const groupIds = await getCurrentGroupIdsForStudent(student.id);
 			const groups = await prisma.group.findMany({
@@ -76,6 +78,7 @@ async function serializeUser(user: {
 		gender: user.gender?.toLowerCase() ?? null,
 		teacherId,
 		studentId,
+		studentNumber,
 		subjectIds,
 		isActive: user.isActive,
 		avatarUrl: user.avatarUrl,
@@ -170,6 +173,7 @@ usersRouter.patch(
 			gender?: "male" | "female";
 			isActive?: boolean;
 			avatarUrl?: string | null;
+			studentNumber?: number | null;
 		};
 
 		if (body.avatarUrl && !isValidAvatarDataUrl(body.avatarUrl)) {
@@ -182,7 +186,34 @@ usersRouter.patch(
 			);
 		}
 
+		if (
+			body.studentNumber != null &&
+			(body.studentNumber < 0 || body.studentNumber > 999)
+		) {
+			return c.json(
+				{
+					success: false,
+					message: "studentNumber must be a 3-digit number between 0 and 999.",
+				},
+				400,
+			);
+		}
+
 		try {
+			const existing = await prisma.user.findUnique({ where: { id: userId } });
+			if (!existing) {
+				return c.json({ success: false, message: "User not found." }, 404);
+			}
+			if (body.studentNumber !== undefined && existing.role !== "STUDENT") {
+				return c.json(
+					{
+						success: false,
+						message: "studentNumber only applies to students.",
+					},
+					400,
+				);
+			}
+
 			const user = await prisma.user.update({
 				where: { id: userId },
 				data: {
@@ -195,10 +226,25 @@ usersRouter.patch(
 					...(body.avatarUrl !== undefined && { avatarUrl: body.avatarUrl }),
 				},
 			});
+			if (body.studentNumber !== undefined) {
+				await prisma.student.update({
+					where: { userId },
+					data: { studentNumber: body.studentNumber },
+				});
+			}
 			return c.json({ success: true, data: await serializeUser(user) });
 		} catch (error: any) {
 			if (error.code === "P2025") {
 				return c.json({ success: false, message: "User not found." }, 404);
+			}
+			if (error.code === "P2002") {
+				return c.json(
+					{
+						success: false,
+						message: "This student number is already assigned to someone else.",
+					},
+					400,
+				);
 			}
 			return c.json({ success: false, message: "Internal server error." }, 500);
 		}
