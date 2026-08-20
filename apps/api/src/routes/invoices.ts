@@ -395,12 +395,13 @@ invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
 		}
 	}
 
-	const [student, reportSettings, lines] = await Promise.all([
+	const [student, reportSettings, invoiceSettings, lines] = await Promise.all([
 		prisma.student.findUnique({
 			where: { id: invoice.studentId },
 			include: { user: true },
 		}),
 		prisma.reportSettings.findFirst(),
+		prisma.invoiceSettings.findFirst(),
 		Promise.all(
 			invoice.lines.map(async (line) => {
 				const [group, teacher] = await Promise.all([
@@ -444,6 +445,8 @@ invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
 		footerPhone: reportSettings?.footerPhone ?? null,
 		footerEmail: reportSettings?.footerEmail ?? null,
 		footerInstagram: reportSettings?.footerInstagram ?? null,
+		bankName: invoiceSettings?.bankName ?? null,
+		bankAccount: invoiceSettings?.bankAccount ?? null,
 		font: reportSettings?.font ?? "HELVETICA",
 		headerPattern: reportSettings?.headerPattern ?? "NONE",
 	});

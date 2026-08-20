@@ -57,6 +57,8 @@ export type InvoiceDocumentProps = {
 	footerPhone: string | null;
 	footerEmail: string | null;
 	footerInstagram: string | null;
+	bankName: string | null;
+	bankAccount: string | null;
 	font: ReportFont;
 	headerPattern: ReportHeaderPattern;
 };
@@ -123,6 +125,8 @@ export function InvoiceDocument({
 	footerPhone,
 	footerEmail,
 	footerInstagram,
+	bankName,
+	bankAccount,
 	font,
 	headerPattern,
 }: InvoiceDocumentProps) {
@@ -191,6 +195,18 @@ export function InvoiceDocument({
 							<Text style={styles.footerLabel}>Tanggal Terbit</Text>
 							<Text style={styles.footerValue}>{issuedAtLabel}</Text>
 						</View>
+						{bankName && (
+							<View>
+								<Text style={styles.footerLabel}>Bank Name</Text>
+								<Text style={styles.footerValue}>{bankName}</Text>
+							</View>
+						)}
+						{bankAccount && (
+							<View>
+								<Text style={styles.footerLabel}>Bank Account</Text>
+								<Text style={styles.footerValue}>{bankAccount}</Text>
+							</View>
+						)}
 					</View>
 				</View>
 
