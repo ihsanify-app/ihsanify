@@ -21,12 +21,6 @@ const TABS = [
 		to: "/groups/$groupId/assignments",
 		adminOnly: false,
 	},
-	{
-		key: "invoices",
-		label: "Invoices",
-		to: "/groups/$groupId/invoices",
-		adminOnly: true,
-	},
 ] as const;
 
 export function GroupTabs({
@@ -34,7 +28,7 @@ export function GroupTabs({
 	active,
 }: {
 	groupId: string;
-	active: "sessions" | "reports" | "assignments" | "invoices";
+	active: "sessions" | "reports" | "assignments";
 }) {
 	return (
 		<div className="flex items-center gap-3 mb-6">

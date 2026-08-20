@@ -4,6 +4,7 @@ import {
 	BookOpen,
 	ClipboardList,
 	LayoutDashboard,
+	Receipt,
 	Settings,
 	Sprout,
 	User,
@@ -24,6 +25,12 @@ const navItems = [
 		icon: BarChart3,
 		title: "Reports",
 		path: "/reports",
+	},
+	{
+		id: 8,
+		icon: Receipt,
+		title: "Invoices",
+		path: "/invoices",
 	},
 	{
 		id: 5,
