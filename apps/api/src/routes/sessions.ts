@@ -16,6 +16,7 @@ function serializeSession(
 		date: Date;
 		durationMinutes: number;
 		status: "DRAFT" | "FINISHED";
+		attendanceRecorded: boolean;
 	},
 	teacherId: string | null,
 	teacherName: string | null,
@@ -34,6 +35,10 @@ function serializeSession(
 		subjectId,
 		subjectName,
 		studentIds: attendees,
+		// Lets the UI tell "these are real recorded attendees" apart from
+		// "nobody's taken attendance yet, so `studentIds` is just the full
+		// roster shown as a default" — both cases can list the same names.
+		attendanceRecorded: session.attendanceRecorded,
 		status: session.status.toLowerCase(),
 		durationMinutes: session.durationMinutes,
 	};
@@ -154,6 +159,7 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 				month: session.date.getMonth() + 1,
 				day: session.date.getDate(),
 				date: session.date.toISOString(),
+				attendanceRecorded: session.attendanceRecorded,
 				status: session.status.toLowerCase(),
 				durationMinutes: session.durationMinutes,
 			},
