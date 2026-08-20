@@ -309,3 +309,12 @@ model InvoiceLine {
   teacher   Teacher   @relation(fields: [teacherId], references: [id])
   sessions  Session[] @relation("InvoiceLineSessions")
 }
+
+// Global invoice PDF settings — one row, applies to every invoice. Kept
+// separate from ReportSettings (which is report-domain only) since bank
+// details are specific to billing, not report cards.
+model InvoiceSettings {
+  id          String  @id @default(cuid())
+  bankName    String?
+  bankAccount String?
+}
