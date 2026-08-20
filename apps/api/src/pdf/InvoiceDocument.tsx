@@ -38,12 +38,12 @@ export type InvoiceLineData = {
 	groupName: string;
 	subjectName: string;
 	teacherName: string;
+	invoiceNo: string;
 	price: number;
 	sessionCount: number;
 };
 
 export type InvoiceDocumentProps = {
-	invoiceNumber: string;
 	studentName: string;
 	month: number;
 	year: number;
@@ -68,12 +68,6 @@ function formatPrice(price: number) {
 function buildStyles(fontFamily: string) {
 	return StyleSheet.create({
 		...buildSharedStyles(fontFamily),
-		invoiceNumber: {
-			fontSize: 11,
-			color: "#ffffff",
-			opacity: 0.85,
-			marginTop: 10,
-		},
 		priceValue: {
 			fontSize: 26,
 			fontWeight: 700,
@@ -94,6 +88,11 @@ function buildStyles(fontFamily: string) {
 			color: "#78716c",
 			marginTop: 2,
 		},
+		lineInvoiceNo: {
+			fontSize: 9,
+			color: "#a8a29e",
+			marginTop: 4,
+		},
 		lineRight: {
 			alignItems: "flex-end",
 		},
@@ -111,7 +110,6 @@ function buildStyles(fontFamily: string) {
 }
 
 export function InvoiceDocument({
-	invoiceNumber,
 	studentName,
 	month,
 	year,
@@ -147,7 +145,6 @@ export function InvoiceDocument({
 					<Text style={styles.headerSubtitle}>
 						{organizationName} — {period}
 					</Text>
-					<Text style={styles.invoiceNumber}>No. {invoiceNumber}</Text>
 
 					<View style={styles.biodataRow}>
 						<View style={styles.biodataItem}>
@@ -170,6 +167,7 @@ export function InvoiceDocument({
 									<Text style={styles.lineMeta}>
 										{line.subjectName} • {line.teacherName}
 									</Text>
+									<Text style={styles.lineInvoiceNo}>No. {line.invoiceNo}</Text>
 								</View>
 								<View style={styles.lineRight}>
 									<Text style={styles.lineSessionCount}>
