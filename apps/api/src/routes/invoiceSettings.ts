@@ -8,11 +8,13 @@ function serializeInvoiceSettings(settings: {
 	id: string;
 	bankName: string | null;
 	bankAccount: string | null;
+	receiverName: string | null;
 }) {
 	return {
 		invoiceSettingsId: settings.id,
 		bankName: settings.bankName,
 		bankAccount: settings.bankAccount,
+		receiverName: settings.receiverName,
 	};
 }
 
@@ -29,6 +31,7 @@ invoiceSettingsRouter.get(
 					id: "",
 					bankName: null,
 					bankAccount: null,
+					receiverName: null,
 				}),
 			});
 		}
@@ -44,11 +47,15 @@ invoiceSettingsRouter.patch(
 		const body = (await c.req.json()) as {
 			bankName?: string | null;
 			bankAccount?: string | null;
+			receiverName?: string | null;
 		};
 
 		const data = {
 			...(body.bankName !== undefined && { bankName: body.bankName }),
 			...(body.bankAccount !== undefined && { bankAccount: body.bankAccount }),
+			...(body.receiverName !== undefined && {
+				receiverName: body.receiverName,
+			}),
 		};
 
 		const existing = await prisma.invoiceSettings.findFirst();

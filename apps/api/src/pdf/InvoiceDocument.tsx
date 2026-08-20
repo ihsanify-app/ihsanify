@@ -59,6 +59,7 @@ export type InvoiceDocumentProps = {
 	footerInstagram: string | null;
 	bankName: string | null;
 	bankAccount: string | null;
+	receiverName: string | null;
 	font: ReportFont;
 	headerPattern: ReportHeaderPattern;
 };
@@ -74,6 +75,9 @@ function buildStyles(fontFamily: string) {
 			fontSize: 26,
 			fontWeight: 700,
 			color: "#292524",
+		},
+		totalAlignRight: {
+			textAlign: "right",
 		},
 		lineRow: {
 			flexDirection: "row",
@@ -127,6 +131,7 @@ export function InvoiceDocument({
 	footerInstagram,
 	bankName,
 	bankAccount,
+	receiverName,
 	font,
 	headerPattern,
 }: InvoiceDocumentProps) {
@@ -186,8 +191,12 @@ export function InvoiceDocument({
 					))}
 
 					<View style={styles.section} wrap={false}>
-						<Text style={styles.sectionLabel}>Total Tagihan</Text>
-						<Text style={styles.priceValue}>{formatPrice(totalPrice)}</Text>
+						<Text style={[styles.sectionLabel, styles.totalAlignRight]}>
+							Total Tagihan
+						</Text>
+						<Text style={[styles.priceValue, styles.totalAlignRight]}>
+							{formatPrice(totalPrice)}
+						</Text>
 					</View>
 
 					<View style={styles.footerRow}>
@@ -205,6 +214,12 @@ export function InvoiceDocument({
 							<View>
 								<Text style={styles.footerLabel}>Bank Account</Text>
 								<Text style={styles.footerValue}>{bankAccount}</Text>
+							</View>
+						)}
+						{receiverName && (
+							<View>
+								<Text style={styles.footerLabel}>Receiver Name</Text>
+								<Text style={styles.footerValue}>{receiverName}</Text>
 							</View>
 						)}
 					</View>

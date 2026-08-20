@@ -212,8 +212,11 @@ invoicesRouter.post(
 			);
 		}
 
-		const periodStart = new Date(body.year, body.month - 1, 1);
-		const periodEnd = new Date(body.year, body.month, 1);
+		const year = body.year;
+		const month = body.month;
+		const studentNumber = student.studentNumber;
+		const periodStart = new Date(year, month - 1, 1);
+		const periodEnd = new Date(year, month, 1);
 		const studentId = body.studentId;
 
 		// Snapshot which sessions count as "attended" for this student in
@@ -273,20 +276,19 @@ invoicesRouter.post(
 		const invoice = await prisma.invoice.create({
 			data: {
 				studentId,
-				month: body.month,
-				year: body.year,
+				month,
+				year,
 				lines: {
 					create: lineInputs.map((line) => ({
 						groupId: line.groupId,
-						// biome-ignore lint/style/noNonNullAssertion: checked via missingTeacherLine/missingSubjectCodeLine above
+						// biome-ignore lint/style/noNonNullAssertion: checked via missingTeacherLine above
 						teacherId: line.teacherId!,
-						// biome-ignore lint/style/noNonNullAssertion: checked via missingSubjectCodeLine above
 						invoiceNo: buildInvoiceNo(
+							// biome-ignore lint/style/noNonNullAssertion: checked via missingSubjectCodeLine above
 							line.subjectCode!,
-							body.year!,
-							body.month!,
-							// biome-ignore lint/style/noNonNullAssertion: checked via the studentNumber guard above
-							student.studentNumber!,
+							year,
+							month,
+							studentNumber,
 						),
 						price: line.price,
 						sessions: {
@@ -447,6 +449,7 @@ invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
 		footerInstagram: reportSettings?.footerInstagram ?? null,
 		bankName: invoiceSettings?.bankName ?? null,
 		bankAccount: invoiceSettings?.bankAccount ?? null,
+		receiverName: invoiceSettings?.receiverName ?? null,
 		font: reportSettings?.font ?? "HELVETICA",
 		headerPattern: reportSettings?.headerPattern ?? "NONE",
 	});
