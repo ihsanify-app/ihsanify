@@ -5,6 +5,7 @@ import { meRouter } from "../auth/me";
 import { authRouter } from "../auth/register";
 import { assignmentsRouter } from "./routes/assignments";
 import { groupsRouter } from "./routes/groups";
+import { invoiceSettingsRouter } from "./routes/invoiceSettings";
 import { invoicesRouter } from "./routes/invoices";
 import { lookupsRouter } from "./routes/lookups";
 import { reportSettingsRouter } from "./routes/reportSettings";
@@ -31,6 +32,7 @@ app
 	.route("/", reportsRouter)
 	.route("/", assignmentsRouter)
 	.route("/", invoicesRouter)
+	.route("/", invoiceSettingsRouter)
 	.route("/", subjectsRouter)
 	.route("/", reportThemesRouter)
 	.route("/", reportSettingsRouter);
