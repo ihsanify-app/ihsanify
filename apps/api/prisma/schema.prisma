@@ -43,7 +43,7 @@ enum DayOfWeek {
   SUNDAY
 }
 
-// Placeholder status shared by Report/Test/Invoice until their real shapes are decided.
+// Placeholder status shared by Assignment/Test until their real shapes are decided.
 enum RecordStatus {
   DRAFT
   FINISHED
@@ -72,6 +72,7 @@ model Teacher {
   subjects     TeacherSubject[]
   groupHistory GroupTeacher[]
   reports      Report[]
+  invoiceLines InvoiceLine[]
 }
 
 model Student {
@@ -82,6 +83,7 @@ model Student {
   enrollmentHistory GroupEnrollment[]
   sessionAttendance SessionAttendance[]
   reports           Report[]
+  invoices          Invoice[]
 }
 
 enum ReportHeaderPattern {
@@ -159,7 +161,7 @@ model Group {
   sessions          Session[]
   reports           Report[]
   assignments       Assignment[]
-  invoices          Invoice[]
+  invoiceLines      InvoiceLine[]
   plannedSessions   PlannedSession[]
 }
 
@@ -196,16 +198,17 @@ model GroupTeacher {
 }
 
 model Session {
-  id                String        @id @default(cuid())
-  groupId           String
-  date              DateTime
-  durationMinutes   Int
-  status            SessionStatus @default(DRAFT)
-  attendanceRecorded Boolean      @default(false)
-  createdAt         DateTime      @default(now())
-  group             Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id                 String        @id @default(cuid())
+  groupId            String
+  date               DateTime
+  durationMinutes    Int
+  status             SessionStatus @default(DRAFT)
+  attendanceRecorded Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  group              Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  attendance SessionAttendance[]
+  attendance   SessionAttendance[]
+  invoiceLines InvoiceLine[]       @relation("InvoiceLineSessions")
 }
 
 model SessionAttendance {
@@ -258,15 +261,40 @@ model Assignment {
   group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
-// Placeholder shape — fields to be refined once the real Invoice design is discussed.
+// Monthly invoice for one student, covering every group they're billed for
+// that month — one InvoiceLine per group, since a student can be enrolled in
+// more than one group at once and each group needs its own manually-entered
+// price. Price stays a flat manual figure rather than a proportional
+// (attended/expected × price-per-month) formula — that was an open edge
+// case, resolved by making it manual instead.
 model Invoice {
-  id          String       @id @default(cuid())
-  groupId     String
-  title       String
-  description String
-  status      RecordStatus @default(DRAFT)
-  createdAt   DateTime     @default(now())
-  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  id        String        @id @default(cuid())
+  studentId String
+  month     Int
+  year      Int
+  // Manually ticked by an admin once the PDF has actually been sent to the
+  // student — not inferred from a download or any other action, since
+  // "downloaded by admin" and "handed to the student" aren't the same event.
+  sent      Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  student   Student       @relation(fields: [studentId], references: [id])
+  lines     InvoiceLine[]
 }
 
-
+// One group's line item within an Invoice. `sessions` snapshots exactly
+// which of that group's sessions counted as "attended" for this student at
+// generation time (mirrors the event-sourced-history philosophy used for
+// enrollment/teacher-assignment elsewhere): if attendance for that month is
+// corrected later, past invoices keep showing what they showed when they
+// were generated.
+model InvoiceLine {
+  id        String    @id @default(cuid())
+  invoiceId String
+  groupId   String
+  teacherId String
+  price     Int
+  invoice   Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  group     Group     @relation(fields: [groupId], references: [id])
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  sessions  Session[] @relation("InvoiceLineSessions")
+}
