@@ -15,9 +15,23 @@ type InvoiceLineRecord = {
 	id: string;
 	groupId: string;
 	teacherId: string;
+	invoiceNo: string;
 	price: number;
 	sessions: { id: string; date: Date; durationMinutes: number }[];
 };
+
+// e.g. buildInvoiceNo("AR", 2026, 8, 1) -> "AR-2026-08-001". Computed once
+// at InvoiceLine creation time and stored — see that model's doc comment.
+function buildInvoiceNo(
+	subjectCode: string,
+	year: number,
+	month: number,
+	studentNumber: number,
+) {
+	return `${subjectCode}-${year}-${String(month).padStart(2, "0")}-${String(
+		studentNumber,
+	).padStart(3, "0")}`;
+}
 
 type InvoiceRecord = {
 	id: string;
@@ -55,6 +69,7 @@ async function serializeInvoice(invoice: InvoiceRecord) {
 				subjectName: group?.subject.name ?? null,
 				teacherId: line.teacherId,
 				teacherName: teacher?.user.name ?? null,
+				invoiceNo: line.invoiceNo,
 				price: line.price,
 				sessions: line.sessions
 					.map((s) => ({
@@ -171,6 +186,16 @@ invoicesRouter.post(
 		if (!student) {
 			return c.json({ success: false, message: "Student not found." }, 404);
 		}
+		if (!student.studentNumber) {
+			return c.json(
+				{
+					success: false,
+					message:
+						"This student doesn't have a student number yet — set one in Settings → User before generating an invoice.",
+				},
+				400,
+			);
+		}
 
 		const currentGroupIds = await getCurrentGroupIdsForStudent(body.studentId);
 		const invalidGroupId = body.lines.find(
@@ -198,8 +223,12 @@ invoicesRouter.post(
 		// part of this check.
 		const lineInputs = await Promise.all(
 			body.lines.map(async (line) => {
-				const [teacherId, attendedSessions] = await Promise.all([
+				const [teacherId, group, attendedSessions] = await Promise.all([
 					getCurrentTeacherId(line.groupId),
+					prisma.group.findUnique({
+						where: { id: line.groupId },
+						include: { subject: true },
+					}),
 					prisma.session.findMany({
 						where: {
 							groupId: line.groupId,
@@ -210,7 +239,12 @@ invoicesRouter.post(
 						orderBy: { date: "asc" },
 					}),
 				]);
-				return { ...line, teacherId, attendedSessions };
+				return {
+					...line,
+					teacherId,
+					subjectCode: group?.subject.subjectCode ?? null,
+					attendedSessions,
+				};
 			}),
 		);
 
@@ -224,6 +258,17 @@ invoicesRouter.post(
 				400,
 			);
 		}
+		const missingSubjectCodeLine = lineInputs.find((line) => !line.subjectCode);
+		if (missingSubjectCodeLine) {
+			return c.json(
+				{
+					success: false,
+					message:
+						"One of the selected groups' subjects doesn't have a subject code yet — set one in Settings → Subject before generating an invoice.",
+				},
+				400,
+			);
+		}
 
 		const invoice = await prisma.invoice.create({
 			data: {
@@ -233,8 +278,16 @@ invoicesRouter.post(
 				lines: {
 					create: lineInputs.map((line) => ({
 						groupId: line.groupId,
-						// biome-ignore lint/style/noNonNullAssertion: checked via missingTeacherLine above
+						// biome-ignore lint/style/noNonNullAssertion: checked via missingTeacherLine/missingSubjectCodeLine above
 						teacherId: line.teacherId!,
+						// biome-ignore lint/style/noNonNullAssertion: checked via missingSubjectCodeLine above
+						invoiceNo: buildInvoiceNo(
+							line.subjectCode!,
+							body.year!,
+							body.month!,
+							// biome-ignore lint/style/noNonNullAssertion: checked via the studentNumber guard above
+							student.studentNumber!,
+						),
 						price: line.price,
 						sessions: {
 							connect: line.attendedSessions.map((s) => ({ id: s.id })),
@@ -365,6 +418,7 @@ invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
 					groupName: group?.name ?? "-",
 					subjectName: group?.subject.name ?? "-",
 					teacherName: teacher?.user.name ?? "-",
+					invoiceNo: line.invoiceNo,
 					price: line.price,
 					sessionCount: line.sessions.length,
 				};
@@ -373,7 +427,6 @@ invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
 	]);
 
 	const buffer = await renderInvoicePdf({
-		invoiceNumber: invoice.id.slice(-8).toUpperCase(),
 		studentName: student?.user.name ?? "-",
 		month: invoice.month,
 		year: invoice.year,
