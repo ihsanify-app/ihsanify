@@ -14,6 +14,7 @@ lookupsRouter.get("/subjects", requireAuth, requireRole("ADMIN"), async (c) => {
 		data: subjects.map((s) => ({
 			subjectId: s.id,
 			subjectName: s.name,
+			subjectCode: s.subjectCode,
 			reportThemeId: s.reportThemeId,
 			reportThemeName: s.reportTheme?.name ?? null,
 		})),

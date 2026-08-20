@@ -11,6 +11,7 @@ export const Route = createFileRoute("/_app/settings_/subject")({
 type Subject = {
 	subjectId: string;
 	subjectName: string;
+	subjectCode: string | null;
 	reportThemeId: string | null;
 	reportThemeName: string | null;
 };
@@ -28,9 +29,10 @@ function AddSubjectModal({
 }: {
 	themes: ReportTheme[];
 	onClose: () => void;
-	onSubmit: (name: string, reportThemeId: string) => void;
+	onSubmit: (name: string, subjectCode: string, reportThemeId: string) => void;
 }) {
 	const [name, setName] = useState("");
+	const [subjectCode, setSubjectCode] = useState("");
 	const [reportThemeId, setReportThemeId] = useState("");
 
 	return (
@@ -57,6 +59,15 @@ function AddSubjectModal({
 						onChange={(e) => setName(e.target.value)}
 					/>
 					<label className="text-xs font-normal text-stone-500">
+						Subject Code
+						<input
+							className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal uppercase"
+							placeholder="e.g. AR"
+							value={subjectCode}
+							onChange={(e) => setSubjectCode(e.target.value.toUpperCase())}
+						/>
+					</label>
+					<label className="text-xs font-normal text-stone-500">
 						Report Theme
 						<select
 							className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
@@ -82,7 +93,7 @@ function AddSubjectModal({
 					</button>
 					<button
 						type="button"
-						onClick={() => onSubmit(name, reportThemeId)}
+						onClick={() => onSubmit(name, subjectCode, reportThemeId)}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						Create
@@ -167,10 +178,18 @@ function RouteComponent() {
 		load();
 	}, [load]);
 
-	async function handleCreate(name: string, reportThemeId: string) {
+	async function handleCreate(
+		name: string,
+		subjectCode: string,
+		reportThemeId: string,
+	) {
 		const { body } = await apiFetch("/subjects", {
 			method: "POST",
-			body: JSON.stringify({ name, reportThemeId: reportThemeId || null }),
+			body: JSON.stringify({
+				name,
+				subjectCode: subjectCode || null,
+				reportThemeId: reportThemeId || null,
+			}),
 		});
 		if (body?.success) {
 			setSubjects((prev) =>
@@ -196,6 +215,20 @@ function RouteComponent() {
 			);
 		} else {
 			setErrorMessage(body?.message ?? "Could not update report theme.");
+		}
+	}
+
+	async function handleCodeChange(subjectId: string, subjectCode: string) {
+		const { body } = await apiFetch(`/subjects/${subjectId}`, {
+			method: "PATCH",
+			body: JSON.stringify({ subjectCode: subjectCode.toUpperCase() || null }),
+		});
+		if (body?.success) {
+			setSubjects((prev) =>
+				prev.map((s) => (s.subjectId === subjectId ? body.data : s)),
+			);
+		} else {
+			setErrorMessage(body?.message ?? "Could not update subject code.");
 		}
 	}
 
@@ -276,6 +309,7 @@ function RouteComponent() {
 						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
 								<th className="px-4 py-3 text-left">Subject</th>
+								<th className="px-4 py-3 text-left">Code</th>
 								<th className="px-4 py-3 text-left">Report Theme</th>
 								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
@@ -284,7 +318,7 @@ function RouteComponent() {
 							{subjects.length === 0 && (
 								<tr>
 									<td
-										colSpan={3}
+										colSpan={4}
 										className="px-4 py-6 text-center text-stone-400 italic"
 									>
 										No subjects yet.
@@ -294,6 +328,20 @@ function RouteComponent() {
 							{subjects.map((s) => (
 								<tr key={s.subjectId} className="hover:bg-green-50">
 									<td className="px-4 py-3">{s.subjectName}</td>
+									<td className="px-4 py-3">
+										<input
+											key={s.subjectCode ?? ""}
+											className="w-20 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors uppercase"
+											placeholder="e.g. AR"
+											defaultValue={s.subjectCode ?? ""}
+											onBlur={(e) => {
+												const value = e.target.value.toUpperCase();
+												if (value !== (s.subjectCode ?? "")) {
+													handleCodeChange(s.subjectId, value);
+												}
+											}}
+										/>
+									</td>
 									<td className="px-4 py-3">
 										<div className="flex items-center gap-2">
 											<span

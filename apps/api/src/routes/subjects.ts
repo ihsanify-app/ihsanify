@@ -4,6 +4,17 @@ import { prisma } from "../utils/prisma";
 
 export const subjectsRouter = new Hono();
 
+function duplicateFieldMessage(error: {
+	code?: string;
+	meta?: { target?: string[] };
+}) {
+	const target = error.meta?.target ?? [];
+	if (target.includes("subjectCode")) {
+		return "A subject with this code already exists.";
+	}
+	return "A subject with this name already exists.";
+}
+
 subjectsRouter.post(
 	"/subjects",
 	requireAuth,
@@ -11,6 +22,7 @@ subjectsRouter.post(
 	async (c) => {
 		const body = (await c.req.json()) as {
 			name?: string;
+			subjectCode?: string | null;
 			reportThemeId?: string | null;
 		};
 		if (!body.name) {
@@ -31,7 +43,11 @@ subjectsRouter.post(
 
 		try {
 			const subject = await prisma.subject.create({
-				data: { name: body.name, reportThemeId: body.reportThemeId ?? null },
+				data: {
+					name: body.name,
+					subjectCode: body.subjectCode || null,
+					reportThemeId: body.reportThemeId ?? null,
+				},
 				include: { reportTheme: true },
 			});
 			return c.json(
@@ -40,6 +56,7 @@ subjectsRouter.post(
 					data: {
 						subjectId: subject.id,
 						subjectName: subject.name,
+						subjectCode: subject.subjectCode,
 						reportThemeId: subject.reportThemeId,
 						reportThemeName: subject.reportTheme?.name ?? null,
 					},
@@ -49,10 +66,7 @@ subjectsRouter.post(
 		} catch (error: any) {
 			if (error.code === "P2002") {
 				return c.json(
-					{
-						success: false,
-						message: "A subject with this name already exists.",
-					},
+					{ success: false, message: duplicateFieldMessage(error) },
 					400,
 				);
 			}
@@ -67,11 +81,17 @@ subjectsRouter.patch(
 	requireRole("ADMIN"),
 	async (c) => {
 		const subjectId = c.req.param("id");
-		const body = (await c.req.json()) as { reportThemeId?: string | null };
+		const body = (await c.req.json()) as {
+			subjectCode?: string | null;
+			reportThemeId?: string | null;
+		};
 
-		if (body.reportThemeId === undefined) {
+		if (body.reportThemeId === undefined && body.subjectCode === undefined) {
 			return c.json(
-				{ success: false, message: "reportThemeId is required." },
+				{
+					success: false,
+					message: "reportThemeId or subjectCode is required.",
+				},
 				400,
 			);
 		}
@@ -91,7 +111,14 @@ subjectsRouter.patch(
 		try {
 			const subject = await prisma.subject.update({
 				where: { id: subjectId },
-				data: { reportThemeId: body.reportThemeId },
+				data: {
+					...(body.reportThemeId !== undefined && {
+						reportThemeId: body.reportThemeId,
+					}),
+					...(body.subjectCode !== undefined && {
+						subjectCode: body.subjectCode || null,
+					}),
+				},
 				include: { reportTheme: true },
 			});
 			return c.json({
@@ -99,6 +126,7 @@ subjectsRouter.patch(
 				data: {
 					subjectId: subject.id,
 					subjectName: subject.name,
+					subjectCode: subject.subjectCode,
 					reportThemeId: subject.reportThemeId,
 					reportThemeName: subject.reportTheme?.name ?? null,
 				},
@@ -106,6 +134,12 @@ subjectsRouter.patch(
 		} catch (error: any) {
 			if (error.code === "P2025") {
 				return c.json({ success: false, message: "Subject not found." }, 404);
+			}
+			if (error.code === "P2002") {
+				return c.json(
+					{ success: false, message: duplicateFieldMessage(error) },
+					400,
+				);
 			}
 			return c.json({ success: false, message: "Internal server error." }, 500);
 		}
