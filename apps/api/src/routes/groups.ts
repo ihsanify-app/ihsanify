@@ -28,6 +28,23 @@ function isDayOfWeek(value: unknown): value is DayOfWeek {
 	);
 }
 
+type DbGroupType = "GROUP" | "PRIVATE" | "SEMI_PRIVATE";
+type ApiGroupType = "group" | "private" | "semi-private";
+
+// SEMI_PRIVATE <-> semi-private isn't a plain case-convert, hence a helper
+// rather than the toUpperCase/toLowerCase used for other enums here.
+function toApiGroupType(groupType: DbGroupType): ApiGroupType {
+	return groupType === "SEMI_PRIVATE"
+		? "semi-private"
+		: (groupType.toLowerCase() as "group" | "private");
+}
+
+function toDbGroupType(groupType: ApiGroupType): DbGroupType {
+	return groupType === "semi-private"
+		? "SEMI_PRIVATE"
+		: (groupType.toUpperCase() as "GROUP" | "PRIVATE");
+}
+
 async function serializeGroup(group: {
 	id: string;
 	name: string;
@@ -35,6 +52,8 @@ async function serializeGroup(group: {
 	isActive: boolean;
 	startDate: Date;
 	endDate: Date | null;
+	cardColor: string | null;
+	groupType: DbGroupType;
 }) {
 	const subject = await prisma.subject.findUnique({
 		where: { id: group.subjectId },
@@ -67,6 +86,8 @@ async function serializeGroup(group: {
 		isActive: group.isActive,
 		startDate: group.startDate.toISOString(),
 		endDate: group.endDate ? group.endDate.toISOString() : null,
+		cardColor: group.cardColor,
+		groupType: toApiGroupType(group.groupType),
 		studentIds: students.map((s) => ({
 			studentId: s.id,
 			studentName: s.user.name,
@@ -89,6 +110,8 @@ groupsRouter.get("/groups", requireAuth, async (c) => {
 		isActive: boolean;
 		startDate: Date;
 		endDate: Date | null;
+		cardColor: string | null;
+		groupType: DbGroupType;
 	}[];
 
 	if (authUser.role === "ADMIN") {
@@ -184,6 +207,8 @@ groupsRouter.patch(
 			startDate?: string;
 			endDate?: string | null;
 			plannedSessions?: { dayOfWeek: string; time: string }[];
+			cardColor?: string | null;
+			groupType?: ApiGroupType;
 		};
 
 		const existing = await prisma.group.findUnique({ where: { id: groupId } });
@@ -197,6 +222,10 @@ groupsRouter.patch(
 				...(body.groupName !== undefined && { name: body.groupName }),
 				...(body.subjectId !== undefined && { subjectId: body.subjectId }),
 				...(body.isActive !== undefined && { isActive: body.isActive }),
+				...(body.cardColor !== undefined && { cardColor: body.cardColor }),
+				...(body.groupType !== undefined && {
+					groupType: toDbGroupType(body.groupType),
+				}),
 				...(body.startDate !== undefined && {
 					startDate: new Date(body.startDate),
 				}),

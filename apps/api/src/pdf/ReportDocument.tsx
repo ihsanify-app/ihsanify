@@ -54,6 +54,7 @@ export type ReportDocumentProps = {
 	studentName: string;
 	studentGenderLabel: string;
 	subjectName: string;
+	groupTypeLabel: string;
 	teacherName: string;
 	month: number;
 	year: number;
@@ -243,6 +244,7 @@ export function ReportDocument({
 	studentName,
 	studentGenderLabel,
 	subjectName,
+	groupTypeLabel,
 	teacherName,
 	month,
 	year,
@@ -330,6 +332,10 @@ export function ReportDocument({
 						<View style={styles.biodataItem}>
 							<Text style={styles.biodataLabel}>Kategori Halaqoh</Text>
 							<Text style={styles.biodataValue}>{subjectName}</Text>
+						</View>
+						<View style={styles.biodataItem}>
+							<Text style={styles.biodataLabel}>Tipe Kelas</Text>
+							<Text style={styles.biodataValue}>{groupTypeLabel}</Text>
 						</View>
 					</View>
 				</View>

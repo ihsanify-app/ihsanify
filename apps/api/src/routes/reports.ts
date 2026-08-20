@@ -449,6 +449,14 @@ function genderLabel(gender: "MALE" | "FEMALE" | null) {
 	return "-";
 }
 
+function groupTypeLabel(
+	groupType: "GROUP" | "PRIVATE" | "SEMI_PRIVATE" | undefined,
+) {
+	if (groupType === "PRIVATE") return "Privat";
+	if (groupType === "SEMI_PRIVATE") return "Semi Privat";
+	return "Kelompok";
+}
+
 reportsRouter.get(
 	"/groups/:id/reports/:reportId/pdf",
 	requireAuth,
@@ -500,6 +508,7 @@ reportsRouter.get(
 			studentName: student?.user.name ?? "-",
 			studentGenderLabel: genderLabel(student?.user.gender ?? null),
 			subjectName: group?.subject.name ?? "-",
+			groupTypeLabel: groupTypeLabel(group?.groupType),
 			teacherName: teacher?.user.name ?? "-",
 			month: report.month,
 			year: report.year,

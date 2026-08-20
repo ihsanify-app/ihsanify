@@ -20,6 +20,14 @@ type InvoiceLineRecord = {
 	sessions: { id: string; date: Date; durationMinutes: number }[];
 };
 
+function groupTypeLabel(
+	groupType: "GROUP" | "PRIVATE" | "SEMI_PRIVATE" | undefined,
+) {
+	if (groupType === "PRIVATE") return "Privat";
+	if (groupType === "SEMI_PRIVATE") return "Semi Privat";
+	return "Kelompok";
+}
+
 // e.g. buildInvoiceNo("AR", 2026, 8, 1) -> "AR-2026-08-001". Computed once
 // at InvoiceLine creation time and stored — see that model's doc comment.
 function buildInvoiceNo(
@@ -67,6 +75,7 @@ async function serializeInvoice(invoice: InvoiceRecord) {
 				groupId: line.groupId,
 				groupName: group?.name ?? null,
 				subjectName: group?.subject.name ?? null,
+				groupTypeLabel: groupTypeLabel(group?.groupType),
 				teacherId: line.teacherId,
 				teacherName: teacher?.user.name ?? null,
 				invoiceNo: line.invoiceNo,
@@ -420,6 +429,7 @@ invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
 					groupId: line.groupId,
 					groupName: group?.name ?? "-",
 					subjectName: group?.subject.name ?? "-",
+					groupTypeLabel: groupTypeLabel(group?.groupType),
 					teacherName: teacher?.user.name ?? "-",
 					invoiceNo: line.invoiceNo,
 					price: line.price,

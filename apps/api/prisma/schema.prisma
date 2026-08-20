@@ -153,6 +153,12 @@ model TeacherSubject {
   @@id([teacherId, subjectId])
 }
 
+enum GroupType {
+  GROUP
+  PRIVATE
+  SEMI_PRIVATE
+}
+
 model Group {
   id        String    @id @default(cuid())
   name      String
@@ -160,6 +166,11 @@ model Group {
   isActive  Boolean   @default(true)
   startDate DateTime  @default(now())
   endDate   DateTime?
+  // Configured in Settings → Group. cardColor is a hex string shown as the
+  // group's card background on the Groups page; falls back to the
+  // isActive-based default color when unset.
+  cardColor String?
+  groupType GroupType @default(GROUP)
   subject   Subject   @relation(fields: [subjectId], references: [id])
 
   enrollmentHistory GroupEnrollment[]

@@ -59,6 +59,8 @@ type Group = {
 	isActive: boolean;
 	startDate: string;
 	endDate: string | null;
+	cardColor: string | null;
+	groupType: "group" | "private" | "semi-private";
 	studentIds: { studentId: string; studentName: string }[];
 	plannedSessions: PlannedSession[];
 };
@@ -585,12 +587,20 @@ function RouteComponent() {
 					transition-all duration-200
 					hover:-translate-y-1 hover:scale-[1.02]
 					hover:shadow-xl flex flex-col gap-4
-				${g.isActive === false ? "bg-stone-400" : "bg-green-700"}`}
-							style={{ animationDelay: `${i * 80}ms` }}
+				${g.cardColor ? "" : g.isActive === false ? "bg-stone-400" : "bg-green-700"}`}
+							style={{
+								animationDelay: `${i * 80}ms`,
+								...(g.cardColor ? { backgroundColor: g.cardColor } : {}),
+							}}
 						>
 							<div>
-								<div className="font-heading font-semibold text-lg">
-									{g.groupName}
+								<div className="flex items-center gap-2">
+									<div className="font-heading font-semibold text-lg">
+										{g.groupName}
+									</div>
+									<span className="bg-white/15 text-xs font-medium px-2 py-0.5 rounded-full capitalize">
+										{g.groupType.replace("-", " ")}
+									</span>
 								</div>
 								<div className="text-sm text-green-100">
 									{g.subjectName ?? "No subject"} •{" "}

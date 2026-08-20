@@ -226,16 +226,18 @@ export function HeaderPatternOverlay({
 	);
 }
 
-// Simple icon glyphs for the footer, redrawn from lucide's (ISC-licensed)
-// 24x24 stroke path data so the PDF's footer icons match the ones used
-// throughout the rest of the app. Shared by every document with a
-// contact-info footer bar (reports, invoices).
+// Simple icon glyphs for the footer. Most are redrawn from lucide's
+// (ISC-licensed) 24x24 stroke path data so they match the icons used
+// throughout the rest of the app; "whatsapp" is a brand mark instead, drawn
+// filled (not stroked) since it's a logo, not a line icon — path data from
+// Simple Icons (CC0). Shared by every document with a contact-info footer
+// bar (reports, invoices).
 export function FooterIcon({
 	kind,
 	size,
 	color,
 }: {
-	kind: "phone" | "mail" | "instagram" | "globe";
+	kind: "whatsapp" | "mail" | "instagram" | "globe";
 	size: number;
 	color: string;
 }) {
@@ -249,10 +251,10 @@ export function FooterIcon({
 
 	return (
 		<Svg viewBox="0 0 24 24" style={{ width: size, height: size }}>
-			{kind === "phone" && (
+			{kind === "whatsapp" && (
 				<Path
-					d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
-					{...common}
+					d="M12.05 2C6.5 2 2 6.5 2 12.05c0 1.78.47 3.45 1.28 4.9L2 22l5.2-1.36a10 10 0 0 0 4.85 1.24h.005c5.548 0 10.045-4.5 10.048-10.05A9.99 9.99 0 0 0 19.14 4.9 9.94 9.94 0 0 0 12.05 2m5.85 14.38c-.247.694-1.433 1.328-2.005 1.413-.512.077-1.16.11-1.87-.118a17 17 0 0 1-1.696-.625c-2.98-1.287-4.928-4.29-5.077-4.487-.148-.198-1.213-1.612-1.213-3.074s.768-2.182 1.04-2.48c.272-.297.594-.371.792-.371.198 0 .396.002.57.01.182.01.427-.069.669.51.248.594.842 2.057.916 2.206.075.15.125.323.025.52-.1.198-.15.322-.298.496-.148.174-.312.388-.446.52-.148.15-.303.31-.13.607.173.297.77 1.271 1.653 2.06 1.135 1.011 2.093 1.324 2.39 1.474.297.148.47.124.644-.075.173-.198.743-.867.94-1.164.198-.298.396-.25.669-.15.272.1 1.733.818 2.03.967.297.15.495.223.57.347.075.124.075.719-.173 1.413"
+					fill={color}
 				/>
 			)}
 			{kind === "mail" && (
@@ -405,7 +407,7 @@ export function buildSharedStyles(fontFamily: string) {
 }
 
 export type FooterContactPart = {
-	kind: "phone" | "mail" | "instagram" | "globe";
+	kind: "whatsapp" | "mail" | "instagram" | "globe";
 	value: string;
 };
 
@@ -419,7 +421,7 @@ export function buildFooterParts(contact: {
 }): FooterContactPart[] {
 	const parts: FooterContactPart[] = [];
 	if (contact.footerPhone)
-		parts.push({ kind: "phone", value: contact.footerPhone });
+		parts.push({ kind: "whatsapp", value: contact.footerPhone });
 	if (contact.footerEmail)
 		parts.push({ kind: "mail", value: contact.footerEmail });
 	if (contact.footerInstagram)

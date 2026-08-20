@@ -37,6 +37,7 @@ export type InvoiceLineData = {
 	groupId: string;
 	groupName: string;
 	subjectName: string;
+	groupTypeLabel: string;
 	teacherName: string;
 	invoiceNo: string;
 	price: number;
@@ -174,7 +175,8 @@ export function InvoiceDocument({
 								<View>
 									<Text style={styles.lineGroupName}>{line.groupName}</Text>
 									<Text style={styles.lineMeta}>
-										{line.subjectName} • {line.teacherName}
+										{line.subjectName} • {line.teacherName} •{" "}
+										{line.groupTypeLabel}
 									</Text>
 									<Text style={styles.lineInvoiceNo}>No. {line.invoiceNo}</Text>
 								</View>
