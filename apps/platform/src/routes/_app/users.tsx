@@ -1,14 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	Ban,
-	CheckCircle,
-	Pencil,
-	PlusCircle,
-	Upload,
-	User,
-	UserCheck,
-	XCircle,
-} from "lucide-react";
+import { PlusCircle, Upload } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
@@ -48,37 +39,31 @@ type AppUser = {
 	email: string;
 	role: "teacher" | "student";
 	gender: "male" | "female" | null;
-	teacherId: string | null;
-	studentId: string | null;
 	subjectIds: { subjectId: string; subjectName: string }[];
 	isActive: boolean;
 	avatarUrl: string | null;
 };
 
 function CreateUserModal({
-	initialData,
 	onClose,
 	onSubmit,
 }: {
-	initialData: AppUser | null;
 	onClose: () => void;
 	onSubmit: (payload: {
 		name: string;
 		email: string;
-		password?: string;
+		password: string;
 		role: "teacher" | "student";
 		gender: "male" | "female";
 		avatarUrl?: string | null;
 	}) => void;
 }) {
-	const [name, setName] = useState(initialData?.name ?? "");
-	const [email, setEmail] = useState(initialData?.email ?? "");
+	const [name, setName] = useState("");
+	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [role, setRole] = useState(initialData?.role ?? "");
-	const [gender, setGender] = useState(initialData?.gender ?? "");
-	const [avatarUrl, setAvatarUrl] = useState<string | null>(
-		initialData?.avatarUrl ?? null,
-	);
+	const [role, setRole] = useState("");
+	const [gender, setGender] = useState("");
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 	const [avatarError, setAvatarError] = useState("");
 
 	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
@@ -112,7 +97,7 @@ function CreateUserModal({
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
-					{initialData ? "Edit User" : "Create User"}
+					Create User
 				</h2>
 				<form>
 					<div className="flex flex-col items-center gap-2 mb-3">
@@ -169,20 +154,17 @@ function CreateUserModal({
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 						/>
-						{!initialData && (
-							<input
-								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-								placeholder="Initial password"
-								type="password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-							/>
-						)}
+						<input
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							placeholder="Initial password"
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						/>
 						<select
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors disabled:bg-stone-100 disabled:text-stone-400"
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 							value={role}
 							onChange={(e) => setRole(e.target.value as "teacher" | "student")}
-							disabled={!!initialData}
 						>
 							<option value="">Select Role</option>
 							<option value="teacher">Teacher</option>
@@ -213,7 +195,7 @@ function CreateUserModal({
 							onSubmit({
 								name,
 								email,
-								...(password ? { password } : {}),
+								password,
 								role: role as "teacher" | "student",
 								gender: gender as "male" | "female",
 								avatarUrl,
@@ -221,7 +203,7 @@ function CreateUserModal({
 						}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
-						{initialData ? "Save Changes" : "Create"}
+						Create
 					</button>
 				</div>
 			</div>
@@ -235,7 +217,6 @@ function RouteComponent() {
 	>("loading");
 	const [users, setUsers] = useState<AppUser[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [editingUser, setEditingUser] = useState<AppUser | null>(null);
 
 	useEffect(() => {
 		apiFetch("/users").then(({ status, body }) => {
@@ -251,7 +232,7 @@ function RouteComponent() {
 	async function handleCreate(payload: {
 		name: string;
 		email: string;
-		password?: string;
+		password: string;
 		role: "teacher" | "student";
 		gender: "male" | "female";
 		avatarUrl?: string | null;
@@ -263,39 +244,6 @@ function RouteComponent() {
 		if (body?.success) {
 			setUsers((prev) => [...prev, body.data]);
 			setIsModalOpen(false);
-		}
-	}
-
-	async function handleUpdate(
-		userId: string,
-		payload: {
-			name: string;
-			email: string;
-			gender: "male" | "female";
-			avatarUrl?: string | null;
-		},
-	) {
-		const { body } = await apiFetch(`/users/${userId}`, {
-			method: "PATCH",
-			body: JSON.stringify(payload),
-		});
-		if (body?.success) {
-			setUsers((prev) =>
-				prev.map((u) => (u.userId === userId ? body.data : u)),
-			);
-			setEditingUser(null);
-		}
-	}
-
-	async function handleToggleActive(user: AppUser) {
-		const { body } = await apiFetch(`/users/${user.userId}`, {
-			method: "PATCH",
-			body: JSON.stringify({ isActive: !user.isActive }),
-		});
-		if (body?.success) {
-			setUsers((prev) =>
-				prev.map((u) => (u.userId === user.userId ? body.data : u)),
-			);
 		}
 	}
 
@@ -316,16 +264,8 @@ function RouteComponent() {
 		<section className="m-10">
 			{isModalOpen && (
 				<CreateUserModal
-					initialData={null}
 					onClose={() => setIsModalOpen(false)}
 					onSubmit={handleCreate}
-				/>
-			)}
-			{editingUser && (
-				<CreateUserModal
-					initialData={editingUser}
-					onClose={() => setEditingUser(null)}
-					onSubmit={(payload) => handleUpdate(editingUser.userId, payload)}
 				/>
 			)}
 			<div>
@@ -348,11 +288,7 @@ function RouteComponent() {
 								<th className="px-4 py-3 text-left">Name</th>
 								<th className="px-4 py-3 text-left">Email</th>
 								<th className="px-4 py-3 text-left">Role</th>
-								<th className="px-4 py-3 text-left">Teacher ID</th>
-								<th className="px-4 py-3 text-left">Student ID</th>
 								<th className="px-4 py-3 text-left">Subject</th>
-								<th className="px-4 py-3 text-left">Active</th>
-								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-stone-100">
@@ -380,34 +316,6 @@ function RouteComponent() {
 									<td className="px-4 py-3">{u.email}</td>
 									<td className="px-4 py-3 capitalize">{u.role}</td>
 									<td className="px-4 py-3">
-										{u.teacherId ? (
-											<div className="flex flex-row items-center gap-2">
-												<User size={16} className="text-sky-600" />
-												<span className="truncate max-w-24" title={u.teacherId}>
-													{u.teacherId}
-												</span>
-											</div>
-										) : (
-											<div className="flex flex-row gap-3">
-												<span>-</span>
-											</div>
-										)}
-									</td>
-									<td className="px-4 py-3">
-										{u.studentId ? (
-											<div className="flex flex-row items-center gap-2">
-												<UserCheck size={16} className="text-green-600" />
-												<span className="truncate max-w-24" title={u.studentId}>
-													{u.studentId}
-												</span>
-											</div>
-										) : (
-											<div className="flex flex-row gap-3">
-												<span>-</span>
-											</div>
-										)}
-									</td>
-									<td className="px-4 py-3">
 										<div className="grid grid-rows gap-1">
 											{u.subjectIds.length > 0
 												? u.subjectIds.map((s) => (
@@ -431,45 +339,6 @@ function RouteComponent() {
 														</div>
 													))
 												: "-"}
-										</div>
-									</td>
-									<td className="px-4 py-3">
-										<div className="flex flex-row items-center gap-2">
-											{u.isActive ? (
-												<CheckCircle size={16} className="text-green-600" />
-											) : (
-												<XCircle size={16} className="text-rose-500" />
-											)}
-											<button
-												type="button"
-												className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-													u.isActive
-														? "bg-green-100 text-green-700 hover:bg-green-200"
-														: "bg-rose-100 text-rose-700 hover:bg-rose-200"
-												}`}
-												onClick={() => handleToggleActive(u)}
-											>
-												{u.isActive ? "Deactivate" : "Activate"}
-											</button>
-										</div>
-									</td>
-									<td className="px-4 py-3">
-										<div className="flex flex-row gap-3">
-											<button
-												type="button"
-												className="flex items-center gap-1 text-green-700 hover:text-green-800 cursor-pointer"
-												onClick={() => setEditingUser(u)}
-											>
-												<Pencil size={16} />
-												<span>Edit</span>
-											</button>
-											<button
-												type="button"
-												className="flex items-center gap-1 text-rose-500 hover:text-rose-600 cursor-pointer"
-											>
-												<Ban size={16} />
-												<span>Delete</span>
-											</button>
 										</div>
 									</td>
 								</tr>
