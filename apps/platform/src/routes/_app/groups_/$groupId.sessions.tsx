@@ -20,6 +20,7 @@ type SessionRow = {
 	teacherName: string | null;
 	subjectName: string | null;
 	studentIds: Option[];
+	attendanceRecorded: boolean;
 	status: "draft" | "finished";
 	durationMinutes: number;
 };
@@ -116,7 +117,6 @@ function EditSessionModal({
 	onSubmit: (payload: {
 		date: string;
 		durationMinutes: number;
-		status: "draft" | "finished";
 		studentIds: string[];
 	}) => void;
 }) {
@@ -124,9 +124,14 @@ function EditSessionModal({
 	const [durationMinutes, setDurationMinutes] = useState(
 		session.durationMinutes,
 	);
-	const [status, setStatus] = useState<"draft" | "finished">(session.status);
+	// Only prefill from `studentIds` once attendance has actually been saved
+	// before — until then, `studentIds` is just a "whole class" placeholder,
+	// not real data, so starting the checkboxes from it would make an
+	// unsaved default look identical to a real save.
 	const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>(
-		session.studentIds.map((s) => s.studentId),
+		session.attendanceRecorded
+			? session.studentIds.map((s) => s.studentId)
+			: [],
 	);
 
 	function toggleStudent(id: string) {
@@ -167,16 +172,6 @@ function EditSessionModal({
 							value={durationMinutes}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
-						<select
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-							value={status}
-							onChange={(e) =>
-								setStatus(e.target.value as "draft" | "finished")
-							}
-						>
-							<option value="draft">Draft</option>
-							<option value="finished">Finished</option>
-						</select>
 						<div className="border border-stone-200 rounded-xl p-2">
 							<p className="text-xs text-stone-500 mb-1">Students present</p>
 							<div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
@@ -211,7 +206,6 @@ function EditSessionModal({
 							onSubmit({
 								date,
 								durationMinutes,
-								status,
 								studentIds: selectedStudentIds,
 							})
 						}
@@ -325,7 +319,6 @@ function RouteComponent() {
 		payload: {
 			date: string;
 			durationMinutes: number;
-			status: "draft" | "finished";
 			studentIds: string[];
 		},
 	) {
