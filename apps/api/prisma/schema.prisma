@@ -79,6 +79,9 @@ model Student {
   id     String @id @default(cuid())
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
+  // Manually assigned by an admin (Settings → User), used as the last
+  // component of an InvoiceLine's invoiceNo — see that model's comment.
+  studentNumber Int? @unique
 
   enrollmentHistory GroupEnrollment[]
   sessionAttendance SessionAttendance[]
@@ -121,6 +124,9 @@ model ReportSettings {
 model Subject {
   id            String       @id @default(cuid())
   name          String       @unique
+  // e.g. "Bahasa Arab" -> "AR" — used as the first component of an
+  // InvoiceLine's invoiceNo, see that model's comment.
+  subjectCode   String?      @unique
   reportThemeId String?
   reportTheme   ReportTheme? @relation(fields: [reportThemeId], references: [id])
 
@@ -286,12 +292,17 @@ model Invoice {
 // generation time (mirrors the event-sourced-history philosophy used for
 // enrollment/teacher-assignment elsewhere): if attendance for that month is
 // corrected later, past invoices keep showing what they showed when they
-// were generated.
+// were generated. `invoiceNo` is computed once at creation time from the
+// group's subject code + the invoice's year/month + the student's student
+// number (e.g. "AR-2026-08-001") and stored rather than recomputed — same
+// snapshot reasoning as `sessions`: if the subject code or student number
+// changes later, past invoices keep the number they were issued with.
 model InvoiceLine {
   id        String    @id @default(cuid())
   invoiceId String
   groupId   String
   teacherId String
+  invoiceNo String
   price     Int
   invoice   Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   group     Group     @relation(fields: [groupId], references: [id])
