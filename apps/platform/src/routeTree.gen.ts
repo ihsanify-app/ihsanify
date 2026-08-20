@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppInvoicesRouteImport } from './routes/_app/invoices'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
@@ -26,7 +27,6 @@ import { Route as AppSettingsGroupRouteImport } from './routes/_app/settings_/gr
 import { Route as AppSettingsAssignmentRouteImport } from './routes/_app/settings_/assignment'
 import { Route as AppGroupsGroupIdSessionsRouteImport } from './routes/_app/groups_/$groupId.sessions'
 import { Route as AppGroupsGroupIdReportsRouteImport } from './routes/_app/groups_/$groupId.reports'
-import { Route as AppGroupsGroupIdInvoicesRouteImport } from './routes/_app/groups_/$groupId.invoices'
 import { Route as AppGroupsGroupIdAssignmentsRouteImport } from './routes/_app/groups_/$groupId.assignments'
 
 const LoginRoute = LoginRouteImport.update({
@@ -56,6 +56,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInvoicesRoute = AppInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGroupsRoute = AppGroupsRouteImport.update({
@@ -114,12 +119,6 @@ const AppGroupsGroupIdReportsRoute = AppGroupsGroupIdReportsRouteImport.update({
   path: '/groups/$groupId/reports',
   getParentRoute: () => AppRoute,
 } as any)
-const AppGroupsGroupIdInvoicesRoute =
-  AppGroupsGroupIdInvoicesRouteImport.update({
-    id: '/groups_/$groupId/invoices',
-    path: '/groups/$groupId/invoices',
-    getParentRoute: () => AppRoute,
-  } as any)
 const AppGroupsGroupIdAssignmentsRoute =
   AppGroupsGroupIdAssignmentsRouteImport.update({
     id: '/groups_/$groupId/assignments',
@@ -133,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/assignments': typeof AppAssignmentsRoute
   '/dashboard': typeof AppDashboardRoute
   '/groups': typeof AppGroupsRoute
+  '/invoices': typeof AppInvoicesRoute
   '/profile': typeof AppProfileRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -143,7 +143,6 @@ export interface FileRoutesByFullPath {
   '/settings/subject': typeof AppSettingsSubjectRoute
   '/settings/user': typeof AppSettingsUserRoute
   '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
-  '/groups/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
   '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
   '/groups/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
 }
@@ -153,6 +152,7 @@ export interface FileRoutesByTo {
   '/assignments': typeof AppAssignmentsRoute
   '/dashboard': typeof AppDashboardRoute
   '/groups': typeof AppGroupsRoute
+  '/invoices': typeof AppInvoicesRoute
   '/profile': typeof AppProfileRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -163,7 +163,6 @@ export interface FileRoutesByTo {
   '/settings/subject': typeof AppSettingsSubjectRoute
   '/settings/user': typeof AppSettingsUserRoute
   '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
-  '/groups/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
   '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
   '/groups/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
 }
@@ -175,6 +174,7 @@ export interface FileRoutesById {
   '/_app/assignments': typeof AppAssignmentsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/groups': typeof AppGroupsRoute
+  '/_app/invoices': typeof AppInvoicesRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
@@ -185,7 +185,6 @@ export interface FileRoutesById {
   '/_app/settings_/subject': typeof AppSettingsSubjectRoute
   '/_app/settings_/user': typeof AppSettingsUserRoute
   '/_app/groups_/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
-  '/_app/groups_/$groupId/invoices': typeof AppGroupsGroupIdInvoicesRoute
   '/_app/groups_/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
   '/_app/groups_/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
 }
@@ -197,6 +196,7 @@ export interface FileRouteTypes {
     | '/assignments'
     | '/dashboard'
     | '/groups'
+    | '/invoices'
     | '/profile'
     | '/settings'
     | '/users'
@@ -207,7 +207,6 @@ export interface FileRouteTypes {
     | '/settings/subject'
     | '/settings/user'
     | '/groups/$groupId/assignments'
-    | '/groups/$groupId/invoices'
     | '/groups/$groupId/reports'
     | '/groups/$groupId/sessions'
   fileRoutesByTo: FileRoutesByTo
@@ -217,6 +216,7 @@ export interface FileRouteTypes {
     | '/assignments'
     | '/dashboard'
     | '/groups'
+    | '/invoices'
     | '/profile'
     | '/settings'
     | '/users'
@@ -227,7 +227,6 @@ export interface FileRouteTypes {
     | '/settings/subject'
     | '/settings/user'
     | '/groups/$groupId/assignments'
-    | '/groups/$groupId/invoices'
     | '/groups/$groupId/reports'
     | '/groups/$groupId/sessions'
   id:
@@ -238,6 +237,7 @@ export interface FileRouteTypes {
     | '/_app/assignments'
     | '/_app/dashboard'
     | '/_app/groups'
+    | '/_app/invoices'
     | '/_app/profile'
     | '/_app/settings'
     | '/_app/users'
@@ -248,7 +248,6 @@ export interface FileRouteTypes {
     | '/_app/settings_/subject'
     | '/_app/settings_/user'
     | '/_app/groups_/$groupId/assignments'
-    | '/_app/groups_/$groupId/invoices'
     | '/_app/groups_/$groupId/reports'
     | '/_app/groups_/$groupId/sessions'
   fileRoutesById: FileRoutesById
@@ -301,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/invoices': {
+      id: '/_app/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AppInvoicesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/groups': {
@@ -380,13 +386,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGroupsGroupIdReportsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/groups_/$groupId/invoices': {
-      id: '/_app/groups_/$groupId/invoices'
-      path: '/groups/$groupId/invoices'
-      fullPath: '/groups/$groupId/invoices'
-      preLoaderRoute: typeof AppGroupsGroupIdInvoicesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/groups_/$groupId/assignments': {
       id: '/_app/groups_/$groupId/assignments'
       path: '/groups/$groupId/assignments'
@@ -401,6 +400,7 @@ interface AppRouteChildren {
   AppAssignmentsRoute: typeof AppAssignmentsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppGroupsRoute: typeof AppGroupsRoute
+  AppInvoicesRoute: typeof AppInvoicesRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
@@ -411,7 +411,6 @@ interface AppRouteChildren {
   AppSettingsSubjectRoute: typeof AppSettingsSubjectRoute
   AppSettingsUserRoute: typeof AppSettingsUserRoute
   AppGroupsGroupIdAssignmentsRoute: typeof AppGroupsGroupIdAssignmentsRoute
-  AppGroupsGroupIdInvoicesRoute: typeof AppGroupsGroupIdInvoicesRoute
   AppGroupsGroupIdReportsRoute: typeof AppGroupsGroupIdReportsRoute
   AppGroupsGroupIdSessionsRoute: typeof AppGroupsGroupIdSessionsRoute
 }
@@ -420,6 +419,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAssignmentsRoute: AppAssignmentsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppGroupsRoute: AppGroupsRoute,
+  AppInvoicesRoute: AppInvoicesRoute,
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
@@ -430,7 +430,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsSubjectRoute: AppSettingsSubjectRoute,
   AppSettingsUserRoute: AppSettingsUserRoute,
   AppGroupsGroupIdAssignmentsRoute: AppGroupsGroupIdAssignmentsRoute,
-  AppGroupsGroupIdInvoicesRoute: AppGroupsGroupIdInvoicesRoute,
   AppGroupsGroupIdReportsRoute: AppGroupsGroupIdReportsRoute,
   AppGroupsGroupIdSessionsRoute: AppGroupsGroupIdSessionsRoute,
 }
