@@ -135,6 +135,31 @@ function MixedScriptText({
 	);
 }
 
+// Shrinks Progress/Saran's font as the teacher writes more, so a long
+// entry is less likely to push the section (wrap={false} keeps it from
+// being sliced mid-border) onto a third page. Linear between two anchors —
+// 50 characters -> 25pt, 200 characters -> 18pt — extrapolated a bit past
+// each end and clamped so it never gets comically large or unreadably
+// small.
+const FONT_SIZE_ANCHOR_SHORT = { length: 50, size: 25 };
+const FONT_SIZE_ANCHOR_LONG = { length: 200, size: 18 };
+const CONTENT_FONT_SIZE_MIN = 13;
+const CONTENT_FONT_SIZE_MAX = 28;
+
+function deriveContentFontSize(text: string): number {
+	const length = text.trim().length;
+	const slope =
+		(FONT_SIZE_ANCHOR_LONG.size - FONT_SIZE_ANCHOR_SHORT.size) /
+		(FONT_SIZE_ANCHOR_LONG.length - FONT_SIZE_ANCHOR_SHORT.length);
+	const raw =
+		FONT_SIZE_ANCHOR_SHORT.size +
+		slope * (length - FONT_SIZE_ANCHOR_SHORT.length);
+	return Math.min(
+		CONTENT_FONT_SIZE_MAX,
+		Math.max(CONTENT_FONT_SIZE_MIN, Math.round(raw)),
+	);
+}
+
 function buildStyles(fontFamily: string) {
 	return StyleSheet.create({
 		...buildSharedStyles(fontFamily),
@@ -268,6 +293,14 @@ export function ReportDocument({
 }: ReportDocumentProps) {
 	const period = `${MONTH_NAMES[month - 1] ?? month} ${year}`;
 	const styles = buildStyles(FONT_FAMILY[font]);
+	const progressTextStyle = {
+		...styles.sectionText,
+		fontSize: deriveContentFontSize(progress),
+	};
+	const adviceTextStyle = {
+		...styles.sectionText,
+		fontSize: deriveContentFontSize(advice),
+	};
 	const footerParts = buildFooterParts({
 		footerPhone,
 		footerEmail,
@@ -345,7 +378,7 @@ export function ReportDocument({
 						<Text style={styles.sectionLabel}>Progress</Text>
 						<MixedScriptText
 							text={progress}
-							style={styles.sectionText}
+							style={progressTextStyle}
 							baseFontFamily={FONT_FAMILY[font]}
 						/>
 					</View>
@@ -354,7 +387,7 @@ export function ReportDocument({
 						<Text style={styles.sectionLabel}>Saran</Text>
 						<MixedScriptText
 							text={advice}
-							style={styles.sectionText}
+							style={adviceTextStyle}
 							baseFontFamily={FONT_FAMILY[font]}
 						/>
 					</View>

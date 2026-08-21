@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppInvoicesRouteImport } from './routes/_app/invoices'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
@@ -51,6 +52,11 @@ const AppUsersRoute = AppUsersRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/groups': typeof AppGroupsRoute
   '/invoices': typeof AppInvoicesRoute
   '/profile': typeof AppProfileRoute
+  '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
   '/settings/assignment': typeof AppSettingsAssignmentRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/groups': typeof AppGroupsRoute
   '/invoices': typeof AppInvoicesRoute
   '/profile': typeof AppProfileRoute
+  '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
   '/settings/assignment': typeof AppSettingsAssignmentRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/_app/groups': typeof AppGroupsRoute
   '/_app/invoices': typeof AppInvoicesRoute
   '/_app/profile': typeof AppProfileRoute
+  '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
   '/_app/settings_/assignment': typeof AppSettingsAssignmentRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/groups'
     | '/invoices'
     | '/profile'
+    | '/reports'
     | '/settings'
     | '/users'
     | '/settings/assignment'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/groups'
     | '/invoices'
     | '/profile'
+    | '/reports'
     | '/settings'
     | '/users'
     | '/settings/assignment'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/_app/groups'
     | '/_app/invoices'
     | '/_app/profile'
+    | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
     | '/_app/settings_/assignment'
@@ -293,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/profile': {
@@ -402,6 +421,7 @@ interface AppRouteChildren {
   AppGroupsRoute: typeof AppGroupsRoute
   AppInvoicesRoute: typeof AppInvoicesRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
   AppSettingsAssignmentRoute: typeof AppSettingsAssignmentRoute
@@ -421,6 +441,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppGroupsRoute: AppGroupsRoute,
   AppInvoicesRoute: AppInvoicesRoute,
   AppProfileRoute: AppProfileRoute,
+  AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
   AppSettingsAssignmentRoute: AppSettingsAssignmentRoute,

@@ -4,6 +4,7 @@ import { requireAuth } from "../utils/auth";
 import {
 	canManageGroup,
 	canUserAccessGroup,
+	getCurrentGroupIdsForTeacher,
 	getCurrentStudentIds,
 	getCurrentTeacherId,
 } from "../utils/groupState";
@@ -57,7 +58,7 @@ type ReportRecord = {
 };
 
 async function serializeReport(report: ReportRecord) {
-	const [student, teacher] = await Promise.all([
+	const [student, teacher, group] = await Promise.all([
 		prisma.student.findUnique({
 			where: { id: report.studentId },
 			include: { user: true },
@@ -65,6 +66,10 @@ async function serializeReport(report: ReportRecord) {
 		prisma.teacher.findUnique({
 			where: { id: report.teacherId },
 			include: { user: true },
+		}),
+		prisma.group.findUnique({
+			where: { id: report.groupId },
+			include: { subject: true },
 		}),
 	]);
 
@@ -85,6 +90,8 @@ async function serializeReport(report: ReportRecord) {
 	return {
 		reportId: report.id,
 		groupId: report.groupId,
+		groupName: group?.name ?? null,
+		subjectName: group?.subject.name ?? null,
 		studentId: report.studentId,
 		studentName: student?.user.name ?? null,
 		teacherId: report.teacherId,
@@ -103,6 +110,46 @@ async function serializeReport(report: ReportRecord) {
 		readAt: report.readAt ? report.readAt.toISOString() : null,
 	};
 }
+
+// Top-level "all reports" view (main menu → Reports), scoped by role:
+// admin sees everything, a teacher sees reports for groups they currently
+// teach, a student sees only their own submitted (not draft) reports —
+// same visibility rule as the per-group endpoint below, just aggregated
+// across every group instead of one.
+reportsRouter.get("/reports", requireAuth, async (c) => {
+	const authUser = c.get("authUser");
+
+	let reports: ReportRecord[];
+	if (authUser.role === "ADMIN") {
+		reports = await prisma.report.findMany({ orderBy: { createdAt: "desc" } });
+	} else if (authUser.role === "TEACHER") {
+		const teacher = await prisma.teacher.findUnique({
+			where: { userId: authUser.id },
+		});
+		const teacherGroupIds = teacher
+			? await getCurrentGroupIdsForTeacher(teacher.id)
+			: [];
+		reports = teacherGroupIds.length
+			? await prisma.report.findMany({
+					where: { groupId: { in: teacherGroupIds } },
+					orderBy: { createdAt: "desc" },
+				})
+			: [];
+	} else {
+		const student = await prisma.student.findUnique({
+			where: { userId: authUser.id },
+		});
+		reports = student
+			? await prisma.report.findMany({
+					where: { studentId: student.id, submittedAt: { not: null } },
+					orderBy: { createdAt: "desc" },
+				})
+			: [];
+	}
+
+	const data = await Promise.all(reports.map(serializeReport));
+	return c.json({ success: true, data });
+});
 
 reportsRouter.get("/groups/:id/reports", requireAuth, async (c) => {
 	const authUser = c.get("authUser");
