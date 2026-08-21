@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { fileURLToPath, URL } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
@@ -6,7 +7,15 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 
+// Product version lives once in the monorepo root package.json — every app
+// reads it from there rather than keeping its own copy that could drift.
+const require = createRequire(import.meta.url);
+const rootPackageJson = require("../../package.json");
+
 const config = defineConfig({
+	define: {
+		__APP_VERSION__: JSON.stringify(rootPackageJson.version),
+	},
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),

@@ -75,6 +75,9 @@ export function Sidebar() {
 					</Link>
 				);
 			})}
+			<span className="mt-auto text-[10px] text-green-400/70">
+				v{__APP_VERSION__}
+			</span>
 		</aside>
 	);
 }
