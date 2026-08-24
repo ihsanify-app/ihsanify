@@ -81,7 +81,7 @@ export function Sidebar() {
 				</span>
 			</aside>
 
-			<nav className="lg:hidden fixed inset-x-0 bottom-0 z-40 flex items-center justify-around bg-green-900 px-1 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+			<nav className="hidden max-lg:flex fixed inset-x-0 bottom-0 z-40 items-center justify-around bg-green-900 px-1 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
 				{navItems.map((n) => {
 					const isActive = pathname === n.path;
 					return (
