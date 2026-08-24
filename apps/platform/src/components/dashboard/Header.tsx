@@ -5,11 +5,11 @@ export function Header() {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<header className="flex flex-row justify-between items-center px-6 py-4 bg-white border-b border-green-100">
-			<h1 className="font-heading font-bold text-green-800 text-lg">
+		<header className="flex flex-row justify-between items-center px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-green-100">
+			<h1 className="font-heading font-bold text-green-800 text-base sm:text-lg">
 				Dashboard
 			</h1>
-			<div className="flex items-center gap-6">
+			<div className="flex items-center gap-3 sm:gap-6">
 				<div className="relative">
 					<button
 						type="button"
@@ -22,13 +22,13 @@ export function Header() {
 						</span>
 					</button>
 					{isOpen && (
-						<div className="absolute right-0 top-9 z-50 bg-white border border-green-100 shadow-lg py-3 px-2 w-56 rounded-xl">
+						<div className="absolute right-0 top-9 z-50 bg-white border border-green-100 shadow-lg py-3 px-2 w-64 max-w-[85vw] rounded-xl">
 							<div className="flex items-center gap-2 text-sm text-stone-700 px-2 py-1.5 rounded-lg hover:bg-green-50">
-								<ClipboardList size={16} className="text-green-600" />
+								<ClipboardList size={16} className="text-green-600 shrink-0" />
 								New quiz posted
 							</div>
 							<div className="flex items-center gap-2 text-sm text-stone-700 px-2 py-1.5 rounded-lg hover:bg-green-50">
-								<FileText size={16} className="text-green-600" />
+								<FileText size={16} className="text-green-600 shrink-0" />
 								Report updated
 							</div>
 							<button
@@ -41,10 +41,10 @@ export function Header() {
 					)}
 				</div>
 				<div className="flex items-center gap-2 text-stone-700">
-					<div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+					<div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
 						<User size={16} className="text-green-700" />
 					</div>
-					<span className="text-sm font-medium">Admin</span>
+					<span className="hidden sm:inline text-sm font-medium">Admin</span>
 				</div>
 			</div>
 		</header>

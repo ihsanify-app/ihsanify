@@ -137,7 +137,7 @@ function RouteComponent() {
 
 	if (loadState === "unauthorized") {
 		return (
-			<section className="m-10 text-center text-stone-500">
+			<section className="m-3 sm:m-10 text-center text-stone-500">
 				<p className="mb-3">
 					You need to be logged in as an admin to view this page.
 				</p>
@@ -149,7 +149,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="m-10">
+		<section className="m-3 sm:m-10">
 			<h1 className="font-heading text-2xl font-bold text-green-800 mb-1">
 				Settings
 			</h1>
@@ -182,7 +182,7 @@ function RouteComponent() {
 						/>
 					</label>
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<label className="text-xs font-medium text-stone-500">
 							Organization Name
 							<input
@@ -208,7 +208,7 @@ function RouteComponent() {
 
 					<div>
 						<p className="text-xs font-medium text-stone-500 mb-1">Logo</p>
-						<div className="flex items-center gap-3">
+						<div className="flex flex-wrap items-center gap-3">
 							<div className="h-16 w-16 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center text-stone-300 text-xs">
 								{settings.logoUrl ? (
 									<img
@@ -251,7 +251,7 @@ function RouteComponent() {
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<label className="text-xs font-medium text-stone-500">
 							Font
 							<select
@@ -287,7 +287,7 @@ function RouteComponent() {
 						<p className="text-xs font-medium text-stone-500 mb-1">
 							Cover Image
 						</p>
-						<div className="flex items-center gap-3">
+						<div className="flex flex-wrap items-center gap-3">
 							<div className="h-20 w-16 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center text-stone-300 text-xs">
 								{settings.coverImageUrl ? (
 									<img
@@ -334,7 +334,7 @@ function RouteComponent() {
 						<p className="text-xs font-medium text-stone-500 mb-1">
 							Footer Contact Info
 						</p>
-						<div className="grid grid-cols-3 gap-2">
+						<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
 							<input
 								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
 								placeholder="Phone"

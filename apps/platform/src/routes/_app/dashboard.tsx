@@ -23,8 +23,8 @@ function RouteComponent() {
 	}, []);
 
 	return (
-		<div className="flex gap-6 p-6">
-			<div className="flex w-72 shrink-0 flex-col gap-6">
+		<div className="flex flex-col gap-4 p-3 sm:p-6 lg:flex-row lg:gap-6">
+			<div className="flex flex-col gap-4 sm:gap-6 lg:w-72 lg:shrink-0">
 				<MiniCalendar
 					focusedDate={focusedDate}
 					onFocusedDateChange={setFocusedDate}

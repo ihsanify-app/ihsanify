@@ -56,28 +56,50 @@ export function Sidebar() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 
 	return (
-		<aside className="flex flex-col bg-green-900 text-white items-center min-h-screen w-24 py-4 gap-2">
-			<Sprout size={28} className="text-green-300 mb-4" />
-			{navItems.map((n) => {
-				const isActive = pathname === n.path;
-				return (
-					<Link
-						to={n.path}
-						key={n.id}
-						className={`flex flex-col items-center justify-center gap-1.5 rounded-xl w-20 py-3 transition-colors ${
-							isActive
-								? "bg-green-700 text-white"
-								: "text-green-200 hover:bg-green-800 hover:text-white"
-						}`}
-					>
-						<n.icon size={20} />
-						<span className="text-xs">{n.title}</span>
-					</Link>
-				);
-			})}
-			<span className="mt-auto text-[10px] text-green-400/70">
-				v{__APP_VERSION__}
-			</span>
-		</aside>
+		<>
+			<aside className="hidden lg:flex flex-col bg-green-900 text-white items-center min-h-screen w-24 py-4 gap-2">
+				<Sprout size={28} className="text-green-300 mb-4" />
+				{navItems.map((n) => {
+					const isActive = pathname === n.path;
+					return (
+						<Link
+							to={n.path}
+							key={n.id}
+							className={`flex flex-col items-center justify-center gap-1.5 rounded-xl w-20 py-3 transition-colors ${
+								isActive
+									? "bg-green-700 text-white"
+									: "text-green-200 hover:bg-green-800 hover:text-white"
+							}`}
+						>
+							<n.icon size={20} />
+							<span className="text-xs">{n.title}</span>
+						</Link>
+					);
+				})}
+				<span className="mt-auto text-[10px] text-green-400/70">
+					v{__APP_VERSION__}
+				</span>
+			</aside>
+
+			<nav className="lg:hidden fixed inset-x-0 bottom-0 z-40 flex items-center justify-around bg-green-900 px-1 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+				{navItems.map((n) => {
+					const isActive = pathname === n.path;
+					return (
+						<Link
+							to={n.path}
+							key={n.id}
+							aria-label={n.title}
+							className={`flex items-center justify-center rounded-full p-2.5 transition-colors ${
+								isActive
+									? "bg-green-700 text-white"
+									: "text-green-300 active:bg-green-800"
+							}`}
+						>
+							<n.icon size={20} />
+						</Link>
+					);
+				})}
+			</nav>
+		</>
 	);
 }

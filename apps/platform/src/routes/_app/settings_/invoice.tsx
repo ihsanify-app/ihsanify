@@ -60,7 +60,7 @@ function RouteComponent() {
 
 	if (loadState === "unauthorized") {
 		return (
-			<section className="m-10 text-center text-stone-500">
+			<section className="m-3 sm:m-10 text-center text-stone-500">
 				<p className="mb-3">
 					You need to be logged in as an admin to view this page.
 				</p>
@@ -72,7 +72,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="m-10">
+		<section className="m-3 sm:m-10">
 			<h1 className="font-heading text-2xl font-bold text-green-800 mb-1">
 				Settings
 			</h1>
@@ -93,7 +93,7 @@ function RouteComponent() {
 				<p className="text-stone-400">Loading…</p>
 			) : (
 				<div className="border border-green-100 rounded-2xl bg-white shadow-sm max-w-xl p-6 flex flex-col gap-4">
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<label className="text-xs font-medium text-stone-500">
 							Bank Name
 							<input

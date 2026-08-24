@@ -165,13 +165,13 @@ function CreateInvoiceModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] flex flex-col"
+				className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg shadow-xl max-h-[90vh] flex flex-col"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -258,7 +258,7 @@ function CreateInvoiceModal({
 											return (
 												<div
 													key={groupId}
-													className="flex items-center justify-between gap-2 text-sm"
+													className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm"
 												>
 													<span className="text-stone-700">
 														{group?.groupName ?? groupId}
@@ -270,7 +270,7 @@ function CreateInvoiceModal({
 													<input
 														type="number"
 														min={0}
-														className="w-32 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+														className="w-full sm:w-32 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
 														value={prices[groupId] ?? 0}
 														onChange={(e) =>
 															setPrices((prev) => ({
@@ -293,7 +293,7 @@ function CreateInvoiceModal({
 						{errorMessage}
 					</p>
 				)}
-				<div className="flex justify-end gap-2 mt-4 shrink-0">
+				<div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4 shrink-0">
 					<button
 						type="button"
 						onClick={onClose}
@@ -326,13 +326,13 @@ function ConfirmDeleteModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-[90vw] max-w-sm flex flex-col gap-4 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="text-stone-800">
@@ -459,7 +459,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-6">
+		<section className="p-3 sm:p-6">
 			{isModalOpen && (
 				<CreateInvoiceModal
 					students={students}
@@ -499,83 +499,88 @@ function RouteComponent() {
 			)}
 
 			<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
-				<table className="w-full">
-					<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
-						<tr>
-							<th className="px-4 py-3 text-left">Period</th>
-							<th className="px-4 py-3 text-left">Student</th>
-							<th className="px-4 py-3 text-left">Groups</th>
-							<th className="px-4 py-3 text-left">Total</th>
-							<th className="px-4 py-3 text-left">Sent</th>
-							<th className="px-4 py-3 text-left">Action</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-stone-100">
-						{invoices.length === 0 && (
+				<div className="overflow-x-auto">
+					<table className="w-full">
+						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
-								<td
-									colSpan={6}
-									className="px-4 py-6 text-center text-stone-400 italic"
-								>
-									No invoices yet.
-								</td>
+								<th className="px-4 py-3 text-left">Period</th>
+								<th className="px-4 py-3 text-left">Student</th>
+								<th className="px-4 py-3 text-left">Groups</th>
+								<th className="px-4 py-3 text-left">Total</th>
+								<th className="px-4 py-3 text-left">Sent</th>
+								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
-						)}
-						{invoices.map((i) => (
-							<tr key={i.invoiceId} className="hover:bg-green-50">
-								<td className="px-4 py-3">
-									{MONTH_NAMES[i.month - 1]} {i.year}
-								</td>
-								<td className="px-4 py-3">{i.studentName ?? "-"}</td>
-								<td className="px-4 py-3">
-									<div className="flex flex-col gap-0.5">
-										{i.lines.map((line) => (
-											<span key={line.invoiceLineId} className="text-xs">
-												{line.groupName ?? "-"} ({line.sessions.length}{" "}
-												{line.sessions.length === 1 ? "session" : "sessions"}) —{" "}
-												{formatPrice(line.price)}
-											</span>
-										))}
-									</div>
-								</td>
-								<td className="px-4 py-3 font-semibold">
-									{formatPrice(i.totalPrice)}
-								</td>
-								<td className="px-4 py-3">
-									<input
-										type="checkbox"
-										checked={i.sent}
-										disabled={!isAdmin}
-										onChange={(e) =>
-											handleToggleSent(i.invoiceId, e.target.checked)
-										}
-										className={isAdmin ? "cursor-pointer" : ""}
-									/>
-								</td>
-								<td className="px-4 py-3">
-									<div className="flex flex-row gap-3">
-										<button
-											type="button"
-											className="text-green-700 hover:text-green-800 cursor-pointer"
-											onClick={() => handleDownload(i)}
-										>
-											<Download size={16} />
-										</button>
-										{isAdmin && (
+						</thead>
+						<tbody className="divide-y divide-stone-100">
+							{invoices.length === 0 && (
+								<tr>
+									<td
+										colSpan={6}
+										className="px-4 py-6 text-center text-stone-400 italic"
+									>
+										No invoices yet.
+									</td>
+								</tr>
+							)}
+							{invoices.map((i) => (
+								<tr key={i.invoiceId} className="hover:bg-green-50">
+									<td className="px-4 py-3 whitespace-nowrap">
+										{MONTH_NAMES[i.month - 1]} {i.year}
+									</td>
+									<td className="px-4 py-3">{i.studentName ?? "-"}</td>
+									<td className="px-4 py-3">
+										<div className="flex flex-col gap-0.5">
+											{i.lines.map((line) => (
+												<span
+													key={line.invoiceLineId}
+													className="text-xs whitespace-nowrap"
+												>
+													{line.groupName ?? "-"} ({line.sessions.length}{" "}
+													{line.sessions.length === 1 ? "session" : "sessions"})
+													— {formatPrice(line.price)}
+												</span>
+											))}
+										</div>
+									</td>
+									<td className="px-4 py-3 font-semibold whitespace-nowrap">
+										{formatPrice(i.totalPrice)}
+									</td>
+									<td className="px-4 py-3">
+										<input
+											type="checkbox"
+											checked={i.sent}
+											disabled={!isAdmin}
+											onChange={(e) =>
+												handleToggleSent(i.invoiceId, e.target.checked)
+											}
+											className={isAdmin ? "cursor-pointer" : ""}
+										/>
+									</td>
+									<td className="px-4 py-3">
+										<div className="flex flex-row gap-3">
 											<button
 												type="button"
-												className="text-rose-500 hover:text-rose-600 cursor-pointer"
-												onClick={() => setDeletingInvoiceId(i.invoiceId)}
+												className="text-green-700 hover:text-green-800 cursor-pointer"
+												onClick={() => handleDownload(i)}
 											>
-												<Ban size={16} />
+												<Download size={16} />
 											</button>
-										)}
-									</div>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+											{isAdmin && (
+												<button
+													type="button"
+													className="text-rose-500 hover:text-rose-600 cursor-pointer"
+													onClick={() => setDeletingInvoiceId(i.invoiceId)}
+												>
+													<Ban size={16} />
+												</button>
+											)}
+										</div>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</section>
 	);

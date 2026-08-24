@@ -10,7 +10,7 @@ function RouteComponent() {
 	return (
 		<div className="flex">
 			<Sidebar />
-			<main className="flex-1">
+			<main className="flex-1 min-w-0 pb-20 lg:pb-0">
 				<Header />
 				<Outlet />
 			</main>

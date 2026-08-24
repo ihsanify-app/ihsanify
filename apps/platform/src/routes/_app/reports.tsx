@@ -118,13 +118,13 @@ function ReportFormModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
+				className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-1">
@@ -139,7 +139,7 @@ function ReportFormModal({
 				)}
 				<form className="overflow-y-auto pr-1">
 					<div className="flex flex-col gap-2">
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<label className="text-xs font-normal text-stone-500">
 								Group
 								<select
@@ -195,7 +195,7 @@ function ReportFormModal({
 								/>
 							</label>
 						</div>
-						<div className="flex gap-2 text-xs font-normal text-stone-500">
+						<div className="flex flex-col sm:flex-row gap-2 text-xs font-normal text-stone-500">
 							<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2">
 								Teacher
 								<div className="text-stone-700 font-semibold">
@@ -209,7 +209,7 @@ function ReportFormModal({
 								</div>
 							</div>
 						</div>
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<textarea
 								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-32"
 								placeholder="Progress"
@@ -245,7 +245,7 @@ function ReportFormModal({
 						</label>
 					</div>
 				</form>
-				<div className="flex justify-end gap-2 mt-4 shrink-0">
+				<div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4 shrink-0">
 					<button
 						type="button"
 						onClick={onClose}
@@ -301,13 +301,13 @@ function ViewReportModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
+				className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-1">Report</h2>
@@ -317,7 +317,7 @@ function ViewReportModal({
 					{report.statusLabel}
 				</span>
 				<div className="flex flex-col gap-2 text-sm overflow-y-auto pr-1">
-					<div className="grid grid-cols-3 gap-2">
+					<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
 						<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
 							Period
 							<div className="text-stone-700 font-semibold">
@@ -337,7 +337,7 @@ function ViewReportModal({
 							</div>
 						</div>
 					</div>
-					<div className="grid grid-cols-2 gap-2">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 						<div className="border border-stone-200 rounded-xl p-2">
 							<p className="text-xs font-normal text-stone-500 mb-1">
 								Progress
@@ -359,11 +359,11 @@ function ViewReportModal({
 						{downloadError}
 					</p>
 				)}
-				<div className="flex justify-between items-center mt-4 shrink-0">
+				<div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-2 mt-4 shrink-0">
 					<button
 						type="button"
 						onClick={handleDownload}
-						className="flex items-center gap-2 cursor-pointer rounded-xl border border-green-600 text-green-700 px-4 py-2 hover:bg-green-50 transition-colors"
+						className="flex items-center justify-center gap-2 cursor-pointer rounded-xl border border-green-600 text-green-700 px-4 py-2 hover:bg-green-50 transition-colors"
 					>
 						<Download size={16} />
 						Download PDF
@@ -500,7 +500,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-6">
+		<section className="p-3 sm:p-6">
 			{isModalOpen && (
 				<ReportFormModal
 					initialData={null}
@@ -551,71 +551,73 @@ function RouteComponent() {
 			)}
 
 			<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
-				<table className="w-full">
-					<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
-						<tr>
-							<th className="px-4 py-3 text-left">Period</th>
-							<th className="px-4 py-3 text-left">Student</th>
-							<th className="px-4 py-3 text-left">Group</th>
-							<th className="px-4 py-3 text-left">Subject</th>
-							<th className="px-4 py-3 text-left">Score</th>
-							<th className="px-4 py-3 text-left">Status</th>
-							<th className="px-4 py-3 text-left">Action</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-stone-100">
-						{reports.length === 0 && (
+				<div className="overflow-x-auto">
+					<table className="w-full">
+						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
-								<td
-									colSpan={7}
-									className="px-4 py-6 text-center text-stone-400 italic"
-								>
-									No reports yet.
-								</td>
+								<th className="px-4 py-3 text-left">Period</th>
+								<th className="px-4 py-3 text-left">Student</th>
+								<th className="px-4 py-3 text-left">Group</th>
+								<th className="px-4 py-3 text-left">Subject</th>
+								<th className="px-4 py-3 text-left">Score</th>
+								<th className="px-4 py-3 text-left">Status</th>
+								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
-						)}
-						{reports.map((r) => (
-							<tr key={r.reportId} className="hover:bg-green-50">
-								<td className="px-4 py-3">
-									{MONTH_NAMES[r.month - 1]} {r.year}
-								</td>
-								<td className="px-4 py-3">{r.studentName ?? "-"}</td>
-								<td className="px-4 py-3">{r.groupName ?? "-"}</td>
-								<td className="px-4 py-3">{r.subjectName ?? "-"}</td>
-								<td className="px-4 py-3">
-									{r.score}/{r.scoreDenominator}
-								</td>
-								<td className="px-4 py-3">
-									<span
-										className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[r.statusKind]}`}
+						</thead>
+						<tbody className="divide-y divide-stone-100">
+							{reports.length === 0 && (
+								<tr>
+									<td
+										colSpan={7}
+										className="px-4 py-6 text-center text-stone-400 italic"
 									>
-										{r.statusLabel}
-									</span>
-								</td>
-								<td className="px-4 py-3">
-									<div className="flex flex-row gap-3">
-										<button
-											type="button"
-											className="text-sky-600 hover:text-sky-700 cursor-pointer"
-											onClick={() => handleView(r)}
+										No reports yet.
+									</td>
+								</tr>
+							)}
+							{reports.map((r) => (
+								<tr key={r.reportId} className="hover:bg-green-50">
+									<td className="px-4 py-3 whitespace-nowrap">
+										{MONTH_NAMES[r.month - 1]} {r.year}
+									</td>
+									<td className="px-4 py-3">{r.studentName ?? "-"}</td>
+									<td className="px-4 py-3">{r.groupName ?? "-"}</td>
+									<td className="px-4 py-3">{r.subjectName ?? "-"}</td>
+									<td className="px-4 py-3">
+										{r.score}/{r.scoreDenominator}
+									</td>
+									<td className="px-4 py-3">
+										<span
+											className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[r.statusKind]}`}
 										>
-											<Eye size={16} />
-										</button>
-										{canManage && (
+											{r.statusLabel}
+										</span>
+									</td>
+									<td className="px-4 py-3">
+										<div className="flex flex-row gap-3">
 											<button
 												type="button"
-												className="text-green-700 hover:text-green-800 cursor-pointer"
-												onClick={() => setEditingReport(r)}
+												className="text-sky-600 hover:text-sky-700 cursor-pointer"
+												onClick={() => handleView(r)}
 											>
-												<Pencil size={16} />
+												<Eye size={16} />
 											</button>
-										)}
-									</div>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+											{canManage && (
+												<button
+													type="button"
+													className="text-green-700 hover:text-green-800 cursor-pointer"
+													onClick={() => setEditingReport(r)}
+												>
+													<Pencil size={16} />
+												</button>
+											)}
+										</div>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</section>
 	);

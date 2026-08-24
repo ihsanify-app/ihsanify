@@ -38,13 +38,13 @@ function CreateSessionModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -128,13 +128,13 @@ function EditSessionModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -214,13 +214,13 @@ function ConfirmDeleteModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="text-stone-800">
@@ -339,7 +339,7 @@ function RouteComponent() {
 
 	if (loadState === "denied") {
 		return (
-			<section className="p-6 text-center text-stone-500">
+			<section className="p-3 sm:p-6 text-center text-stone-500">
 				<p className="mb-3">{errorMessage}</p>
 				<Link to="/groups" className="text-green-700 font-semibold underline">
 					Back to groups
@@ -349,7 +349,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-6">
+		<section className="p-3 sm:p-6">
 			{isModalOpen && (
 				<CreateSessionModal
 					onClose={() => setIsModalOpen(false)}
@@ -391,78 +391,80 @@ function RouteComponent() {
 				</p>
 			)}
 
-			<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
-				<table className="w-full">
-					<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
-						<tr>
-							<th className="px-4 py-3 text-left">Year</th>
-							<th className="px-4 py-3 text-left">Month</th>
-							<th className="px-4 py-3 text-left">Day</th>
-							<th className="px-4 py-3 text-left">Teacher</th>
-							<th className="px-4 py-3 text-left">Students</th>
-							<th className="px-4 py-3 text-left">Subject</th>
-							<th className="px-4 py-3 text-left">Attendance</th>
-							<th className="px-4 py-3 text-left">Duration</th>
-							{canManage && <th className="px-4 py-3 text-left">Action</th>}
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-stone-100">
-						{sessions.length === 0 && (
+			<div className="overflow-x-auto">
+				<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+					<table className="w-full">
+						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
-								<td
-									colSpan={canManage ? 9 : 8}
-									className="px-4 py-6 text-center text-stone-400 italic"
-								>
-									No sessions logged yet.
-								</td>
+								<th className="px-4 py-3 text-left">Year</th>
+								<th className="px-4 py-3 text-left">Month</th>
+								<th className="px-4 py-3 text-left">Day</th>
+								<th className="px-4 py-3 text-left">Teacher</th>
+								<th className="px-4 py-3 text-left">Students</th>
+								<th className="px-4 py-3 text-left">Subject</th>
+								<th className="px-4 py-3 text-left">Attendance</th>
+								<th className="px-4 py-3 text-left">Duration</th>
+								{canManage && <th className="px-4 py-3 text-left">Action</th>}
 							</tr>
-						)}
-						{sessions.map((s) => (
-							<tr key={s.sessionId} className="hover:bg-green-50">
-								<td className="px-4 py-3">{s.year}</td>
-								<td className="px-4 py-3">{s.month}</td>
-								<td className="px-4 py-3">{s.day}</td>
-								<td className="px-4 py-3">{s.teacherName ?? "-"}</td>
-								<td className="px-4 py-3">
-									{s.studentIds.map((st) => st.studentName).join(", ") || "-"}
-								</td>
-								<td className="px-4 py-3">{s.subjectName ?? "-"}</td>
-								<td className="px-4 py-3">
-									<span
-										className={
-											s.attendanceRecorded
-												? "bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full"
-												: "bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full"
-										}
+						</thead>
+						<tbody className="divide-y divide-stone-100">
+							{sessions.length === 0 && (
+								<tr>
+									<td
+										colSpan={canManage ? 9 : 8}
+										className="px-4 py-6 text-center text-stone-400 italic"
 									>
-										{s.attendanceRecorded ? "Recorded" : "Pending"}
-									</span>
-								</td>
-								<td className="px-4 py-3">{s.durationMinutes} min</td>
-								{canManage && (
-									<td className="px-4 py-3">
-										<div className="flex flex-row gap-3">
-											<button
-												type="button"
-												className="text-green-700 hover:text-green-800 cursor-pointer"
-												onClick={() => setEditingSession(s)}
-											>
-												<Pencil size={16} />
-											</button>
-											<button
-												type="button"
-												className="text-rose-500 hover:text-rose-600 cursor-pointer"
-												onClick={() => setDeletingSessionId(s.sessionId)}
-											>
-												<Ban size={16} />
-											</button>
-										</div>
+										No sessions logged yet.
 									</td>
-								)}
-							</tr>
-						))}
-					</tbody>
-				</table>
+								</tr>
+							)}
+							{sessions.map((s) => (
+								<tr key={s.sessionId} className="hover:bg-green-50">
+									<td className="px-4 py-3">{s.year}</td>
+									<td className="px-4 py-3">{s.month}</td>
+									<td className="px-4 py-3">{s.day}</td>
+									<td className="px-4 py-3">{s.teacherName ?? "-"}</td>
+									<td className="px-4 py-3">
+										{s.studentIds.map((st) => st.studentName).join(", ") || "-"}
+									</td>
+									<td className="px-4 py-3">{s.subjectName ?? "-"}</td>
+									<td className="px-4 py-3">
+										<span
+											className={
+												s.attendanceRecorded
+													? "bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full"
+													: "bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full"
+											}
+										>
+											{s.attendanceRecorded ? "Recorded" : "Pending"}
+										</span>
+									</td>
+									<td className="px-4 py-3">{s.durationMinutes} min</td>
+									{canManage && (
+										<td className="px-4 py-3">
+											<div className="flex flex-row gap-3">
+												<button
+													type="button"
+													className="text-green-700 hover:text-green-800 cursor-pointer"
+													onClick={() => setEditingSession(s)}
+												>
+													<Pencil size={16} />
+												</button>
+												<button
+													type="button"
+													className="text-rose-500 hover:text-rose-600 cursor-pointer"
+													onClick={() => setDeletingSessionId(s.sessionId)}
+												>
+													<Ban size={16} />
+												</button>
+											</div>
+										</td>
+									)}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</section>
 	);

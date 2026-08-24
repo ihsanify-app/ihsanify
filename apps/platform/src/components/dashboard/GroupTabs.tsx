@@ -38,7 +38,7 @@ export function GroupTabs({
 			>
 				<ArrowLeft size={20} />
 			</Link>
-			<div className="flex gap-1 border-b border-stone-200 flex-1">
+			<div className="flex gap-1 border-b border-stone-200 flex-1 overflow-x-auto">
 				{TABS.filter((tab) => !tab.adminOnly || mockUser.role === "admin").map(
 					(tab) => (
 						<Link
@@ -47,8 +47,8 @@ export function GroupTabs({
 							params={{ groupId }}
 							className={
 								active === tab.key
-									? "px-4 py-2 text-sm font-semibold text-green-700 border-b-2 border-green-600 -mb-px"
-									: "px-4 py-2 text-sm font-medium text-stone-500 hover:text-green-700 transition-colors"
+									? "px-4 py-2 text-sm font-semibold text-green-700 border-b-2 border-green-600 -mb-px whitespace-nowrap shrink-0"
+									: "px-4 py-2 text-sm font-medium text-stone-500 hover:text-green-700 transition-colors whitespace-nowrap shrink-0"
 							}
 						>
 							{tab.label}

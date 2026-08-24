@@ -106,8 +106,8 @@ export function GroupCalendar({
 	}
 
 	return (
-		<div className="flex min-h-[600px] flex-col rounded-2xl border border-gray-200 bg-white shadow-sm">
-			<div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+		<div className="flex min-h-105 flex-col rounded-2xl border border-gray-200 bg-white shadow-sm sm:min-h-150">
+			<div className="flex flex-col gap-3 border-b border-gray-100 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
@@ -116,7 +116,7 @@ export function GroupCalendar({
 					>
 						<ChevronLeft size={18} />
 					</button>
-					<span className="min-w-[180px] text-sm font-semibold text-gray-800">
+					<span className="min-w-0 flex-1 text-sm font-semibold text-gray-800 sm:min-w-45 sm:flex-none">
 						{periodLabel(viewMode, focusedDate)}
 					</span>
 					<button
@@ -134,7 +134,7 @@ export function GroupCalendar({
 						Today
 					</button>
 				</div>
-				<div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1">
+				<div className="flex items-center gap-1 self-start rounded-lg bg-gray-100 p-1 sm:self-auto">
 					{(["daily", "weekly", "monthly"] as ViewMode[]).map((mode) => (
 						<button
 							type="button"
@@ -318,65 +318,67 @@ function MonthlyGrid({
 	);
 
 	return (
-		<div className="flex-1 p-2">
-			<div className="grid grid-cols-7 border-b border-gray-100 pb-1">
-				{DAYS.map((d) => (
-					<span
-						key={d.key}
-						className="text-center text-[11px] font-medium text-gray-400"
-					>
-						{d.label}
-					</span>
-				))}
-			</div>
-			<div
-				className="grid grid-cols-7 grid-rows-6 gap-px bg-gray-100"
-				style={{ height: "calc(100% - 24px)" }}
-			>
-				{dates.map((date) => {
-					const dayEvents = events
-						.filter((e) => isSameDay(e.date, date))
-						.sort((a, b) => a.startMinutes - b.startMinutes);
-					const inMonth = date.getMonth() === focusedDate.getMonth();
-					const isToday = isSameDay(date, today);
-					const visible = dayEvents.slice(0, 3);
-					const overflowCount = dayEvents.length - visible.length;
-					return (
-						<div
-							key={date.toISOString()}
-							className={`min-h-[90px] bg-white p-1.5 ${inMonth ? "" : "bg-gray-50/60"}`}
+		<div className="flex-1 overflow-x-auto p-2">
+			<div className="min-w-160">
+				<div className="grid grid-cols-7 border-b border-gray-100 pb-1">
+					{DAYS.map((d) => (
+						<span
+							key={d.key}
+							className="text-center text-[11px] font-medium text-gray-400"
 						>
-							<span
-								className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
-									isToday
-										? "bg-green-700 font-semibold text-white"
-										: inMonth
-											? "text-gray-700"
-											: "text-gray-300"
-								}`}
+							{d.label}
+						</span>
+					))}
+				</div>
+				<div
+					className="grid grid-cols-7 grid-rows-6 gap-px bg-gray-100"
+					style={{ height: "calc(100% - 24px)" }}
+				>
+					{dates.map((date) => {
+						const dayEvents = events
+							.filter((e) => isSameDay(e.date, date))
+							.sort((a, b) => a.startMinutes - b.startMinutes);
+						const inMonth = date.getMonth() === focusedDate.getMonth();
+						const isToday = isSameDay(date, today);
+						const visible = dayEvents.slice(0, 3);
+						const overflowCount = dayEvents.length - visible.length;
+						return (
+							<div
+								key={date.toISOString()}
+								className={`min-h-[90px] bg-white p-1.5 ${inMonth ? "" : "bg-gray-50/60"}`}
 							>
-								{date.getDate()}
-							</span>
-							<div className="mt-1 flex flex-col gap-0.5">
-								{visible.map((event) => (
-									<div
-										key={`${event.groupId}-${event.startMinutes}`}
-										className="truncate rounded px-1 py-0.5 text-[10px] font-medium text-white"
-										style={{ backgroundColor: event.cardColor || "#0f766e" }}
-										title={event.groupName}
-									>
-										{event.groupName}
-									</div>
-								))}
-								{overflowCount > 0 && (
-									<span className="text-[10px] text-gray-400">
-										+{overflowCount} more
-									</span>
-								)}
+								<span
+									className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
+										isToday
+											? "bg-green-700 font-semibold text-white"
+											: inMonth
+												? "text-gray-700"
+												: "text-gray-300"
+									}`}
+								>
+									{date.getDate()}
+								</span>
+								<div className="mt-1 flex flex-col gap-0.5">
+									{visible.map((event) => (
+										<div
+											key={`${event.groupId}-${event.startMinutes}`}
+											className="truncate rounded px-1 py-0.5 text-[10px] font-medium text-white"
+											style={{ backgroundColor: event.cardColor || "#0f766e" }}
+											title={event.groupName}
+										>
+											{event.groupName}
+										</div>
+									))}
+									{overflowCount > 0 && (
+										<span className="text-[10px] text-gray-400">
+											+{overflowCount} more
+										</span>
+									)}
+								</div>
 							</div>
-						</div>
-					);
-				})}
+						);
+					})}
+				</div>
 			</div>
 		</div>
 	);

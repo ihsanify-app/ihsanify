@@ -77,13 +77,13 @@ function ConfirmModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="text-stone-800">
@@ -200,13 +200,13 @@ function CreateGroupModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-md shadow-xl max-h-[90vh] overflow-y-auto"
+				className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -262,7 +262,7 @@ function CreateGroupModal({
 											.join(", ")}
 							</button>
 							{isStudentDropdownOpen && (
-								<div className="border border-stone-200 rounded-xl mt-1 p-2 grid grid-cols-3 gap-1 max-h-30 overflow-y-auto">
+								<div className="border border-stone-200 rounded-xl mt-1 p-2 grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-30 overflow-y-auto">
 									{students.map((s) => (
 										<label
 											key={s.id}
@@ -502,7 +502,7 @@ function RouteComponent() {
 
 	if (loadState === "unauthorized") {
 		return (
-			<section className="p-6 text-center text-stone-500">
+			<section className="p-3 sm:p-6 text-center text-stone-500">
 				<p className="mb-3">Please log in to view groups.</p>
 				<Link to="/login" className="text-green-700 font-semibold underline">
 					Go to login
@@ -512,7 +512,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-6">
+		<section className="p-3 sm:p-6">
 			{isModalOpen && (
 				<CreateGroupModal
 					initialData={null}
@@ -539,7 +539,7 @@ function RouteComponent() {
 					onClose={() => setDeletingGroupId(null)}
 				/>
 			)}
-			<div className="flex justify-between items-center mb-4">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
 				<h1 className="font-heading text-2xl font-bold text-green-800">
 					Groups
 				</h1>
@@ -548,7 +548,7 @@ function RouteComponent() {
 					placeholder="Search Group / Teacher / Subject ..."
 					value={selectedQuery}
 					onChange={(e) => setSelectedQuery(e.target.value)}
-					className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors"
+					className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors w-full sm:w-auto"
 				/>
 			</div>
 			{mockUser.role === "admin" && (

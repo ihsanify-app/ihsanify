@@ -68,7 +68,7 @@ function RouteComponent() {
 
 	if (loadState === "unauthorized") {
 		return (
-			<section className="m-10 text-center text-stone-500">
+			<section className="m-3 sm:m-10 text-center text-stone-500">
 				<p className="mb-3">
 					You need to be logged in as an admin to view this page.
 				</p>
@@ -80,7 +80,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="m-10">
+		<section className="m-3 sm:m-10">
 			<h1 className="font-heading text-2xl font-bold text-green-800 mb-1">
 				Settings
 			</h1>
@@ -101,65 +101,67 @@ function RouteComponent() {
 				<p className="text-stone-400">Loading…</p>
 			) : (
 				<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm max-w-2xl">
-					<table className="w-full">
-						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
-							<tr>
-								<th className="px-4 py-3 text-left">Group</th>
-								<th className="px-4 py-3 text-left">Subject</th>
-								<th className="px-4 py-3 text-left">Card Color</th>
-								<th className="px-4 py-3 text-left">Type</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-stone-100">
-							{groups.length === 0 && (
+					<div className="overflow-x-auto">
+						<table className="w-full">
+							<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 								<tr>
-									<td
-										colSpan={4}
-										className="px-4 py-6 text-center text-stone-400 italic"
-									>
-										No groups yet.
-									</td>
+									<th className="px-4 py-3 text-left">Group</th>
+									<th className="px-4 py-3 text-left">Subject</th>
+									<th className="px-4 py-3 text-left">Card Color</th>
+									<th className="px-4 py-3 text-left">Type</th>
 								</tr>
-							)}
-							{groups.map((g) => (
-								<tr key={g.groupId} className="hover:bg-green-50">
-									<td className="px-4 py-3">{g.groupName}</td>
-									<td className="px-4 py-3 text-stone-500">
-										{g.subjectName ?? "-"}
-									</td>
-									<td className="px-4 py-3">
-										<input
-											type="color"
-											className="h-9 w-14 cursor-pointer border border-stone-300 rounded-lg p-1"
-											value={g.cardColor ?? DEFAULT_CARD_COLOR}
-											onChange={(e) =>
-												handleCardColorChange(g.groupId, e.target.value)
-											}
-										/>
-									</td>
-									<td className="px-4 py-3">
-										<select
-											className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-											value={g.groupType}
-											onChange={(e) =>
-												handleGroupTypeChange(
-													g.groupId,
-													e.target.value as
-														| "group"
-														| "private"
-														| "semi-private",
-												)
-											}
+							</thead>
+							<tbody className="divide-y divide-stone-100">
+								{groups.length === 0 && (
+									<tr>
+										<td
+											colSpan={4}
+											className="px-4 py-6 text-center text-stone-400 italic"
 										>
-											<option value="group">Group</option>
-											<option value="private">Private</option>
-											<option value="semi-private">Semi-Private</option>
-										</select>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
+											No groups yet.
+										</td>
+									</tr>
+								)}
+								{groups.map((g) => (
+									<tr key={g.groupId} className="hover:bg-green-50">
+										<td className="px-4 py-3">{g.groupName}</td>
+										<td className="px-4 py-3 text-stone-500">
+											{g.subjectName ?? "-"}
+										</td>
+										<td className="px-4 py-3">
+											<input
+												type="color"
+												className="h-9 w-14 cursor-pointer border border-stone-300 rounded-lg p-1"
+												value={g.cardColor ?? DEFAULT_CARD_COLOR}
+												onChange={(e) =>
+													handleCardColorChange(g.groupId, e.target.value)
+												}
+											/>
+										</td>
+										<td className="px-4 py-3">
+											<select
+												className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+												value={g.groupType}
+												onChange={(e) =>
+													handleGroupTypeChange(
+														g.groupId,
+														e.target.value as
+															| "group"
+															| "private"
+															| "semi-private",
+													)
+												}
+											>
+												<option value="group">Group</option>
+												<option value="private">Private</option>
+												<option value="semi-private">Semi-Private</option>
+											</select>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			)}
 		</section>

@@ -93,7 +93,7 @@ function CreateUserModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 gap-1 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-[90vw] max-w-md gap-1 shadow-xl max-h-[90vh] overflow-y-auto"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -261,7 +261,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="m-10">
+		<section className="m-3 sm:m-10">
 			{isModalOpen && (
 				<CreateUserModal
 					onClose={() => setIsModalOpen(false)}
@@ -282,69 +282,71 @@ function RouteComponent() {
 					</div>
 				)}
 				<div className="mt-3 border border-green-100 min-h-screen rounded-2xl overflow-hidden bg-white shadow-sm">
-					<table className="w-full">
-						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
-							<tr>
-								<th className="px-4 py-3 text-left">Name</th>
-								<th className="px-4 py-3 text-left">Email</th>
-								<th className="px-4 py-3 text-left">Role</th>
-								<th className="px-4 py-3 text-left">Subject</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-stone-100">
-							{users.map((u) => (
-								<tr
-									key={u.userId}
-									className={u.isActive ? "hover:bg-green-50" : "bg-rose-50"}
-								>
-									<td className="px-4 py-3">
-										<div className="flex items-center gap-2">
-											<div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-green-200 bg-green-50 flex items-center justify-center text-green-700 text-xs font-heading font-bold">
-												{u.avatarUrl ? (
-													<img
-														src={u.avatarUrl}
-														alt={u.name}
-														className="h-full w-full object-cover"
-													/>
-												) : (
-													initials(u.name)
-												)}
-											</div>
-											{u.name}
-										</div>
-									</td>
-									<td className="px-4 py-3">{u.email}</td>
-									<td className="px-4 py-3 capitalize">{u.role}</td>
-									<td className="px-4 py-3">
-										<div className="grid grid-rows gap-1">
-											{u.subjectIds.length > 0
-												? u.subjectIds.map((s) => (
-														<div
-															key={s.subjectId}
-															className={
-																s.subjectName === "Calistung"
-																	? "bg-violet-100 text-violet-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
-																	: s.subjectName === "Tahsin"
-																		? "bg-sky-100 text-sky-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
-																		: s.subjectName === "Tahfizh"
-																			? "bg-green-100 text-green-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
-																			: s.subjectName === "Bahasa Arab"
-																				? "bg-rose-100 text-rose-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
-																				: s.subjectName === "Bahasa Inggris"
-																					? "bg-amber-100 text-amber-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
-																					: "bg-stone-100 text-stone-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
-															}
-														>
-															{s.subjectName}
-														</div>
-													))
-												: "-"}
-										</div>
-									</td>
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-160">
+							<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
+								<tr>
+									<th className="px-4 py-3 text-left">Name</th>
+									<th className="px-4 py-3 text-left">Email</th>
+									<th className="px-4 py-3 text-left">Role</th>
+									<th className="px-4 py-3 text-left">Subject</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody className="divide-y divide-stone-100">
+								{users.map((u) => (
+									<tr
+										key={u.userId}
+										className={u.isActive ? "hover:bg-green-50" : "bg-rose-50"}
+									>
+										<td className="px-4 py-3">
+											<div className="flex items-center gap-2">
+												<div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-green-200 bg-green-50 flex items-center justify-center text-green-700 text-xs font-heading font-bold">
+													{u.avatarUrl ? (
+														<img
+															src={u.avatarUrl}
+															alt={u.name}
+															className="h-full w-full object-cover"
+														/>
+													) : (
+														initials(u.name)
+													)}
+												</div>
+												{u.name}
+											</div>
+										</td>
+										<td className="px-4 py-3">{u.email}</td>
+										<td className="px-4 py-3 capitalize">{u.role}</td>
+										<td className="px-4 py-3">
+											<div className="grid grid-rows gap-1">
+												{u.subjectIds.length > 0
+													? u.subjectIds.map((s) => (
+															<div
+																key={s.subjectId}
+																className={
+																	s.subjectName === "Calistung"
+																		? "bg-violet-100 text-violet-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																		: s.subjectName === "Tahsin"
+																			? "bg-sky-100 text-sky-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																			: s.subjectName === "Tahfizh"
+																				? "bg-green-100 text-green-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																				: s.subjectName === "Bahasa Arab"
+																					? "bg-rose-100 text-rose-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																					: s.subjectName === "Bahasa Inggris"
+																						? "bg-amber-100 text-amber-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																						: "bg-stone-100 text-stone-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+																}
+															>
+																{s.subjectName}
+															</div>
+														))
+													: "-"}
+											</div>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</section>

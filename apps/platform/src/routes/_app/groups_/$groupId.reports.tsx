@@ -96,7 +96,7 @@ function ReportFormModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
@@ -117,7 +117,7 @@ function ReportFormModal({
 				)}
 				<form className="overflow-y-auto pr-1">
 					<div className="flex flex-col gap-2">
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<label className="text-xs font-normal text-stone-500">
 								Student
 								<select
@@ -172,7 +172,7 @@ function ReportFormModal({
 								</div>
 							</div>
 						</div>
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<textarea
 								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-32"
 								placeholder="Progress"
@@ -266,7 +266,7 @@ function ViewReportModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
@@ -282,7 +282,7 @@ function ViewReportModal({
 					{report.statusLabel}
 				</span>
 				<div className="flex flex-col gap-2 text-sm overflow-y-auto pr-1">
-					<div className="grid grid-cols-4 gap-2">
+					<div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
 						<div className="bg-stone-50 border border-stone-200 rounded-xl p-2 text-xs font-normal text-stone-500">
 							Period
 							<div className="text-stone-700 font-semibold">
@@ -306,7 +306,7 @@ function ViewReportModal({
 							</div>
 						</div>
 					</div>
-					<div className="grid grid-cols-2 gap-2">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 						<div className="border border-stone-200 rounded-xl p-2">
 							<p className="text-xs font-normal text-stone-500 mb-1">
 								Progress
@@ -361,13 +361,13 @@ function ConfirmDeleteModal({
 		<div
 			role="dialog"
 			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50"
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
 			onClick={onClose}
 		>
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-6 w-96 flex flex-col gap-4 shadow-xl"
+				className="bg-white rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="text-stone-800">
@@ -525,7 +525,7 @@ function RouteComponent() {
 
 	if (loadState === "denied") {
 		return (
-			<section className="p-6 text-center text-stone-500">
+			<section className="p-3 sm:p-6 text-center text-stone-500">
 				<p className="mb-3">{errorMessage}</p>
 				<Link to="/groups" className="text-green-700 font-semibold underline">
 					Back to groups
@@ -535,7 +535,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-6">
+		<section className="p-3 sm:p-6">
 			{isModalOpen && (
 				<ReportFormModal
 					title="Add Report"
@@ -598,77 +598,79 @@ function RouteComponent() {
 				</p>
 			)}
 
-			<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
-				<table className="w-full">
-					<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
-						<tr>
-							<th className="px-4 py-3 text-left">Period</th>
-							<th className="px-4 py-3 text-left">Student</th>
-							<th className="px-4 py-3 text-left">Score</th>
-							<th className="px-4 py-3 text-left">Status</th>
-							<th className="px-4 py-3 text-left">Action</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-stone-100">
-						{reports.length === 0 && (
+			<div className="overflow-x-auto">
+				<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+					<table className="w-full">
+						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
-								<td
-									colSpan={5}
-									className="px-4 py-6 text-center text-stone-400 italic"
-								>
-									No reports yet.
-								</td>
+								<th className="px-4 py-3 text-left">Period</th>
+								<th className="px-4 py-3 text-left">Student</th>
+								<th className="px-4 py-3 text-left">Score</th>
+								<th className="px-4 py-3 text-left">Status</th>
+								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
-						)}
-						{reports.map((r) => (
-							<tr key={r.reportId} className="hover:bg-green-50">
-								<td className="px-4 py-3">
-									{MONTH_NAMES[r.month - 1]} {r.year}
-								</td>
-								<td className="px-4 py-3">{r.studentName ?? "-"}</td>
-								<td className="px-4 py-3">
-									{r.score}/{r.scoreDenominator}
-								</td>
-								<td className="px-4 py-3">
-									<span
-										className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[r.statusKind]}`}
+						</thead>
+						<tbody className="divide-y divide-stone-100">
+							{reports.length === 0 && (
+								<tr>
+									<td
+										colSpan={5}
+										className="px-4 py-6 text-center text-stone-400 italic"
 									>
-										{r.statusLabel}
-									</span>
-								</td>
-								<td className="px-4 py-3">
-									<div className="flex flex-row gap-3">
-										<button
-											type="button"
-											className="text-sky-600 hover:text-sky-700 cursor-pointer"
-											onClick={() => handleView(r)}
+										No reports yet.
+									</td>
+								</tr>
+							)}
+							{reports.map((r) => (
+								<tr key={r.reportId} className="hover:bg-green-50">
+									<td className="px-4 py-3">
+										{MONTH_NAMES[r.month - 1]} {r.year}
+									</td>
+									<td className="px-4 py-3">{r.studentName ?? "-"}</td>
+									<td className="px-4 py-3">
+										{r.score}/{r.scoreDenominator}
+									</td>
+									<td className="px-4 py-3">
+										<span
+											className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_BADGE_CLASS[r.statusKind]}`}
 										>
-											<Eye size={16} />
-										</button>
-										{canManage && (
-											<>
-												<button
-													type="button"
-													className="text-green-700 hover:text-green-800 cursor-pointer"
-													onClick={() => setEditingReport(r)}
-												>
-													<Pencil size={16} />
-												</button>
-												<button
-													type="button"
-													className="text-rose-500 hover:text-rose-600 cursor-pointer"
-													onClick={() => setDeletingReportId(r.reportId)}
-												>
-													<Ban size={16} />
-												</button>
-											</>
-										)}
-									</div>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+											{r.statusLabel}
+										</span>
+									</td>
+									<td className="px-4 py-3">
+										<div className="flex flex-row gap-3">
+											<button
+												type="button"
+												className="text-sky-600 hover:text-sky-700 cursor-pointer"
+												onClick={() => handleView(r)}
+											>
+												<Eye size={16} />
+											</button>
+											{canManage && (
+												<>
+													<button
+														type="button"
+														className="text-green-700 hover:text-green-800 cursor-pointer"
+														onClick={() => setEditingReport(r)}
+													>
+														<Pencil size={16} />
+													</button>
+													<button
+														type="button"
+														className="text-rose-500 hover:text-rose-600 cursor-pointer"
+														onClick={() => setDeletingReportId(r.reportId)}
+													>
+														<Ban size={16} />
+													</button>
+												</>
+											)}
+										</div>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</section>
 	);
