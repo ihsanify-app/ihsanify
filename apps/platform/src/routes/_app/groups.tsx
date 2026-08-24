@@ -502,7 +502,7 @@ function RouteComponent() {
 
 	if (loadState === "unauthorized") {
 		return (
-			<section className="p-3 sm:p-6 text-center text-stone-500">
+			<section className="max-sm:p-3 sm:p-6 text-center text-stone-500">
 				<p className="mb-3">Please log in to view groups.</p>
 				<Link to="/login" className="text-green-700 font-semibold underline">
 					Go to login
@@ -512,7 +512,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-3 sm:p-6">
+		<section className="max-sm:p-3 sm:p-6">
 			{isModalOpen && (
 				<CreateGroupModal
 					initialData={null}
@@ -539,7 +539,7 @@ function RouteComponent() {
 					onClose={() => setDeletingGroupId(null)}
 				/>
 			)}
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+			<div className="flex max-sm:flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
 				<h1 className="font-heading text-2xl font-bold text-green-800">
 					Groups
 				</h1>

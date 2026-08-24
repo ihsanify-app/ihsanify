@@ -124,7 +124,7 @@ function ReportFormModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
+				className="bg-white rounded-2xl max-sm:p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-1">
@@ -195,7 +195,7 @@ function ReportFormModal({
 								/>
 							</label>
 						</div>
-						<div className="flex flex-col sm:flex-row gap-2 text-xs font-normal text-stone-500">
+						<div className="flex max-sm:flex-col sm:flex-row gap-2 text-xs font-normal text-stone-500">
 							<div className="flex-1 bg-stone-50 border border-stone-200 rounded-xl p-2">
 								Teacher
 								<div className="text-stone-700 font-semibold">
@@ -307,7 +307,7 @@ function ViewReportModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
+				className="bg-white rounded-2xl max-sm:p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-1">Report</h2>
@@ -500,7 +500,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-3 sm:p-6">
+		<section className="max-sm:p-3 sm:p-6">
 			{isModalOpen && (
 				<ReportFormModal
 					initialData={null}

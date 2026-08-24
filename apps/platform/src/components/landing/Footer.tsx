@@ -3,7 +3,7 @@ import { Sprout } from "lucide-react";
 export function Footer() {
 	return (
 		<footer className="bg-green-900 text-white px-10 py-10 mt-10">
-			<div className="flex flex-col sm:flex-row justify-center gap-8 sm:gap-32 items-center sm:items-start w-full mb-8 text-center sm:text-left">
+			<div className="flex max-sm:flex-col sm:flex-row justify-center gap-8 sm:gap-32 max-sm:items-center sm:items-start w-full mb-8 text-center sm:text-left">
 				<div className="flex items-center gap-2 text-2xl font-heading font-bold text-white">
 					<Sprout size={24} className="text-green-300" />
 					Ihsanify

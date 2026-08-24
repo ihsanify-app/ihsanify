@@ -280,7 +280,7 @@ function RouteComponent() {
 			</h1>
 			<SettingsTabs active="subject" />
 
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+			<div className="flex max-sm:flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
 				<p className="text-stone-500 text-sm">
 					Subjects available to assign to groups, each with a report PDF color
 					theme.

@@ -171,7 +171,7 @@ function CreateInvoiceModal({
 			<div
 				role="dialog"
 				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-lg shadow-xl max-h-[90vh] flex flex-col"
+				className="bg-white rounded-2xl max-sm:p-4 sm:p-6 w-full max-w-lg shadow-xl max-h-[90vh] flex flex-col"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">
@@ -258,7 +258,7 @@ function CreateInvoiceModal({
 											return (
 												<div
 													key={groupId}
-													className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm"
+													className="flex max-sm:flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm"
 												>
 													<span className="text-stone-700">
 														{group?.groupName ?? groupId}
@@ -459,7 +459,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-3 sm:p-6">
+		<section className="max-sm:p-3 sm:p-6">
 			{isModalOpen && (
 				<CreateInvoiceModal
 					students={students}

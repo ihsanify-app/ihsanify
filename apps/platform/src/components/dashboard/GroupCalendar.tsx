@@ -107,7 +107,7 @@ export function GroupCalendar({
 
 	return (
 		<div className="flex min-h-105 flex-col rounded-2xl border border-gray-200 bg-white shadow-sm sm:min-h-150">
-			<div className="flex flex-col gap-3 border-b border-gray-100 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+			<div className="flex max-sm:flex-col gap-3 border-b border-gray-100 max-sm:px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
@@ -116,7 +116,7 @@ export function GroupCalendar({
 					>
 						<ChevronLeft size={18} />
 					</button>
-					<span className="min-w-0 flex-1 text-sm font-semibold text-gray-800 sm:min-w-45 sm:flex-none">
+					<span className="min-w-0 max-sm:flex-1 text-sm font-semibold text-gray-800 sm:min-w-45 sm:flex-none">
 						{periodLabel(viewMode, focusedDate)}
 					</span>
 					<button

@@ -234,7 +234,7 @@ function RouteComponent() {
 
 	if (loadState === "denied") {
 		return (
-			<section className="p-3 sm:p-6 text-center text-stone-500">
+			<section className="max-sm:p-3 sm:p-6 text-center text-stone-500">
 				<p className="mb-3">{errorMessage}</p>
 				<Link to="/groups" className="text-green-700 font-semibold underline">
 					Back to groups
@@ -244,7 +244,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="p-3 sm:p-6">
+		<section className="max-sm:p-3 sm:p-6">
 			{isModalOpen && (
 				<AssignmentModal
 					initialData={null}
