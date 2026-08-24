@@ -21,7 +21,6 @@ type SessionRow = {
 	subjectName: string | null;
 	studentIds: Option[];
 	attendanceRecorded: boolean;
-	status: "draft" | "finished";
 	durationMinutes: number;
 };
 
@@ -30,15 +29,10 @@ function CreateSessionModal({
 	onSubmit,
 }: {
 	onClose: () => void;
-	onSubmit: (payload: {
-		date: string;
-		durationMinutes: number;
-		status: "draft" | "finished";
-	}) => void;
+	onSubmit: (payload: { date: string; durationMinutes: number }) => void;
 }) {
 	const [date, setDate] = useState("");
 	const [durationMinutes, setDurationMinutes] = useState(60);
-	const [status, setStatus] = useState<"draft" | "finished">("draft");
 
 	return (
 		<div
@@ -72,16 +66,6 @@ function CreateSessionModal({
 							value={durationMinutes}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
-						<select
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-							value={status}
-							onChange={(e) =>
-								setStatus(e.target.value as "draft" | "finished")
-							}
-						>
-							<option value="draft">Draft</option>
-							<option value="finished">Finished</option>
-						</select>
 					</div>
 				</form>
 				<div className="flex justify-end gap-2 mt-4">
@@ -94,7 +78,7 @@ function CreateSessionModal({
 					</button>
 					<button
 						type="button"
-						onClick={() => onSubmit({ date, durationMinutes, status })}
+						onClick={() => onSubmit({ date, durationMinutes })}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						Save
@@ -300,7 +284,6 @@ function RouteComponent() {
 	async function handleCreate(payload: {
 		date: string;
 		durationMinutes: number;
-		status: "draft" | "finished";
 	}) {
 		const { body } = await apiFetch(`/groups/${groupId}/sessions`, {
 			method: "POST",
@@ -418,7 +401,7 @@ function RouteComponent() {
 							<th className="px-4 py-3 text-left">Teacher</th>
 							<th className="px-4 py-3 text-left">Students</th>
 							<th className="px-4 py-3 text-left">Subject</th>
-							<th className="px-4 py-3 text-left">Status</th>
+							<th className="px-4 py-3 text-left">Attendance</th>
 							<th className="px-4 py-3 text-left">Duration</th>
 							{canManage && <th className="px-4 py-3 text-left">Action</th>}
 						</tr>
@@ -447,12 +430,12 @@ function RouteComponent() {
 								<td className="px-4 py-3">
 									<span
 										className={
-											s.status === "finished"
+											s.attendanceRecorded
 												? "bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full"
 												: "bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full"
 										}
 									>
-										{s.status === "finished" ? "Finished" : "Draft"}
+										{s.attendanceRecorded ? "Recorded" : "Pending"}
 									</span>
 								</td>
 								<td className="px-4 py-3">{s.durationMinutes} min</td>
