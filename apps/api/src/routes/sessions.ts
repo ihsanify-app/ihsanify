@@ -15,7 +15,6 @@ function serializeSession(
 		id: string;
 		date: Date;
 		durationMinutes: number;
-		status: "DRAFT" | "FINISHED";
 		attendanceRecorded: boolean;
 	},
 	teacherId: string | null,
@@ -39,7 +38,6 @@ function serializeSession(
 		// "nobody's taken attendance yet, so `studentIds` is just the full
 		// roster shown as a default" — both cases can list the same names.
 		attendanceRecorded: session.attendanceRecorded,
-		status: session.status.toLowerCase(),
 		durationMinutes: session.durationMinutes,
 	};
 }
@@ -131,7 +129,6 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 	const body = (await c.req.json()) as {
 		date?: string;
 		durationMinutes?: number;
-		status?: "draft" | "finished";
 	};
 
 	if (!body.date || !body.durationMinutes) {
@@ -146,7 +143,6 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 			groupId,
 			date: new Date(body.date),
 			durationMinutes: body.durationMinutes,
-			status: body.status === "finished" ? "FINISHED" : "DRAFT",
 		},
 	});
 
@@ -160,7 +156,6 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 				day: session.date.getDate(),
 				date: session.date.toISOString(),
 				attendanceRecorded: session.attendanceRecorded,
-				status: session.status.toLowerCase(),
 				durationMinutes: session.durationMinutes,
 			},
 		},
@@ -204,7 +199,6 @@ sessionsRouter.patch(
 		const body = (await c.req.json()) as {
 			date?: string;
 			durationMinutes?: number;
-			status?: "draft" | "finished";
 			studentIds?: string[];
 		};
 
@@ -214,9 +208,6 @@ sessionsRouter.patch(
 				...(body.date !== undefined && { date: new Date(body.date) }),
 				...(body.durationMinutes !== undefined && {
 					durationMinutes: body.durationMinutes,
-				}),
-				...(body.status !== undefined && {
-					status: body.status === "finished" ? "FINISHED" : "DRAFT",
 				}),
 				...(body.studentIds !== undefined && { attendanceRecorded: true }),
 			},

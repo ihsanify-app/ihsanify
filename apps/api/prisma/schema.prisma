@@ -28,11 +28,6 @@ enum TeacherAssignmentAction {
   REMOVED
 }
 
-enum SessionStatus {
-  DRAFT
-  FINISHED
-}
-
 enum DayOfWeek {
   MONDAY
   TUESDAY
@@ -76,12 +71,12 @@ model Teacher {
 }
 
 model Student {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  id            String @id @default(cuid())
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id])
   // Manually assigned by an admin (Settings → User), used as the last
   // component of an InvoiceLine's invoiceNo — see that model's comment.
-  studentNumber Int? @unique
+  studentNumber Int?   @unique
 
   enrollmentHistory GroupEnrollment[]
   sessionAttendance SessionAttendance[]
@@ -215,14 +210,13 @@ model GroupTeacher {
 }
 
 model Session {
-  id                 String        @id @default(cuid())
+  id                 String   @id @default(cuid())
   groupId            String
   date               DateTime
   durationMinutes    Int
-  status             SessionStatus @default(DRAFT)
-  attendanceRecorded Boolean       @default(false)
-  createdAt          DateTime      @default(now())
-  group              Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  attendanceRecorded Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  group              Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   attendance   SessionAttendance[]
   invoiceLines InvoiceLine[]       @relation("InvoiceLineSessions")

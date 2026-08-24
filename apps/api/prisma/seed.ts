@@ -314,10 +314,10 @@ async function main() {
 		if (existingSessionCount === 0) {
 			const now = new Date();
 			const sampleSessions = [
-				{ daysAgo: 21, durationMinutes: 60, status: "FINISHED" as const },
-				{ daysAgo: 14, durationMinutes: 60, status: "FINISHED" as const },
-				{ daysAgo: 7, durationMinutes: 45, status: "FINISHED" as const },
-				{ daysAgo: 0, durationMinutes: 60, status: "DRAFT" as const },
+				{ daysAgo: 21, durationMinutes: 60 },
+				{ daysAgo: 14, durationMinutes: 60 },
+				{ daysAgo: 7, durationMinutes: 45 },
+				{ daysAgo: 0, durationMinutes: 60 },
 			];
 			for (const s of sampleSessions) {
 				const date = new Date(now);
@@ -327,7 +327,6 @@ async function main() {
 						groupId: group.id,
 						date,
 						durationMinutes: s.durationMinutes,
-						status: s.status,
 					},
 				});
 			}
