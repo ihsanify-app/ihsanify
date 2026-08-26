@@ -9,9 +9,16 @@ export async function getCurrentTeacherId(groupId: string) {
 	return latest?.action === "ASSIGN" ? latest.teacherId : null;
 }
 
-export async function getCurrentStudentIds(groupId: string) {
+// `asOf` defaults to now, so every existing caller keeps its original
+// "current roster" behavior unchanged — pass an explicit date (e.g. end of
+// a past payroll month) to replay the enrollment log only up to that point,
+// for historically-accurate reporting instead of today's roster.
+export async function getCurrentStudentIds(
+	groupId: string,
+	asOf: Date = new Date(),
+) {
 	const events = await prisma.groupEnrollment.findMany({
-		where: { groupId },
+		where: { groupId, date: { lte: asOf } },
 		orderBy: { date: "asc" },
 	});
 	const lastActionByStudent = new Map<string, "JOIN" | "LEAVE">();
@@ -37,9 +44,13 @@ export async function getCurrentGroupIdsForStudent(studentId: string) {
 		.map(([groupId]) => groupId);
 }
 
-export async function getCurrentGroupIdsForTeacher(teacherId: string) {
+// See getCurrentStudentIds' comment — `asOf` defaults to now.
+export async function getCurrentGroupIdsForTeacher(
+	teacherId: string,
+	asOf: Date = new Date(),
+) {
 	const events = await prisma.groupTeacher.findMany({
-		where: { teacherId },
+		where: { teacherId, date: { lte: asOf } },
 		orderBy: { date: "asc" },
 	});
 	const lastActionByGroup = new Map<string, "ASSIGN" | "REMOVED">();
