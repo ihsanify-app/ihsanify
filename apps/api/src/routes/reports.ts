@@ -8,11 +8,28 @@ import {
 	getCurrentStudentIds,
 	getCurrentTeacherId,
 } from "../utils/groupState";
+import { notifyUser } from "../utils/notify";
 import { prisma } from "../utils/prisma";
 
 export const reportsRouter = new Hono();
 
 const SCORE_DENOMINATOR = 100;
+
+async function notifyReportSubmitted(
+	studentId: string,
+	month: number,
+	year: number,
+) {
+	const student = await prisma.student.findUnique({ where: { id: studentId } });
+	if (!student) return;
+	await notifyUser({
+		userId: student.userId,
+		type: "REPORT",
+		title: "New report available",
+		message: `Your report for ${month}/${year} is ready to view.`,
+		link: "/reports",
+	});
+}
 
 type ReportGrade = "MUMTAZ" | "JAYYID_JIDDAN" | "JAYYID" | "MAQBUL" | "DHAIF";
 
@@ -292,6 +309,9 @@ reportsRouter.post("/groups/:id/reports", requireAuth, async (c) => {
 			submittedAt: body.submit ? new Date() : null,
 		},
 	});
+	if (body.submit) {
+		await notifyReportSubmitted(body.studentId, body.month, body.year);
+	}
 	return c.json({ success: true, data: await serializeReport(report) }, 201);
 });
 
@@ -397,12 +417,20 @@ reportsRouter.post(
 			);
 		}
 
-		const report = existing.submittedAt
+		const wasAlreadySubmitted = existing.submittedAt !== null;
+		const report = wasAlreadySubmitted
 			? existing
 			: await prisma.report.update({
 					where: { id: reportId },
 					data: { submittedAt: new Date() },
 				});
+		if (!wasAlreadySubmitted) {
+			await notifyReportSubmitted(
+				existing.studentId,
+				existing.month,
+				existing.year,
+			);
+		}
 		return c.json({ success: true, data: await serializeReport(report) });
 	},
 );

@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 import { requireAuth } from "../utils/auth";
-import { canManageGroup, canUserAccessGroup } from "../utils/groupState";
+import {
+	canManageGroup,
+	canUserAccessGroup,
+	getCurrentStudentIds,
+} from "../utils/groupState";
+import { notifyUser } from "../utils/notify";
 import { prisma } from "../utils/prisma";
 
 export const assignmentsRouter = new Hono();
@@ -82,6 +87,23 @@ assignmentsRouter.post("/groups/:id/assignments", requireAuth, async (c) => {
 			status: body.status === "finished" ? "FINISHED" : "DRAFT",
 		},
 	});
+
+	const studentIds = await getCurrentStudentIds(groupId);
+	const students = await prisma.student.findMany({
+		where: { id: { in: studentIds } },
+	});
+	await Promise.all(
+		students.map((student) =>
+			notifyUser({
+				userId: student.userId,
+				type: "ASSIGNMENT",
+				title: "New assignment posted",
+				message: `"${assignment.title}" was added to ${group.name}.`,
+				link: `/groups/${groupId}/assignments`,
+			}),
+		),
+	);
+
 	return c.json({ success: true, data: serializeAssignment(assignment) }, 201);
 });
 

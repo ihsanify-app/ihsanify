@@ -60,8 +60,33 @@ model User {
   phone     String?
   createdAt DateTime @default(now())
 
-  teacher Teacher?
-  student Student?
+  teacher       Teacher?
+  student       Student?
+  notifications Notification[]
+}
+
+enum NotificationType {
+  REPORT
+  ASSIGNMENT
+  GROUP_ASSIGNMENT
+}
+
+// One row per recipient per event — a group of 5 students getting the same
+// assignment creates 5 rows, not 1 row fanned out at read time. Simpler to
+// query ("my unread count") at the cost of some duplication, which is fine
+// at this app's scale.
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  // Frontend route to deep-link to, e.g. "/reports" or "/groups/abc/assignments".
+  // Null means informational only, nothing to click through to.
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
 }
 
 enum TeacherTitle {

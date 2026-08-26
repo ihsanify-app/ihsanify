@@ -6,9 +6,32 @@ import {
 	getCurrentStudentIds,
 	getCurrentTeacherId,
 } from "../utils/groupState";
+import { notifyUser } from "../utils/notify";
 import { prisma } from "../utils/prisma";
 
 export const groupsRouter = new Hono();
+
+async function notifyGroupAssignment(
+	role: "teacher" | "student",
+	id: string,
+	groupName: string,
+) {
+	const record =
+		role === "teacher"
+			? await prisma.teacher.findUnique({ where: { id } })
+			: await prisma.student.findUnique({ where: { id } });
+	if (!record) return;
+	await notifyUser({
+		userId: record.userId,
+		type: "GROUP_ASSIGNMENT",
+		title:
+			role === "teacher"
+				? "Assigned to a new group"
+				: "Enrolled in a new group",
+		message: `You've been ${role === "teacher" ? "assigned to teach" : "enrolled in"} ${groupName}.`,
+		link: "/groups",
+	});
+}
 
 const DAYS_OF_WEEK = [
 	"MONDAY",
@@ -172,11 +195,13 @@ groupsRouter.post("/groups", requireAuth, requireRole("ADMIN"), async (c) => {
 		await prisma.groupTeacher.create({
 			data: { groupId: group.id, teacherId: body.teacherId, action: "ASSIGN" },
 		});
+		await notifyGroupAssignment("teacher", body.teacherId, group.name);
 	}
 	for (const studentId of body.studentIds ?? []) {
 		await prisma.groupEnrollment.create({
 			data: { groupId: group.id, studentId, action: "JOIN" },
 		});
+		await notifyGroupAssignment("student", studentId, group.name);
 	}
 	for (const planned of body.plannedSessions ?? []) {
 		if (!isDayOfWeek(planned.dayOfWeek) || !planned.time) continue;
@@ -247,6 +272,7 @@ groupsRouter.patch(
 					await prisma.groupTeacher.create({
 						data: { groupId, teacherId: body.teacherId, action: "ASSIGN" },
 					});
+					await notifyGroupAssignment("teacher", body.teacherId, group.name);
 				}
 			}
 		}
@@ -269,6 +295,7 @@ groupsRouter.patch(
 				await prisma.groupEnrollment.create({
 					data: { groupId, studentId, action: "JOIN" },
 				});
+				await notifyGroupAssignment("student", studentId, group.name);
 			}
 		}
 
