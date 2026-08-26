@@ -16,6 +16,7 @@ import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppPayrollRouteImport } from './routes/_app/payroll'
 import { Route as AppInvoicesRouteImport } from './routes/_app/invoices'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -26,6 +27,7 @@ import { Route as AppSettingsReportRouteImport } from './routes/_app/settings_/r
 import { Route as AppSettingsInvoiceRouteImport } from './routes/_app/settings_/invoice'
 import { Route as AppSettingsGroupRouteImport } from './routes/_app/settings_/group'
 import { Route as AppSettingsAssignmentRouteImport } from './routes/_app/settings_/assignment'
+import { Route as AppPayrollPayslipIdRouteImport } from './routes/_app/payroll_/$payslipId'
 import { Route as AppGroupsGroupIdSessionsRouteImport } from './routes/_app/groups_/$groupId.sessions'
 import { Route as AppGroupsGroupIdReportsRouteImport } from './routes/_app/groups_/$groupId.reports'
 import { Route as AppGroupsGroupIdAssignmentsRouteImport } from './routes/_app/groups_/$groupId.assignments'
@@ -62,6 +64,11 @@ const AppReportsRoute = AppReportsRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPayrollRoute = AppPayrollRouteImport.update({
+  id: '/payroll',
+  path: '/payroll',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInvoicesRoute = AppInvoicesRouteImport.update({
@@ -114,6 +121,11 @@ const AppSettingsAssignmentRoute = AppSettingsAssignmentRouteImport.update({
   path: '/settings/assignment',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPayrollPayslipIdRoute = AppPayrollPayslipIdRouteImport.update({
+  id: '/payroll_/$payslipId',
+  path: '/payroll/$payslipId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppGroupsGroupIdSessionsRoute =
   AppGroupsGroupIdSessionsRouteImport.update({
     id: '/groups_/$groupId/sessions',
@@ -139,10 +151,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/groups': typeof AppGroupsRoute
   '/invoices': typeof AppInvoicesRoute
+  '/payroll': typeof AppPayrollRoute
   '/profile': typeof AppProfileRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
+  '/payroll/$payslipId': typeof AppPayrollPayslipIdRoute
   '/settings/assignment': typeof AppSettingsAssignmentRoute
   '/settings/group': typeof AppSettingsGroupRoute
   '/settings/invoice': typeof AppSettingsInvoiceRoute
@@ -160,10 +174,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/groups': typeof AppGroupsRoute
   '/invoices': typeof AppInvoicesRoute
+  '/payroll': typeof AppPayrollRoute
   '/profile': typeof AppProfileRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
+  '/payroll/$payslipId': typeof AppPayrollPayslipIdRoute
   '/settings/assignment': typeof AppSettingsAssignmentRoute
   '/settings/group': typeof AppSettingsGroupRoute
   '/settings/invoice': typeof AppSettingsInvoiceRoute
@@ -183,10 +199,12 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/groups': typeof AppGroupsRoute
   '/_app/invoices': typeof AppInvoicesRoute
+  '/_app/payroll': typeof AppPayrollRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
+  '/_app/payroll_/$payslipId': typeof AppPayrollPayslipIdRoute
   '/_app/settings_/assignment': typeof AppSettingsAssignmentRoute
   '/_app/settings_/group': typeof AppSettingsGroupRoute
   '/_app/settings_/invoice': typeof AppSettingsInvoiceRoute
@@ -206,10 +224,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/groups'
     | '/invoices'
+    | '/payroll'
     | '/profile'
     | '/reports'
     | '/settings'
     | '/users'
+    | '/payroll/$payslipId'
     | '/settings/assignment'
     | '/settings/group'
     | '/settings/invoice'
@@ -227,10 +247,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/groups'
     | '/invoices'
+    | '/payroll'
     | '/profile'
     | '/reports'
     | '/settings'
     | '/users'
+    | '/payroll/$payslipId'
     | '/settings/assignment'
     | '/settings/group'
     | '/settings/invoice'
@@ -249,10 +271,12 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/groups'
     | '/_app/invoices'
+    | '/_app/payroll'
     | '/_app/profile'
     | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
+    | '/_app/payroll_/$payslipId'
     | '/_app/settings_/assignment'
     | '/_app/settings_/group'
     | '/_app/settings_/invoice'
@@ -319,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/payroll': {
+      id: '/_app/payroll'
+      path: '/payroll'
+      fullPath: '/payroll'
+      preLoaderRoute: typeof AppPayrollRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/invoices': {
@@ -391,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsAssignmentRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/payroll_/$payslipId': {
+      id: '/_app/payroll_/$payslipId'
+      path: '/payroll/$payslipId'
+      fullPath: '/payroll/$payslipId'
+      preLoaderRoute: typeof AppPayrollPayslipIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/groups_/$groupId/sessions': {
       id: '/_app/groups_/$groupId/sessions'
       path: '/groups/$groupId/sessions'
@@ -420,10 +458,12 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppGroupsRoute: typeof AppGroupsRoute
   AppInvoicesRoute: typeof AppInvoicesRoute
+  AppPayrollRoute: typeof AppPayrollRoute
   AppProfileRoute: typeof AppProfileRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
+  AppPayrollPayslipIdRoute: typeof AppPayrollPayslipIdRoute
   AppSettingsAssignmentRoute: typeof AppSettingsAssignmentRoute
   AppSettingsGroupRoute: typeof AppSettingsGroupRoute
   AppSettingsInvoiceRoute: typeof AppSettingsInvoiceRoute
@@ -440,10 +480,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppGroupsRoute: AppGroupsRoute,
   AppInvoicesRoute: AppInvoicesRoute,
+  AppPayrollRoute: AppPayrollRoute,
   AppProfileRoute: AppProfileRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
+  AppPayrollPayslipIdRoute: AppPayrollPayslipIdRoute,
   AppSettingsAssignmentRoute: AppSettingsAssignmentRoute,
   AppSettingsGroupRoute: AppSettingsGroupRoute,
   AppSettingsInvoiceRoute: AppSettingsInvoiceRoute,
