@@ -1,8 +1,28 @@
-import { Bell, ClipboardList, FileText, User } from "lucide-react";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Bell, ClipboardList, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../../lib/apiClient";
+import { mockUser } from "../../lib/mockAuth";
+
+function initials(name: string) {
+	const parts = name.trim().split(/\s+/);
+	if (parts.length === 0 || !parts[0]) return "?";
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+	return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
 export function Header() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [name, setName] = useState(mockUser.name);
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+	useEffect(() => {
+		apiFetch("/profile").then(({ status, body }) => {
+			if (status !== 200) return;
+			setName(body?.data?.name ?? mockUser.name);
+			setAvatarUrl(body?.data?.avatarUrl ?? null);
+		});
+	}, []);
 
 	return (
 		<header className="flex flex-row justify-between items-center px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-green-100">
@@ -40,12 +60,23 @@ export function Header() {
 						</div>
 					)}
 				</div>
-				<div className="flex items-center gap-2 text-stone-700">
-					<div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-						<User size={16} className="text-green-700" />
+				<Link
+					to="/profile"
+					className="flex items-center gap-2 text-stone-700 hover:text-green-700 transition-colors"
+				>
+					<div className="w-8 h-8 overflow-hidden rounded-full bg-green-100 flex items-center justify-center shrink-0 text-green-700 text-xs font-heading font-bold">
+						{avatarUrl ? (
+							<img
+								src={avatarUrl}
+								alt={name}
+								className="h-full w-full object-cover"
+							/>
+						) : (
+							initials(name)
+						)}
 					</div>
-					<span className="hidden sm:inline text-sm font-medium">Admin</span>
-				</div>
+					<span className="hidden sm:inline text-sm font-medium">{name}</span>
+				</Link>
 			</div>
 		</header>
 	);

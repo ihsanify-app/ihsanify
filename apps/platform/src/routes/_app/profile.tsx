@@ -328,7 +328,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<section className="max-sm:p-3 sm:p-6 max-w-2xl">
+		<section className="max-sm:p-3 sm:p-6 max-w-2xl mx-auto">
 			<h1 className="font-heading text-2xl font-bold text-green-800 mb-4">
 				My Profile
 			</h1>
