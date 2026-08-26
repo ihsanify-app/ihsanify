@@ -28,6 +28,94 @@ type AppUser = {
 	avatarUrl: string | null;
 };
 
+type GroupTypeKey = "group" | "private" | "semi_private";
+
+const RATE_GROUP_TYPES: { key: GroupTypeKey; label: string }[] = [
+	{ key: "group", label: "Group" },
+	{ key: "private", label: "Private" },
+	{ key: "semi_private", label: "Semi-Private" },
+];
+
+function TeacherRatesEditor({ teacherId }: { teacherId: string }) {
+	const [rates, setRates] = useState<Record<GroupTypeKey, string>>({
+		group: "",
+		private: "",
+		semi_private: "",
+	});
+	const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+		"idle",
+	);
+
+	useEffect(() => {
+		apiFetch(`/teachers/${teacherId}/rates`).then(({ status, body }) => {
+			if (status !== 200) return;
+			const byType = new Map<string, number>(
+				(body?.data ?? []).map(
+					(r: { groupType: string; monthlyRate: number }) => [
+						r.groupType,
+						r.monthlyRate,
+					],
+				),
+			);
+			setRates({
+				group: byType.has("group") ? String(byType.get("group")) : "",
+				private: byType.has("private") ? String(byType.get("private")) : "",
+				semi_private: byType.has("semi_private")
+					? String(byType.get("semi_private"))
+					: "",
+			});
+		});
+	}, [teacherId]);
+
+	async function saveRates(next: Record<GroupTypeKey, string>) {
+		setSaveState("saving");
+		await apiFetch(`/teachers/${teacherId}/rates`, {
+			method: "PATCH",
+			body: JSON.stringify({
+				rates: RATE_GROUP_TYPES.map(({ key }) => ({
+					groupType: key,
+					monthlyRate: Number(next[key] || 0),
+				})),
+			}),
+		});
+		setSaveState("saved");
+	}
+
+	return (
+		<div className="mt-2 rounded-xl border border-stone-200 p-3">
+			<p className="mb-2 text-xs font-semibold text-stone-500">
+				Monthly rate per group type (Payroll)
+			</p>
+			<div className="flex flex-col gap-2">
+				{RATE_GROUP_TYPES.map(({ key, label }) => (
+					<label key={key} className="flex items-center gap-2 text-sm">
+						<span className="w-28 shrink-0 text-stone-600">{label}</span>
+						<input
+							type="number"
+							min={0}
+							placeholder="e.g. 100000"
+							className="flex-1 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							value={rates[key]}
+							onChange={(e) => {
+								const next = { ...rates, [key]: e.target.value };
+								setRates(next);
+								setSaveState("idle");
+							}}
+							onBlur={() => saveRates(rates)}
+						/>
+					</label>
+				))}
+			</div>
+			{saveState === "saving" && (
+				<p className="mt-1 text-xs text-stone-400">Saving…</p>
+			)}
+			{saveState === "saved" && (
+				<p className="mt-1 text-xs text-green-600">Saved</p>
+			)}
+		</div>
+	);
+}
+
 function initials(name: string) {
 	const parts = name.trim().split(/\s+/);
 	if (parts.length === 0 || !parts[0]) return "?";
@@ -88,6 +176,9 @@ function EditUserModal({
 						</select>
 					</div>
 				</form>
+				{user.role === "teacher" && user.teacherId && (
+					<TeacherRatesEditor teacherId={user.teacherId} />
+				)}
 				<div className="flex justify-end gap-2 mt-4">
 					<button
 						type="button"
