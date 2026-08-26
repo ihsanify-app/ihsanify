@@ -53,35 +53,73 @@ model User {
   gender    Gender?
   isActive  Boolean  @default(true)
   avatarUrl String?
+  // Self-editable profile fields (Profile page) — distinct from the
+  // admin-managed fields above (name/email/gender/isActive via Settings → User).
+  bio       String?
+  address   String?
+  phone     String?
   createdAt DateTime @default(now())
 
   teacher Teacher?
   student Student?
 }
 
-model Teacher {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+enum TeacherTitle {
+  S_PD
+  S_T
+  LC
+}
 
-  subjects     TeacherSubject[]
-  groupHistory GroupTeacher[]
-  reports      Report[]
-  invoiceLines InvoiceLine[]
+model Teacher {
+  id     String        @id @default(cuid())
+  userId String        @unique
+  user   User          @relation(fields: [userId], references: [id])
+  // Academic title, optional — set by the teacher on their own Profile page.
+  title  TeacherTitle?
+
+  subjects        TeacherSubject[]
+  groupHistory    GroupTeacher[]
+  reports         Report[]
+  invoiceLines    InvoiceLine[]
+  rates           TeacherRate[]
+  payslips        Payslip[]
+  teachingHistory TeachingHistory[]
+}
+
+// A teacher's prior work history before joining — freeform organization name
+// since it covers outside schools/institutions not modeled elsewhere here.
+// Self-managed by the teacher from their own Profile page.
+model TeachingHistory {
+  id           String  @id @default(cuid())
+  teacherId    String
+  teacher      Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  startYear    Int
+  endYear      Int
+  organization String
+}
+
+// Fixed list for now, per the Profile page's school selection field — add
+// values here (+ migration) as more partner schools come on.
+enum School {
+  MEDINA_INTERNATIONAL_SCHOOL
+  AL_WILDAN_INTERNATIONAL_ISLAMIC_SCHOOL
 }
 
 model Student {
-  id            String @id @default(cuid())
-  userId        String @unique
-  user          User   @relation(fields: [userId], references: [id])
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  // Set by the student on their own Profile page.
+  school        School?
+  user          User    @relation(fields: [userId], references: [id])
   // Manually assigned by an admin (Settings → User), used as the last
   // component of an InvoiceLine's invoiceNo — see that model's comment.
-  studentNumber Int?   @unique
+  studentNumber Int?    @unique
 
   enrollmentHistory GroupEnrollment[]
   sessionAttendance SessionAttendance[]
   reports           Report[]
   invoices          Invoice[]
+  payslipLines      PayslipLine[]
 }
 
 enum ReportHeaderPattern {
@@ -175,6 +213,7 @@ model Group {
   assignments       Assignment[]
   invoiceLines      InvoiceLine[]
   plannedSessions   PlannedSession[]
+  payslipLines      PayslipLine[]
 }
 
 // A group's recurring weekly meeting slots (e.g. "every Tuesday at 20:00 WIB").
@@ -323,4 +362,73 @@ model InvoiceSettings {
   bankName     String?
   bankAccount  String?
   receiverName String?
+}
+
+// A teacher's flat monthly rate per group type they may teach (Settings →
+// User). Drives Payslip cost math: a teacher earns this rate ONCE PER
+// STUDENT enrolled in a group of that type, not once per group — e.g. a
+// Semi-Private group with 2 students contributes 2x the Semi-Private rate to
+// that teacher's cost, regardless of each student's attendance that month.
+model TeacherRate {
+  id          String    @id @default(cuid())
+  teacherId   String
+  groupType   GroupType
+  monthlyRate Int
+  teacher     Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, groupType])
+}
+
+// One calendar month's payroll — the real parent entity a month/year period
+// represents, not just a query filter. totalRevenue/totalCost/totalProfit/
+// totalGroup are deliberately NOT stored here — always computed live from
+// this row's Payslips/PayslipLines (GET /payroll), so they can never drift
+// out of sync with the records they summarize.
+model Payroll {
+  id        String    @id @default(cuid())
+  month     Int
+  year      Int
+  createdAt DateTime  @default(now())
+  payslips  Payslip[]
+
+  @@unique([month, year])
+}
+
+// One payslip per teacher per Payroll period — the parent record for that
+// teacher's PayslipLine rows. Uniqueness on [payrollId, teacherId] is a
+// deliberate guard against double-counting the same teacher's cost/profit
+// twice in a period's aggregate totals.
+model Payslip {
+  id        String        @id @default(cuid())
+  payrollId String
+  teacherId String
+  createdAt DateTime      @default(now())
+  payroll   Payroll       @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+  teacher   Teacher       @relation(fields: [teacherId], references: [id])
+  lines     PayslipLine[]
+
+  @@unique([payrollId, teacherId])
+}
+
+// One (group, student) line within a Payslip. Every value here is a frozen
+// snapshot taken at creation time — sessionsAttended/sessionsTotal and
+// teacherRateSnapshot/groupTypeSnapshot are computed server-side from the
+// group's actual roster/sessions "as of" that month, so the payslip doesn't
+// silently change later if a rate is edited or a student's enrollment is
+// corrected retroactively. `price` is the admin's manually entered per-
+// student amount (the "profit" contribution — negotiated with parents,
+// deliberately not derived from attendance).
+model PayslipLine {
+  id                  String    @id @default(cuid())
+  payslipId           String
+  groupId             String
+  studentId           String
+  sessionsAttended    Int
+  sessionsTotal       Int
+  price               Int
+  groupTypeSnapshot   GroupType
+  teacherRateSnapshot Int
+  payslip             Payslip   @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  group               Group     @relation(fields: [groupId], references: [id])
+  student             Student   @relation(fields: [studentId], references: [id])
 }
