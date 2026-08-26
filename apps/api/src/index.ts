@@ -8,6 +8,8 @@ import { groupsRouter } from "./routes/groups";
 import { invoiceSettingsRouter } from "./routes/invoiceSettings";
 import { invoicesRouter } from "./routes/invoices";
 import { lookupsRouter } from "./routes/lookups";
+import { payrollRouter } from "./routes/payroll";
+import { profileRouter } from "./routes/profile";
 import { publicRouter } from "./routes/public";
 import { reportSettingsRouter } from "./routes/reportSettings";
 import { reportsRouter } from "./routes/reports";
@@ -30,6 +32,8 @@ app
 	.route("/", groupsRouter)
 	.route("/", lookupsRouter)
 	.route("/", publicRouter)
+	.route("/", payrollRouter)
+	.route("/", profileRouter)
 	.route("/", sessionsRouter)
 	.route("/", reportsRouter)
 	.route("/", assignmentsRouter)
