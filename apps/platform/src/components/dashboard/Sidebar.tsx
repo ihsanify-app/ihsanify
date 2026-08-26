@@ -9,6 +9,7 @@ import {
 	Sprout,
 	User,
 	Users,
+	Wallet,
 } from "lucide-react";
 
 const navItems = [
@@ -31,6 +32,12 @@ const navItems = [
 		icon: Receipt,
 		title: "Invoices",
 		path: "/invoices",
+	},
+	{
+		id: 9,
+		icon: Wallet,
+		title: "Payroll",
+		path: "/payroll",
 	},
 	{
 		id: 5,
