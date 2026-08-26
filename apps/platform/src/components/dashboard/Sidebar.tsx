@@ -11,6 +11,7 @@ import {
 	Users,
 	Wallet,
 } from "lucide-react";
+import { mockUser } from "../../lib/mockAuth";
 
 const navItems = [
 	{ id: 1, icon: LayoutDashboard, title: "Dashboard", path: "/dashboard" },
@@ -32,12 +33,14 @@ const navItems = [
 		icon: Receipt,
 		title: "Invoices",
 		path: "/invoices",
+		adminOnly: true,
 	},
 	{
 		id: 9,
 		icon: Wallet,
 		title: "Payroll",
 		path: "/payroll",
+		adminOnly: true,
 	},
 	{
 		id: 5,
@@ -56,17 +59,21 @@ const navItems = [
 		icon: Settings,
 		title: "Settings",
 		path: "/settings",
+		adminOnly: true,
 	},
 ];
 
 export function Sidebar() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const visibleNavItems = navItems.filter(
+		(n) => !n.adminOnly || mockUser.role === "admin",
+	);
 
 	return (
 		<>
 			<aside className="hidden lg:flex flex-col bg-green-900 text-white items-center min-h-screen w-24 py-4 gap-2">
 				<Sprout size={28} className="text-green-300 mb-4" />
-				{navItems.map((n) => {
+				{visibleNavItems.map((n) => {
 					const isActive = pathname === n.path;
 					return (
 						<Link
@@ -89,7 +96,7 @@ export function Sidebar() {
 			</aside>
 
 			<nav className="hidden max-lg:flex fixed inset-x-0 bottom-0 z-40 items-center justify-around bg-green-900 px-1 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-				{navItems.map((n) => {
+				{visibleNavItems.map((n) => {
 					const isActive = pathname === n.path;
 					return (
 						<Link

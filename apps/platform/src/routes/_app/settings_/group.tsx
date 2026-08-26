@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SettingsTabs } from "../../../components/dashboard/SettingsTabs";
 import { apiFetch } from "../../../lib/apiClient";
+import { mockUser } from "../../../lib/mockAuth";
 
 export const Route = createFileRoute("/_app/settings_/group")({
 	component: RouteComponent,
@@ -25,6 +26,14 @@ function RouteComponent() {
 	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
+		// `GET /groups` is intentionally role-scoped (teachers/students see
+		// their own groups) rather than admin-only, so it never 401/403s them —
+		// this page still needs its own gate to stay admin-only like the rest
+		// of Settings.
+		if (mockUser.role !== "admin") {
+			setLoadState("unauthorized");
+			return;
+		}
 		apiFetch("/groups").then(({ status, body }) => {
 			if (status === 401 || status === 403) {
 				setLoadState("unauthorized");

@@ -4,7 +4,6 @@ import { DEFAULT_THEME_COLOR } from "../pdf/shared";
 import { requireAuth, requireRole } from "../utils/auth";
 import {
 	getCurrentGroupIdsForStudent,
-	getCurrentGroupIdsForTeacher,
 	getCurrentTeacherId,
 } from "../utils/groupState";
 import { prisma } from "../utils/prisma";
@@ -106,47 +105,20 @@ async function serializeInvoice(invoice: InvoiceRecord) {
 
 const INVOICE_INCLUDE = { lines: { include: { sessions: true } } } as const;
 
-invoicesRouter.get("/invoices", requireAuth, async (c) => {
-	const authUser = c.get("authUser");
-
-	let invoices: InvoiceRecord[];
-	if (authUser.role === "ADMIN") {
-		invoices = await prisma.invoice.findMany({
+invoicesRouter.get(
+	"/invoices",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const invoices: InvoiceRecord[] = await prisma.invoice.findMany({
 			include: INVOICE_INCLUDE,
 			orderBy: { createdAt: "desc" },
 		});
-	} else if (authUser.role === "TEACHER") {
-		const teacher = await prisma.teacher.findUnique({
-			where: { userId: authUser.id },
-		});
-		if (!teacher) {
-			invoices = [];
-		} else {
-			const teacherGroupIds = await getCurrentGroupIdsForTeacher(teacher.id);
-			const all = await prisma.invoice.findMany({
-				include: INVOICE_INCLUDE,
-				orderBy: { createdAt: "desc" },
-			});
-			invoices = all.filter((invoice) =>
-				invoice.lines.some((line) => teacherGroupIds.includes(line.groupId)),
-			);
-		}
-	} else {
-		const student = await prisma.student.findUnique({
-			where: { userId: authUser.id },
-		});
-		invoices = student
-			? await prisma.invoice.findMany({
-					where: { studentId: student.id },
-					include: INVOICE_INCLUDE,
-					orderBy: { createdAt: "desc" },
-				})
-			: [];
-	}
 
-	const data = await Promise.all(invoices.map(serializeInvoice));
-	return c.json({ success: true, data });
-});
+		const data = await Promise.all(invoices.map(serializeInvoice));
+		return c.json({ success: true, data });
+	},
+);
 
 invoicesRouter.post(
 	"/invoices",
@@ -362,110 +334,86 @@ invoicesRouter.delete(
 	},
 );
 
-invoicesRouter.get("/invoices/:invoiceId/pdf", requireAuth, async (c) => {
-	const authUser = c.get("authUser");
-	const invoiceId = c.req.param("invoiceId");
+invoicesRouter.get(
+	"/invoices/:invoiceId/pdf",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const invoiceId = c.req.param("invoiceId");
 
-	const invoice = await prisma.invoice.findUnique({
-		where: { id: invoiceId },
-		include: {
-			lines: { include: { sessions: { orderBy: { date: "asc" } } } },
-		},
-	});
-	if (!invoice) {
-		return c.json({ success: false, message: "Invoice not found." }, 404);
-	}
-
-	if (authUser.role === "ADMIN") {
-		// allowed
-	} else if (authUser.role === "TEACHER") {
-		const teacher = await prisma.teacher.findUnique({
-			where: { userId: authUser.id },
+		const invoice = await prisma.invoice.findUnique({
+			where: { id: invoiceId },
+			include: {
+				lines: { include: { sessions: { orderBy: { date: "asc" } } } },
+			},
 		});
-		const teacherGroupIds = teacher
-			? await getCurrentGroupIdsForTeacher(teacher.id)
-			: [];
-		const canAccess = invoice.lines.some((line) =>
-			teacherGroupIds.includes(line.groupId),
+		if (!invoice) {
+			return c.json({ success: false, message: "Invoice not found." }, 404);
+		}
+
+		const [student, reportSettings, invoiceSettings, lines] = await Promise.all(
+			[
+				prisma.student.findUnique({
+					where: { id: invoice.studentId },
+					include: { user: true },
+				}),
+				prisma.reportSettings.findFirst(),
+				prisma.invoiceSettings.findFirst(),
+				Promise.all(
+					invoice.lines.map(async (line) => {
+						const [group, teacher] = await Promise.all([
+							prisma.group.findUnique({
+								where: { id: line.groupId },
+								include: { subject: true },
+							}),
+							prisma.teacher.findUnique({
+								where: { id: line.teacherId },
+								include: { user: true },
+							}),
+						]);
+						return {
+							groupId: line.groupId,
+							groupName: group?.name ?? "-",
+							subjectName: group?.subject.name ?? "-",
+							groupTypeLabel: groupTypeLabel(group?.groupType),
+							teacherName: teacher?.user.name ?? "-",
+							invoiceNo: line.invoiceNo,
+							price: line.price,
+							sessionCount: line.sessions.length,
+						};
+					}),
+				),
+			],
 		);
-		if (!canAccess) {
-			return c.json(
-				{ success: false, message: "You don't have access to this invoice." },
-				403,
-			);
-		}
-	} else {
-		const student = await prisma.student.findUnique({
-			where: { userId: authUser.id },
-		});
-		if (!student || invoice.studentId !== student.id) {
-			return c.json(
-				{ success: false, message: "You don't have access to this invoice." },
-				403,
-			);
-		}
-	}
 
-	const [student, reportSettings, invoiceSettings, lines] = await Promise.all([
-		prisma.student.findUnique({
-			where: { id: invoice.studentId },
-			include: { user: true },
-		}),
-		prisma.reportSettings.findFirst(),
-		prisma.invoiceSettings.findFirst(),
-		Promise.all(
-			invoice.lines.map(async (line) => {
-				const [group, teacher] = await Promise.all([
-					prisma.group.findUnique({
-						where: { id: line.groupId },
-						include: { subject: true },
-					}),
-					prisma.teacher.findUnique({
-						where: { id: line.teacherId },
-						include: { user: true },
-					}),
-				]);
-				return {
-					groupId: line.groupId,
-					groupName: group?.name ?? "-",
-					subjectName: group?.subject.name ?? "-",
-					groupTypeLabel: groupTypeLabel(group?.groupType),
-					teacherName: teacher?.user.name ?? "-",
-					invoiceNo: line.invoiceNo,
-					price: line.price,
-					sessionCount: line.sessions.length,
-				};
+		const buffer = await renderInvoicePdf({
+			studentName: student?.user.name ?? "-",
+			month: invoice.month,
+			year: invoice.year,
+			issuedAtLabel: invoice.createdAt.toLocaleDateString("en-GB", {
+				day: "numeric",
+				month: "long",
+				year: "numeric",
 			}),
-		),
-	]);
+			lines,
+			totalPrice: lines.reduce((sum, line) => sum + line.price, 0),
+			primaryColor: DEFAULT_THEME_COLOR,
+			organizationName: reportSettings?.organizationName ?? "Ihsanify",
+			logoUrl: reportSettings?.logoUrl ?? null,
+			websiteUrl: reportSettings?.websiteUrl ?? null,
+			footerPhone: reportSettings?.footerPhone ?? null,
+			footerEmail: reportSettings?.footerEmail ?? null,
+			footerInstagram: reportSettings?.footerInstagram ?? null,
+			bankName: invoiceSettings?.bankName ?? null,
+			bankAccount: invoiceSettings?.bankAccount ?? null,
+			receiverName: invoiceSettings?.receiverName ?? null,
+			font: reportSettings?.font ?? "HELVETICA",
+			headerPattern: reportSettings?.headerPattern ?? "NONE",
+		});
 
-	const buffer = await renderInvoicePdf({
-		studentName: student?.user.name ?? "-",
-		month: invoice.month,
-		year: invoice.year,
-		issuedAtLabel: invoice.createdAt.toLocaleDateString("en-GB", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-		}),
-		lines,
-		totalPrice: lines.reduce((sum, line) => sum + line.price, 0),
-		primaryColor: DEFAULT_THEME_COLOR,
-		organizationName: reportSettings?.organizationName ?? "Ihsanify",
-		logoUrl: reportSettings?.logoUrl ?? null,
-		websiteUrl: reportSettings?.websiteUrl ?? null,
-		footerPhone: reportSettings?.footerPhone ?? null,
-		footerEmail: reportSettings?.footerEmail ?? null,
-		footerInstagram: reportSettings?.footerInstagram ?? null,
-		bankName: invoiceSettings?.bankName ?? null,
-		bankAccount: invoiceSettings?.bankAccount ?? null,
-		receiverName: invoiceSettings?.receiverName ?? null,
-		font: reportSettings?.font ?? "HELVETICA",
-		headerPattern: reportSettings?.headerPattern ?? "NONE",
-	});
-
-	return c.body(new Uint8Array(buffer), 200, {
-		"Content-Type": "application/pdf",
-		"Content-Disposition": `attachment; filename="invoice-${invoice.year}-${invoice.month}-${student?.user.name ?? invoiceId}.pdf"`,
-	});
-});
+		return c.body(new Uint8Array(buffer), 200, {
+			"Content-Type": "application/pdf",
+			"Content-Disposition": `attachment; filename="invoice-${invoice.year}-${invoice.month}-${student?.user.name ?? invoiceId}.pdf"`,
+		});
+	},
+);
