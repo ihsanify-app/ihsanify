@@ -117,7 +117,9 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 					type="button"
 					onClick={handleRecordAttendance}
 					disabled={status === "saving" || status === "checking"}
-					className="group relative w-full overflow-hidden rounded-2xl bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 p-4 text-left text-white shadow-lg shadow-orange-500/30 transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:hover:translate-y-0"
+					className={`group relative w-full overflow-hidden rounded-2xl bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 p-4 text-left text-white shadow-lg shadow-orange-500/30 transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:hover:translate-y-0 ${
+						status === "idle" ? "animate-shake" : ""
+					}`}
 				>
 					<div className="pointer-events-none absolute inset-0 bg-white/0 transition-colors group-hover:bg-white/10" />
 					<div className="relative flex items-center gap-3">

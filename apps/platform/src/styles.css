@@ -53,3 +53,29 @@ code {
 .animate-marquee-right:hover {
 	animation-play-state: paused;
 }
+
+/* Subtle attention-getting wiggle for the unactioned Log Attendance prompt —
+   stops once attendance is recorded (that state renders a different element
+   entirely, so this class is simply absent then). */
+@keyframes shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	20% {
+		transform: translateX(-3px) rotate(-1deg);
+	}
+	40% {
+		transform: translateX(3px) rotate(1deg);
+	}
+	60% {
+		transform: translateX(-2px) rotate(-0.5deg);
+	}
+	80% {
+		transform: translateX(2px) rotate(0.5deg);
+	}
+}
+
+.animate-shake {
+	animation: shake 2.5s ease-in-out infinite;
+}
