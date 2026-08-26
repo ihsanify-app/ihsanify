@@ -1,3 +1,5 @@
+import { Reveal } from "./Reveal";
+
 const testimonials = [
 	{
 		id: 1,
@@ -35,27 +37,31 @@ const testimonials = [
 
 export function Testimonials() {
 	return (
-		<section className="bg-green-50 py-16 px-6 text-center">
-			<h2 className="font-heading text-3xl font-bold text-green-800 mb-10">
-				What Families Say
-			</h2>
+		<section
+			id="testimoni"
+			className="scroll-mt-20 bg-green-50 py-16 px-4 text-center sm:px-6"
+		>
+			<Reveal>
+				<h2 className="font-heading text-3xl font-bold text-green-800 mb-10">
+					Kata Mereka
+				</h2>
+			</Reveal>
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-				{testimonials.map((t) => (
-					<div
-						key={t.id}
-						className="bg-white rounded-2xl p-6 shadow-sm border border-green-100 flex flex-col items-center"
-					>
-						<div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-3xl mb-3">
-							{t.icon}
+				{testimonials.map((t, i) => (
+					<Reveal key={t.id} delayMs={i * 80}>
+						<div className="h-full bg-white rounded-2xl p-6 shadow-sm border border-green-100 flex flex-col items-center">
+							<div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-3xl mb-3">
+								{t.icon}
+							</div>
+							<h4 className="text-lg font-semibold text-stone-800">{t.name}</h4>
+							<p className="text-sm text-stone-500 mb-3">
+								<i>{t.subject}</i>
+							</p>
+							<p className="text-stone-600 text-sm leading-relaxed">
+								{t.content}
+							</p>
 						</div>
-						<h4 className="text-lg font-semibold text-stone-800">{t.name}</h4>
-						<p className="text-sm text-stone-500 mb-3">
-							<i>{t.subject}</i>
-						</p>
-						<p className="text-stone-600 text-sm leading-relaxed">
-							{t.content}
-						</p>
-					</div>
+					</Reveal>
 				))}
 			</div>
 		</section>

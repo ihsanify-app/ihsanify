@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+	scroll-behavior: smooth;
+}
+
 body {
 	@apply m-0;
 	font-family:
@@ -27,4 +31,25 @@ code {
 
 .animate-fade-slide-up {
 	animation: fade-slide-up 0.4s ease both;
+}
+
+/* Infinite left-to-right poster marquee. The track holds the item list
+   duplicated exactly twice at `width: max-content`, so translateX(-50%)
+   always shifts by exactly one set's width — the loop point is seamless
+   regardless of how many items or how wide they are. */
+@keyframes marquee-right {
+	from {
+		transform: translateX(-50%);
+	}
+	to {
+		transform: translateX(0%);
+	}
+}
+
+.animate-marquee-right {
+	animation: marquee-right 28s linear infinite;
+}
+
+.animate-marquee-right:hover {
+	animation-play-state: paused;
 }

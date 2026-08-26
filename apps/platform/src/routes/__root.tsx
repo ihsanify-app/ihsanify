@@ -1,6 +1,8 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
+import { useBrandLogo } from "../lib/useBrandLogo";
 import appCss from "../styles.css?url";
 import "@lmsproject/ui/globals.css";
 
@@ -38,6 +40,14 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	const logoUrl = useBrandLogo();
+
+	useEffect(() => {
+		if (!logoUrl) return;
+		const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+		if (link) link.href = logoUrl;
+	}, [logoUrl]);
+
 	return (
 		<html lang="en">
 			<head>

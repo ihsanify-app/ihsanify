@@ -8,6 +8,7 @@ import { groupsRouter } from "./routes/groups";
 import { invoiceSettingsRouter } from "./routes/invoiceSettings";
 import { invoicesRouter } from "./routes/invoices";
 import { lookupsRouter } from "./routes/lookups";
+import { publicRouter } from "./routes/public";
 import { reportSettingsRouter } from "./routes/reportSettings";
 import { reportsRouter } from "./routes/reports";
 import { reportThemesRouter } from "./routes/reportThemes";
@@ -28,6 +29,7 @@ app
 	.route("/", usersRouter)
 	.route("/", groupsRouter)
 	.route("/", lookupsRouter)
+	.route("/", publicRouter)
 	.route("/", sessionsRouter)
 	.route("/", reportsRouter)
 	.route("/", assignmentsRouter)

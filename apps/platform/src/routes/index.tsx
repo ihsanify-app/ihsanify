@@ -1,29 +1,29 @@
-// import { Sidebar, SidebarItem } from "@lmsproject/ui";
 import { createFileRoute } from "@tanstack/react-router";
-import { Features } from "../components/landing/Features";
+import { Faq } from "../components/landing/Faq";
 import { Footer } from "../components/landing/Footer";
 import { Hero } from "../components/landing/Hero";
+import { InstagramMarquee } from "../components/landing/InstagramMarquee";
 import { Navbar } from "../components/landing/Navbar";
-import { Stats } from "../components/landing/Stats";
-import { Teachers } from "../components/landing/Teachers";
+import { NiatTujuan } from "../components/landing/NiatTujuan";
+import { ProgramFasilitas } from "../components/landing/ProgramFasilitas";
+import { Registrasi } from "../components/landing/Registrasi";
+import { TentangKami } from "../components/landing/TentangKami";
 import { Testimonials } from "../components/landing/Testimonials";
 
 export const Route = createFileRoute("/")({ component: App });
 
-// https://www.youtube.com/watch?v=NFrFhBJPTmI
 function App() {
-	console.log("Environment Variable TEST:", import.meta.env.VITE_TEST);
 	return (
 		<div>
-			{/* <Sidebar>
-				<SidebarItem icon={<LayoutDashboard size={20} />} />
-			</Sidebar> */}
 			<Navbar />
 			<Hero schoolName="Madrasatul Ilmin Naafi" />
-			<Features />
-			<Teachers />
+			<InstagramMarquee />
+			<TentangKami />
+			<NiatTujuan />
+			<ProgramFasilitas />
 			<Testimonials />
-			<Stats />
+			<Registrasi />
+			<Faq />
 			<Footer />
 		</div>
 	);
