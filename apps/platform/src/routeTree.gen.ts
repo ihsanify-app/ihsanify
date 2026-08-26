@@ -21,6 +21,7 @@ import { Route as AppInvoicesRouteImport } from './routes/_app/invoices'
 import { Route as AppGroupsRouteImport } from './routes/_app/groups'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppSettingsUserRouteImport } from './routes/_app/settings_/user'
 import { Route as AppSettingsSubjectRouteImport } from './routes/_app/settings_/subject'
 import { Route as AppSettingsReportRouteImport } from './routes/_app/settings_/report'
@@ -91,6 +92,11 @@ const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
   path: '/assignments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsUserRoute = AppSettingsUserRouteImport.update({
   id: '/settings_/user',
   path: '/settings/user',
@@ -147,6 +153,7 @@ const AppGroupsGroupIdAssignmentsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/analytics': typeof AppAnalyticsRoute
   '/assignments': typeof AppAssignmentsRoute
   '/dashboard': typeof AppDashboardRoute
   '/groups': typeof AppGroupsRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/analytics': typeof AppAnalyticsRoute
   '/assignments': typeof AppAssignmentsRoute
   '/dashboard': typeof AppDashboardRoute
   '/groups': typeof AppGroupsRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/assignments': typeof AppAssignmentsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/groups': typeof AppGroupsRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/analytics'
     | '/assignments'
     | '/dashboard'
     | '/groups'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/analytics'
     | '/assignments'
     | '/dashboard'
     | '/groups'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/_app/analytics'
     | '/_app/assignments'
     | '/_app/dashboard'
     | '/_app/groups'
@@ -380,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssignmentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings_/user': {
       id: '/_app/settings_/user'
       path: '/settings/user'
@@ -454,6 +473,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppAssignmentsRoute: typeof AppAssignmentsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppGroupsRoute: typeof AppGroupsRoute
@@ -476,6 +496,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
   AppAssignmentsRoute: AppAssignmentsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppGroupsRoute: AppGroupsRoute,

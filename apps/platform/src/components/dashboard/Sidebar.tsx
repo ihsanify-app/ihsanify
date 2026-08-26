@@ -4,6 +4,7 @@ import {
 	BookOpen,
 	ClipboardList,
 	LayoutDashboard,
+	LineChart,
 	Receipt,
 	Settings,
 	Sprout,
@@ -40,6 +41,13 @@ const navItems = [
 		icon: Wallet,
 		title: "Payroll",
 		path: "/payroll",
+		adminOnly: true,
+	},
+	{
+		id: 10,
+		icon: LineChart,
+		title: "Analytics",
+		path: "/analytics",
 		adminOnly: true,
 	},
 	{
