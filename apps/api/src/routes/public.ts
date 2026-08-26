@@ -82,3 +82,92 @@ publicRouter.get("/public/instagram-posts", async (c) => {
 		})),
 	});
 });
+
+// "Verse of the Day" on the Dashboard. Text/translations are fetched live
+// from api.alquran.cloud (free, no API key) rather than hand-typed, since
+// accuracy of Arabic scripture shouldn't depend on what could be reliably
+// recalled from memory. Only a small pool of candidate ayahs rotates by
+// day-of-year — chosen for being short and meaningful standalone (not
+// mid-narrative/legal-context verses that read oddly in isolation) — but the
+// actual text/translation always comes from the API, not this list.
+// Cached per calendar day so repeated dashboard loads don't hit the external
+// API on every request; falls back to the last good cache, or a small
+// hand-checked static verse if that's empty too, if the API is unreachable —
+// this feature should never be the reason the Dashboard breaks.
+const VERSE_REFERENCES = [
+	"1:2",
+	"2:153",
+	"10:57",
+	"13:28",
+	"14:7",
+	"16:97",
+	"94:1",
+	"94:5",
+	"94:6",
+	"103:1",
+	"103:2",
+	"103:3",
+	"112:1",
+	"112:2",
+];
+
+type DailyVerse = {
+	reference: string;
+	arabic: string;
+	english: string;
+	indonesian: string;
+};
+
+const FALLBACK_VERSE: DailyVerse = {
+	reference: "QS. Ash-Sharh 94:5",
+	arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
+	english: "For indeed, with hardship [will be] ease.",
+	indonesian: "Maka sesungguhnya bersama kesulitan ada kemudahan.",
+};
+
+let verseCache: { dateKey: string; verse: DailyVerse } | null = null;
+
+function dayOfYear(date: Date) {
+	const start = new Date(date.getFullYear(), 0, 0);
+	return Math.floor((date.getTime() - start.getTime()) / 86_400_000);
+}
+
+publicRouter.get("/public/daily-verse", async (c) => {
+	const now = new Date();
+	const dateKey = now.toISOString().slice(0, 10);
+
+	if (verseCache?.dateKey === dateKey) {
+		return c.json({ success: true, data: verseCache.verse });
+	}
+
+	const reference = VERSE_REFERENCES[dayOfYear(now) % VERSE_REFERENCES.length];
+
+	try {
+		const res = await fetch(
+			`https://api.alquran.cloud/v1/ayah/${reference}/editions/quran-uthmani,en.sahih,id.indonesian`,
+		);
+		if (!res.ok) throw new Error(`alquran.cloud returned ${res.status}`);
+		const json = (await res.json()) as {
+			data: {
+				text: string;
+				numberInSurah: number;
+				surah: { number: number; englishName: string };
+			}[];
+		};
+		const [arabicEd, englishEd, indonesianEd] = json.data;
+		const verse: DailyVerse = {
+			reference: `QS. ${arabicEd.surah.englishName} ${arabicEd.surah.number}:${arabicEd.numberInSurah}`,
+			arabic: arabicEd.text,
+			english: englishEd.text,
+			indonesian: indonesianEd.text,
+		};
+		verseCache = { dateKey, verse };
+		return c.json({ success: true, data: verse });
+	} catch (err) {
+		console.error("[daily-verse] fetch failed:", err);
+		return c.json({
+			success: true,
+			data: verseCache?.verse ?? FALLBACK_VERSE,
+		});
+	}
+});

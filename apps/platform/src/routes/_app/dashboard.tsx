@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AttendancePrompt } from "../../components/dashboard/AttendancePrompt";
+import { DailyVerseCard } from "../../components/dashboard/DailyVerseCard";
 import { GroupCalendar } from "../../components/dashboard/GroupCalendar";
 import { MiniCalendar } from "../../components/dashboard/MiniCalendar";
 import { NearestSessionCard } from "../../components/dashboard/NearestSessionCard";
@@ -25,12 +26,13 @@ function RouteComponent() {
 	return (
 		<div className="flex max-lg:flex-col gap-4 max-sm:p-3 sm:p-6 lg:flex-row lg:gap-6">
 			<div className="flex flex-col gap-4 sm:gap-6 lg:w-72 lg:shrink-0">
+				<AttendancePrompt groups={groups} />
+				<DailyVerseCard />
 				<MiniCalendar
 					focusedDate={focusedDate}
 					onFocusedDateChange={setFocusedDate}
 				/>
 				<NearestSessionCard groups={groups} />
-				<AttendancePrompt groups={groups} />
 			</div>
 			<div className="min-w-0 flex-1">
 				<GroupCalendar
