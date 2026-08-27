@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Sprout } from "lucide-react";
 import { useState } from "react";
+import { apiFetch } from "../lib/apiClient";
 import { setStoredAuth } from "../lib/mockAuth";
 
 export const Route = createFileRoute("/login")({
@@ -23,25 +24,23 @@ function LoginPage() {
 		setIsLoading(true);
 		setError("");
 		try {
-			const res = await fetch("http://localhost:8000/auth/login", {
+			const { ok, body } = await apiFetch("/auth/login", {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email, password }),
 			});
-			const data = await res.json();
-			if (!res.ok || !data.success) {
-				setError(data.message ?? "Something went wrong. Please try again.");
+			if (!ok || !body?.success) {
+				setError(body?.message ?? "Something went wrong. Please try again.");
 				return;
 			}
 			setStoredAuth(
 				{
-					id: data.data.user.id,
+					id: body.data.user.id,
 					teacherId: null,
 					studentId: null,
-					role: data.data.user.role.toLowerCase(),
-					name: data.data.user.name,
+					role: body.data.user.role.toLowerCase(),
+					name: body.data.user.name,
 				},
-				data.data.token,
+				body.data.token,
 			);
 			// Full page navigation so mockUser (read once at module load) picks up
 			// the freshly stored auth instead of the stale pre-login value.
