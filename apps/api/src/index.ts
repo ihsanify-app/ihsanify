@@ -20,7 +20,14 @@ import { subjectsRouter } from "./routes/subjects";
 import { usersRouter } from "./routes/users";
 
 const app = new Hono();
-app.use("*", cors({ origin: "http://localhost:3000" }));
+// Comma-separated list in CORS_ORIGINS (e.g. "http://localhost:3000,http://103.187.146.151:3000")
+// so this doesn't need a code change every time the frontend is accessed from
+// a new host/IP — defaults to localhost for local dev.
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
+	.split(",")
+	.map((origin) => origin.trim())
+	.filter(Boolean);
+app.use("*", cors({ origin: allowedOrigins }));
 console.log("Environment Variable TEST:", process.env.TEST);
 
 app
