@@ -7,6 +7,7 @@ import { Navbar } from "../components/landing/Navbar";
 import { NiatTujuan } from "../components/landing/NiatTujuan";
 import { ProgramFasilitas } from "../components/landing/ProgramFasilitas";
 import { Registrasi } from "../components/landing/Registrasi";
+import { Stats } from "../components/landing/Stats";
 import { TentangKami } from "../components/landing/TentangKami";
 import { Testimonials } from "../components/landing/Testimonials";
 
@@ -14,16 +15,17 @@ export const Route = createFileRoute("/")({ component: App });
 
 function App() {
 	return (
-		<div>
+		<div className="font-sans">
 			<Navbar />
 			<Hero schoolName="Madrasatul Ilmin Naafi" />
+			<Stats />
 			<InstagramMarquee />
 			<TentangKami />
 			<NiatTujuan />
 			<ProgramFasilitas />
 			<Testimonials />
-			<Registrasi />
 			<Faq />
+			<Registrasi />
 			<Footer />
 		</div>
 	);
