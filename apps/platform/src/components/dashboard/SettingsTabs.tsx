@@ -7,6 +7,7 @@ const TABS = [
 	{ key: "group", label: "Group", to: "/settings/group" },
 	{ key: "invoice", label: "Invoice", to: "/settings/invoice" },
 	{ key: "assignment", label: "Assignment", to: "/settings/assignment" },
+	{ key: "landing", label: "Landing", to: "/settings/landing" },
 ] as const;
 
 export type SettingsTabKey = (typeof TABS)[number]["key"];
