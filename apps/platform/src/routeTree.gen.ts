@@ -25,6 +25,7 @@ import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppSettingsUserRouteImport } from './routes/_app/settings_/user'
 import { Route as AppSettingsSubjectRouteImport } from './routes/_app/settings_/subject'
 import { Route as AppSettingsReportRouteImport } from './routes/_app/settings_/report'
+import { Route as AppSettingsLandingRouteImport } from './routes/_app/settings_/landing'
 import { Route as AppSettingsInvoiceRouteImport } from './routes/_app/settings_/invoice'
 import { Route as AppSettingsGroupRouteImport } from './routes/_app/settings_/group'
 import { Route as AppSettingsAssignmentRouteImport } from './routes/_app/settings_/assignment'
@@ -112,6 +113,11 @@ const AppSettingsReportRoute = AppSettingsReportRouteImport.update({
   path: '/settings/report',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSettingsLandingRoute = AppSettingsLandingRouteImport.update({
+  id: '/settings_/landing',
+  path: '/settings/landing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsInvoiceRoute = AppSettingsInvoiceRouteImport.update({
   id: '/settings_/invoice',
   path: '/settings/invoice',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/settings/assignment': typeof AppSettingsAssignmentRoute
   '/settings/group': typeof AppSettingsGroupRoute
   '/settings/invoice': typeof AppSettingsInvoiceRoute
+  '/settings/landing': typeof AppSettingsLandingRoute
   '/settings/report': typeof AppSettingsReportRoute
   '/settings/subject': typeof AppSettingsSubjectRoute
   '/settings/user': typeof AppSettingsUserRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/settings/assignment': typeof AppSettingsAssignmentRoute
   '/settings/group': typeof AppSettingsGroupRoute
   '/settings/invoice': typeof AppSettingsInvoiceRoute
+  '/settings/landing': typeof AppSettingsLandingRoute
   '/settings/report': typeof AppSettingsReportRoute
   '/settings/subject': typeof AppSettingsSubjectRoute
   '/settings/user': typeof AppSettingsUserRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/_app/settings_/assignment': typeof AppSettingsAssignmentRoute
   '/_app/settings_/group': typeof AppSettingsGroupRoute
   '/_app/settings_/invoice': typeof AppSettingsInvoiceRoute
+  '/_app/settings_/landing': typeof AppSettingsLandingRoute
   '/_app/settings_/report': typeof AppSettingsReportRoute
   '/_app/settings_/subject': typeof AppSettingsSubjectRoute
   '/_app/settings_/user': typeof AppSettingsUserRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/settings/assignment'
     | '/settings/group'
     | '/settings/invoice'
+    | '/settings/landing'
     | '/settings/report'
     | '/settings/subject'
     | '/settings/user'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/settings/assignment'
     | '/settings/group'
     | '/settings/invoice'
+    | '/settings/landing'
     | '/settings/report'
     | '/settings/subject'
     | '/settings/user'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/_app/settings_/assignment'
     | '/_app/settings_/group'
     | '/_app/settings_/invoice'
+    | '/_app/settings_/landing'
     | '/_app/settings_/report'
     | '/_app/settings_/subject'
     | '/_app/settings_/user'
@@ -420,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsReportRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/settings_/landing': {
+      id: '/_app/settings_/landing'
+      path: '/settings/landing'
+      fullPath: '/settings/landing'
+      preLoaderRoute: typeof AppSettingsLandingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings_/invoice': {
       id: '/_app/settings_/invoice'
       path: '/settings/invoice'
@@ -487,6 +506,7 @@ interface AppRouteChildren {
   AppSettingsAssignmentRoute: typeof AppSettingsAssignmentRoute
   AppSettingsGroupRoute: typeof AppSettingsGroupRoute
   AppSettingsInvoiceRoute: typeof AppSettingsInvoiceRoute
+  AppSettingsLandingRoute: typeof AppSettingsLandingRoute
   AppSettingsReportRoute: typeof AppSettingsReportRoute
   AppSettingsSubjectRoute: typeof AppSettingsSubjectRoute
   AppSettingsUserRoute: typeof AppSettingsUserRoute
@@ -510,6 +530,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsAssignmentRoute: AppSettingsAssignmentRoute,
   AppSettingsGroupRoute: AppSettingsGroupRoute,
   AppSettingsInvoiceRoute: AppSettingsInvoiceRoute,
+  AppSettingsLandingRoute: AppSettingsLandingRoute,
   AppSettingsReportRoute: AppSettingsReportRoute,
   AppSettingsSubjectRoute: AppSettingsSubjectRoute,
   AppSettingsUserRoute: AppSettingsUserRoute,
