@@ -1,9 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
 	--font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
 	--font-heading: "Baloo 2", "Nunito", ui-sans-serif, system-ui, sans-serif;
+	/* Casual handwriting face for the testimonial chat bubbles specifically —
+	   deliberately distinct from the site's usual heading/body pair, to read
+	   as a warm, personal note rather than another block of interface copy. */
+	--font-handwritten: "Caveat", "Nunito", cursive;
 }
 
 h1,
@@ -11,6 +15,14 @@ h2,
 h3,
 h4 {
 	font-family: var(--font-heading);
+}
+
+/* Plain rule, not a Tailwind-generated utility — apps/platform's separate
+   Tailwind compilation (@tailwindcss/vite) never sees this package's @theme
+   block, only this already-built stylesheet, so `.font-handwritten` has to
+   exist here literally for consumers like Testimonials.tsx to use it. */
+.font-handwritten {
+	font-family: var(--font-handwritten);
 }
 
 :focus-visible {
