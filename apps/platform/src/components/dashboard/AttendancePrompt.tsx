@@ -1,4 +1,4 @@
-import { BellRing, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertTriangle, BellRing, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
@@ -17,6 +17,7 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 	const [status, setStatus] = useState<Status>("checking");
 	const [sessionId, setSessionId] = useState<string | null>(null);
 	const [showConfirmation, setShowConfirmation] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
 		const interval = setInterval(() => setNow(new Date()), 30_000);
@@ -38,6 +39,7 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 			({ status: httpStatus, body }) => {
 				if (cancelled) return;
 				if (httpStatus !== 200) {
+					setErrorMessage("Couldn't check today's attendance status.");
 					setStatus("error");
 					return;
 				}
@@ -62,6 +64,7 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 	async function handleRecordAttendance() {
 		if (!target) return;
 		setStatus("saving");
+		setErrorMessage("");
 		try {
 			let id = sessionId;
 			if (!id) {
@@ -94,7 +97,8 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 			setStatus("recorded");
 			setShowConfirmation(true);
 		} catch {
-			setStatus("idle");
+			setErrorMessage("Couldn't save attendance. Please try again.");
+			setStatus("error");
 		}
 	}
 
@@ -111,6 +115,25 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 							{target.groupName}
 						</p>
 					</div>
+				</div>
+			) : status === "error" ? (
+				<div className="flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
+					<AlertTriangle className="shrink-0 text-rose-600" size={22} />
+					<div className="min-w-0 flex-1">
+						<p className="truncate text-sm font-semibold text-rose-800">
+							{errorMessage || "Something went wrong."}
+						</p>
+						<p className="truncate text-xs text-rose-700/80">
+							{target.groupName}
+						</p>
+					</div>
+					<button
+						type="button"
+						onClick={() => setStatus("idle")}
+						className="shrink-0 cursor-pointer rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+					>
+						Try again
+					</button>
 				</div>
 			) : (
 				<button
@@ -163,10 +186,10 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 						onClick={(e) => e.stopPropagation()}
 					>
 						<CheckCircle2 className="mx-auto mb-3 text-green-600" size={40} />
-						<p className="text-base font-semibold text-gray-800">
+						<p className="text-base font-semibold text-stone-800">
 							Attendance has been recorded
 						</p>
-						<p className="mt-1 text-sm text-gray-500">{target.groupName}</p>
+						<p className="mt-1 text-sm text-stone-500">{target.groupName}</p>
 						<button
 							type="button"
 							onClick={() => setShowConfirmation(false)}

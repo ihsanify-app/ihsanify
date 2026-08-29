@@ -33,8 +33,8 @@ export function NearestSessionCard({
 
 	if (!nearest) {
 		return (
-			<div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-				<div className="flex items-center gap-2 text-gray-500">
+			<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+				<div className="flex items-center gap-2 text-stone-500">
 					<CalendarClock size={18} />
 					<span className="text-sm font-medium">No upcoming sessions</span>
 				</div>
@@ -60,9 +60,9 @@ export function NearestSessionCard({
 				<CalendarClock size={14} />
 				Class reminder
 			</div>
-			<p className="mt-2 text-base font-semibold leading-tight">
+			<h2 className="mt-2 font-heading text-lg font-bold leading-tight">
 				{nearest.groupName}
-			</p>
+			</h2>
 			{nearest.subjectName && (
 				<p className="text-xs opacity-80">{nearest.subjectName}</p>
 			)}

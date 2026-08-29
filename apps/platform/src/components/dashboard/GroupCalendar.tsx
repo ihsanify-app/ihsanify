@@ -106,35 +106,37 @@ export function GroupCalendar({
 	}
 
 	return (
-		<div className="flex min-h-105 flex-col rounded-2xl border border-gray-200 bg-white shadow-sm sm:min-h-150">
-			<div className="flex max-sm:flex-col gap-3 border-b border-gray-100 max-sm:px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+		<div className="flex min-h-105 flex-col rounded-2xl border border-green-100 bg-white shadow-sm sm:min-h-150">
+			<div className="flex max-sm:flex-col gap-3 border-b border-green-100 max-sm:px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
+						aria-label="Previous period"
 						onClick={() => navigate(-1)}
-						className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100"
+						className="rounded-md p-1.5 text-stone-500 hover:bg-stone-100"
 					>
 						<ChevronLeft size={18} />
 					</button>
-					<span className="min-w-0 max-sm:flex-1 text-sm font-semibold text-gray-800 sm:min-w-45 sm:flex-none">
+					<h2 className="min-w-0 max-sm:flex-1 font-heading text-lg font-bold text-stone-800 sm:min-w-45 sm:flex-none">
 						{periodLabel(viewMode, focusedDate)}
-					</span>
+					</h2>
 					<button
 						type="button"
+						aria-label="Next period"
 						onClick={() => navigate(1)}
-						className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100"
+						className="rounded-md p-1.5 text-stone-500 hover:bg-stone-100"
 					>
 						<ChevronRight size={18} />
 					</button>
 					<button
 						type="button"
 						onClick={() => onFocusedDateChange(new Date())}
-						className="ml-2 rounded-md border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+						className="ml-2 rounded-md border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-600 hover:bg-stone-50"
 					>
 						Today
 					</button>
 				</div>
-				<div className="flex items-center gap-1 self-start rounded-lg bg-gray-100 p-1 sm:self-auto">
+				<div className="flex items-center gap-1 self-start rounded-lg bg-stone-100 p-1 sm:self-auto">
 					{(["daily", "weekly", "monthly"] as ViewMode[]).map((mode) => (
 						<button
 							type="button"
@@ -142,8 +144,8 @@ export function GroupCalendar({
 							onClick={() => setViewMode(mode)}
 							className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors ${
 								viewMode === mode
-									? "bg-white text-gray-900 shadow-sm"
-									: "text-gray-500 hover:text-gray-700"
+									? "bg-white text-stone-900 shadow-sm"
+									: "text-stone-500 hover:text-stone-700"
 							}`}
 						>
 							{mode}
@@ -192,13 +194,13 @@ function TimeGrid({
 	return (
 		<div className="flex-1 overflow-auto">
 			<div className="flex min-w-full">
-				<div className="w-16 shrink-0 border-r border-gray-100">
-					<div className="h-10 border-b border-gray-100" />
+				<div className="w-16 shrink-0 border-r border-stone-100">
+					<div className="h-10 border-b border-stone-100" />
 					{hours.map((hour) => (
 						<div
 							key={hour}
 							style={{ height: ROW_HEIGHT_PX }}
-							className="relative -translate-y-2 px-2 text-right text-[11px] text-gray-400"
+							className="relative -translate-y-2 px-2 text-right text-[11px] text-stone-400"
 						>
 							{formatHourLabel(hour)}
 						</div>
@@ -217,11 +219,11 @@ function TimeGrid({
 						return (
 							<div
 								key={date.toISOString()}
-								className="border-r border-gray-100 last:border-r-0"
+								className="border-r border-stone-100 last:border-r-0"
 							>
 								<div
-									className={`flex h-10 flex-col items-center justify-center border-b border-gray-100 text-xs ${
-										isToday ? "text-green-700 font-semibold" : "text-gray-500"
+									className={`flex h-10 flex-col items-center justify-center border-b border-stone-100 text-xs ${
+										isToday ? "text-green-700 font-semibold" : "text-stone-500"
 									}`}
 								>
 									<span>
@@ -233,7 +235,7 @@ function TimeGrid({
 									{hours.map((hour, i) => (
 										<div
 											key={hour}
-											className="absolute inset-x-0 border-b border-gray-50"
+											className="absolute inset-x-0 border-b border-stone-50"
 											style={{ top: i * ROW_HEIGHT_PX, height: ROW_HEIGHT_PX }}
 										/>
 									))}
@@ -320,18 +322,18 @@ function MonthlyGrid({
 	return (
 		<div className="flex-1 overflow-x-auto p-2">
 			<div className="min-w-160">
-				<div className="grid grid-cols-7 border-b border-gray-100 pb-1">
+				<div className="grid grid-cols-7 border-b border-stone-100 pb-1">
 					{DAYS.map((d) => (
 						<span
 							key={d.key}
-							className="text-center text-[11px] font-medium text-gray-400"
+							className="text-center text-[11px] font-medium text-stone-400"
 						>
 							{d.label}
 						</span>
 					))}
 				</div>
 				<div
-					className="grid grid-cols-7 grid-rows-6 gap-px bg-gray-100"
+					className="grid grid-cols-7 grid-rows-6 gap-px bg-stone-100"
 					style={{ height: "calc(100% - 24px)" }}
 				>
 					{dates.map((date) => {
@@ -345,15 +347,15 @@ function MonthlyGrid({
 						return (
 							<div
 								key={date.toISOString()}
-								className={`min-h-[90px] bg-white p-1.5 ${inMonth ? "" : "bg-gray-50/60"}`}
+								className={`min-h-[90px] bg-white p-1.5 ${inMonth ? "" : "bg-stone-50/60"}`}
 							>
 								<span
 									className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
 										isToday
 											? "bg-green-700 font-semibold text-white"
 											: inMonth
-												? "text-gray-700"
-												: "text-gray-300"
+												? "text-stone-700"
+												: "text-stone-300"
 									}`}
 								>
 									{date.getDate()}
@@ -370,7 +372,7 @@ function MonthlyGrid({
 										</div>
 									))}
 									{overflowCount > 0 && (
-										<span className="text-[10px] text-gray-400">
+										<span className="text-[10px] text-stone-400">
 											+{overflowCount} more
 										</span>
 									)}

@@ -44,31 +44,33 @@ export function MiniCalendar({
 	});
 
 	return (
-		<div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+		<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
 			<div className="mb-3 flex items-center justify-between">
-				<span className="text-sm font-semibold text-gray-800">
+				<h2 className="font-heading text-lg font-bold text-stone-800">
 					{monthLabel}
-				</span>
+				</h2>
 				<div className="flex items-center gap-1">
 					<button
 						type="button"
+						aria-label="Previous month"
 						onClick={() =>
 							setViewMonth(
 								(prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
 							)
 						}
-						className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
+						className="rounded-md p-1 text-stone-500 hover:bg-stone-100"
 					>
 						<ChevronLeft size={16} />
 					</button>
 					<button
 						type="button"
+						aria-label="Next month"
 						onClick={() =>
 							setViewMonth(
 								(prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
 							)
 						}
-						className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
+						className="rounded-md p-1 text-stone-500 hover:bg-stone-100"
 					>
 						<ChevronRight size={16} />
 					</button>
@@ -76,7 +78,7 @@ export function MiniCalendar({
 			</div>
 			<div className="grid grid-cols-7 gap-y-1 text-center">
 				{WEEKDAY_LABELS.map((label) => (
-					<span key={label} className="text-[11px] font-medium text-gray-400">
+					<span key={label} className="text-[11px] font-medium text-stone-400">
 						{label}
 					</span>
 				))}
@@ -95,8 +97,8 @@ export function MiniCalendar({
 									: isToday
 										? "text-green-700 font-semibold hover:bg-green-50"
 										: inMonth
-											? "text-gray-700 hover:bg-gray-100"
-											: "text-gray-300 hover:bg-gray-50"
+											? "text-stone-700 hover:bg-stone-100"
+											: "text-stone-300 hover:bg-stone-50"
 							}`}
 						>
 							{day.getDate()}
