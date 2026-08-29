@@ -11,6 +11,13 @@
 				],
 				"createdAt": "2026-08-29T10:00:14.964Z",
 				"reason": "Unselected chip text sits on the modal's white background, not a colored one - the green is only applied on hover/selected state, so this is a detector false positive"
+			},
+			{
+				"rule": "gray-on-color",
+				"value": "text-stone-600",
+				"files": ["apps/platform/src/components/landing/Navbar.tsx"],
+				"createdAt": "2026-08-29T13:59:29.524Z",
+				"reason": "Nav link unselected state sits on the white/blurred navbar background, not a colored one - green only applies on hover/active state, same false-positive pattern already sanctioned in RegistrasiFormModal.tsx"
 			}
 		]
 	}
