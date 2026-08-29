@@ -9,13 +9,15 @@ publicRouter.get("/public/stats", async (c) => {
 	const [
 		teacherCount,
 		studentCount,
-		subjectCount,
+		groupCount,
 		sessionDuration,
 		landingStats,
 	] = await Promise.all([
 		prisma.teacher.count(),
 		prisma.student.count(),
-		prisma.subject.count(),
+		// Every class ever run, not just currently active ones — reflects the
+		// school's real track record, not a snapshot of today's roster.
+		prisma.group.count(),
 		prisma.session.aggregate({ _sum: { durationMinutes: true } }),
 		prisma.landingStats.findFirst(),
 	]);
@@ -33,7 +35,7 @@ publicRouter.get("/public/stats", async (c) => {
 		data: {
 			teacherCount,
 			studentCount,
-			subjectCount,
+			groupCount,
 			totalSessionHours: trackedHours + historicalHours,
 		},
 	});

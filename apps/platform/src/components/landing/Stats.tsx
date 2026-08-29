@@ -5,7 +5,7 @@ import { Reveal } from "./Reveal";
 type PublicStats = {
 	teacherCount: number;
 	studentCount: number;
-	subjectCount: number;
+	groupCount: number;
 	totalSessionHours: number;
 };
 
@@ -35,10 +35,10 @@ export function Stats() {
 	if (loadState === "error") return null;
 
 	const items = [
-		{ id: 1, title: "Pengajar", count: stats?.teacherCount ?? 0 },
-		{ id: 2, title: "Pembelajar", count: stats?.studentCount ?? 0 },
-		{ id: 3, title: "Pelajaran", count: stats?.subjectCount ?? 0 },
-		{ id: 4, title: "Jam Pembelajaran", count: stats?.totalSessionHours ?? 0 },
+		{ id: 1, title: "Jam Pembelajaran", count: stats?.totalSessionHours ?? 0 },
+		{ id: 2, title: "Kelas", count: stats?.groupCount ?? 0 },
+		{ id: 3, title: "Pembelajar", count: stats?.studentCount ?? 0 },
+		{ id: 4, title: "Pengajar", count: stats?.teacherCount ?? 0 },
 	];
 
 	return (
