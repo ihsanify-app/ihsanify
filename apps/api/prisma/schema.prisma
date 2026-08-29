@@ -473,3 +473,15 @@ model Testimonial {
   givenAt   DateTime @default(now())
   createdAt DateTime @default(now())
 }
+
+// One row, global — a manually-set number added to the live-computed
+// session-hour stat on the landing page (GET /public/stats), representing
+// real teaching hours that happened before this LMS existed (since 2021)
+// and were never tracked as individual Session rows here. Deliberately not
+// backdated as fake Session/attendance records — this app's Session rows
+// feed real Payroll/Invoice/Report calculations, and pre-2026 attendance
+// wasn't tracked at that granularity anyway.
+model LandingStats {
+  id                     String @id @default(cuid())
+  historicalSessionHours Int    @default(0)
+}

@@ -7,6 +7,7 @@ import { assignmentsRouter } from "./routes/assignments";
 import { groupsRouter } from "./routes/groups";
 import { invoiceSettingsRouter } from "./routes/invoiceSettings";
 import { invoicesRouter } from "./routes/invoices";
+import { landingStatsRouter } from "./routes/landingStats";
 import { lookupsRouter } from "./routes/lookups";
 import { notificationsRouter } from "./routes/notifications";
 import { payrollRouter } from "./routes/payroll";
@@ -52,7 +53,8 @@ app
 	.route("/", subjectsRouter)
 	.route("/", reportThemesRouter)
 	.route("/", reportSettingsRouter)
-	.route("/", testimonialsRouter);
+	.route("/", testimonialsRouter)
+	.route("/", landingStatsRouter);
 
 serve(
 	{
