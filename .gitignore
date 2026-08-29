@@ -197,3 +197,9 @@ count.txt
 __unconfig*
 todos.json
 **/generated/prisma
+
+# Impeccable design skill — keep PRODUCT.md, DESIGN.md, .impeccable/design.json,
+# and .impeccable/config.json (durable project docs + persisted false-positive
+# ignores); skip the local scan cache and point-in-time critique snapshots.
+**/.impeccable/hook.cache.json
+**/.impeccable/critique/
