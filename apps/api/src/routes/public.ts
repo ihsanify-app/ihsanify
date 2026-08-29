@@ -6,13 +6,27 @@ import { prisma } from "../utils/prisma";
 export const publicRouter = new Hono();
 
 publicRouter.get("/public/stats", async (c) => {
-	const [teacherCount, studentCount, subjectCount, sessionDuration] =
-		await Promise.all([
-			prisma.teacher.count(),
-			prisma.student.count(),
-			prisma.subject.count(),
-			prisma.session.aggregate({ _sum: { durationMinutes: true } }),
-		]);
+	const [
+		teacherCount,
+		studentCount,
+		subjectCount,
+		sessionDuration,
+		landingStats,
+	] = await Promise.all([
+		prisma.teacher.count(),
+		prisma.student.count(),
+		prisma.subject.count(),
+		prisma.session.aggregate({ _sum: { durationMinutes: true } }),
+		prisma.landingStats.findFirst(),
+	]);
+
+	// Real teaching happened for years before this LMS tracked individual
+	// Session rows (since 2021) — historicalSessionHours (Settings → Landing)
+	// is a manually-set, honest addition for that, not backdated fake data.
+	const trackedHours = Math.round(
+		(sessionDuration._sum.durationMinutes ?? 0) / 60,
+	);
+	const historicalHours = landingStats?.historicalSessionHours ?? 0;
 
 	return c.json({
 		success: true,
@@ -20,9 +34,7 @@ publicRouter.get("/public/stats", async (c) => {
 			teacherCount,
 			studentCount,
 			subjectCount,
-			totalSessionHours: Math.round(
-				(sessionDuration._sum.durationMinutes ?? 0) / 60,
-			),
+			totalSessionHours: trackedHours + historicalHours,
 		},
 	});
 });
@@ -54,6 +66,22 @@ publicRouter.get("/public/testimonials", async (c) => {
 			message: t.message,
 			givenAt: t.givenAt.toISOString(),
 			createdAt: t.createdAt.toISOString(),
+		})),
+	});
+});
+
+// Subject names only, no PII — safe to expose without auth so the landing
+// page's registration form can offer real subject choices instead of a
+// hardcoded list.
+publicRouter.get("/public/subjects", async (c) => {
+	const subjects = await prisma.subject.findMany({
+		orderBy: { name: "asc" },
+	});
+	return c.json({
+		success: true,
+		data: subjects.map((s) => ({
+			subjectId: s.id,
+			subjectName: s.name,
 		})),
 	});
 });
