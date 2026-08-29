@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, Sprout, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useBrandLogo } from "../../lib/useBrandLogo";
 
 const NAV_ITEMS = [
 	{ id: "tentang-kami", label: "Tentang Kami" },
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 ];
 
 export function Navbar() {
+	const logoUrl = useBrandLogo();
 	const [activeId, setActiveId] = useState(NAV_ITEMS[0].id);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -37,9 +39,17 @@ export function Navbar() {
 	return (
 		<nav className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-green-100">
 			<div className="flex items-center justify-between px-4 py-4 sm:px-6">
-				<span className="flex items-center gap-2 text-green-700 font-heading font-bold text-xl">
-					<Sprout className="text-green-600" size={24} />
-					Ihsanify
+				<span className="flex max-w-42.5 items-center gap-2 text-green-700 font-heading font-bold text-base sm:max-w-none sm:text-xl">
+					{logoUrl ? (
+						<img
+							src={logoUrl}
+							alt="Madrasatul 'Ilmin Naafi'"
+							className="h-8 w-8 shrink-0 rounded-full object-cover"
+						/>
+					) : (
+						<Sprout className="shrink-0 text-green-600" size={24} />
+					)}
+					<span className="truncate">Madrasatul 'Ilmin Naafi'</span>
 				</span>
 
 				<div className="hidden items-center gap-1 lg:flex">
