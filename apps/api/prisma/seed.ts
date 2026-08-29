@@ -1,5 +1,6 @@
 import { hash } from "bcryptjs";
 import { prisma } from "../src/utils/prisma";
+import testimonialSeeds from "./seed-data/testimonials.json";
 
 const SEED_PASSWORD = "password123";
 
@@ -343,6 +344,27 @@ async function main() {
 				headerPattern: "NONE",
 			},
 		});
+	}
+
+	// Testimonials have no natural unique key, so identity for reseed purposes
+	// is the (name, message) pair — same convention as everything else in this
+	// file (matched by name, not an id). Editing an entry's message via
+	// Settings → Landing and then reseeding creates a second row rather than
+	// updating the first; this file is a known-good starting baseline, not a
+	// live mirror of the admin-managed table.
+	for (const t of testimonialSeeds) {
+		const existing = await prisma.testimonial.findFirst({
+			where: { name: t.name, message: t.message },
+		});
+		if (!existing) {
+			await prisma.testimonial.create({
+				data: {
+					name: t.name,
+					message: t.message,
+					givenAt: new Date(t.givenAt),
+				},
+			});
+		}
 	}
 
 	console.log(

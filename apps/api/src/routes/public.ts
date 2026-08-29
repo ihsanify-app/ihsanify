@@ -38,6 +38,26 @@ publicRouter.get("/public/branding", async (c) => {
 	});
 });
 
+// Admin-authored content meant to be shown publicly, so the read side needs
+// no auth — same endpoint serves both the landing page and the Settings →
+// Landing management page. Only create/update/delete (testimonials.ts) are
+// admin-gated.
+publicRouter.get("/public/testimonials", async (c) => {
+	const testimonials = await prisma.testimonial.findMany({
+		orderBy: { givenAt: "desc" },
+	});
+	return c.json({
+		success: true,
+		data: testimonials.map((t) => ({
+			testimonialId: t.id,
+			name: t.name,
+			message: t.message,
+			givenAt: t.givenAt.toISOString(),
+			createdAt: t.createdAt.toISOString(),
+		})),
+	});
+});
+
 // Public feed for the landing page's Instagram marquee. The source of truth
 // is a hand-maintained JSON file hosted at a public Dropbox direct-download
 // link (INSTAGRAM_POSTS_JSON_URL) — no Instagram API, no DB table, no cron

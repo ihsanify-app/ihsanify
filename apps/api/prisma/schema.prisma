@@ -457,3 +457,19 @@ model PayslipLine {
   group               Group     @relation(fields: [groupId], references: [id])
   student             Student   @relation(fields: [studentId], references: [id])
 }
+
+// Landing page testimonials, admin-managed via Settings → Landing. Public
+// read (no auth) since this is exactly the content it's meant to display;
+// only create/update/delete are admin-gated.
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  message   String
+  // When the testimony was actually given — editable by the admin, since
+  // testimonials are often entered well after the fact (e.g. copied from an
+  // old WhatsApp conversation). Deliberately separate from createdAt, which
+  // is pure system record-keeping (when the row was added) and must never
+  // silently stand in for this.
+  givenAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+}

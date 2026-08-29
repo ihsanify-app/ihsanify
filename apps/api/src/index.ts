@@ -17,6 +17,7 @@ import { reportsRouter } from "./routes/reports";
 import { reportThemesRouter } from "./routes/reportThemes";
 import { sessionsRouter } from "./routes/sessions";
 import { subjectsRouter } from "./routes/subjects";
+import { testimonialsRouter } from "./routes/testimonials";
 import { usersRouter } from "./routes/users";
 
 const app = new Hono();
@@ -50,7 +51,8 @@ app
 	.route("/", invoiceSettingsRouter)
 	.route("/", subjectsRouter)
 	.route("/", reportThemesRouter)
-	.route("/", reportSettingsRouter);
+	.route("/", reportSettingsRouter)
+	.route("/", testimonialsRouter);
 
 serve(
 	{
