@@ -62,7 +62,7 @@ function PlaceholderCard({
 			className={`flex h-52 w-40 shrink-0 flex-col items-center justify-center gap-3 rounded-2xl bg-linear-to-br p-4 text-center text-white shadow-md sm:h-60 sm:w-44 ${gradient}`}
 		>
 			<Instagram size={26} />
-			<span className="text-sm font-semibold leading-snug">{label}</span>
+			<span className="text-base font-semibold leading-snug">{label}</span>
 		</div>
 	);
 }
@@ -103,8 +103,8 @@ export function InstagramMarquee() {
 		<section className="overflow-hidden bg-white py-10">
 			<div className="mb-5 flex items-center justify-center gap-2 px-4">
 				<Instagram size={18} className="text-green-700" />
-				<p className="text-sm font-medium text-stone-500">
-					Update terbaru dari Instagram kami
+				<p className="text-base font-medium text-stone-500">
+					Live Instagram Feeds
 				</p>
 			</div>
 			<div className="relative mx-4 border-x-2 border-green-100 sm:mx-6">

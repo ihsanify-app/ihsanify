@@ -1,10 +1,10 @@
 import { MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { RegistrasiFormModal } from "./RegistrasiFormModal";
 import { Reveal } from "./Reveal";
 
-const WHATSAPP_URL =
-	"https://wa.me/6285282821607?text=Assalamu'alaikum%2C%20saya%20ingin%20mendaftar%20di%20Ihsanify";
-
 export function Registrasi() {
+	const [isFormOpen, setIsFormOpen] = useState(false);
 	return (
 		<section
 			id="registrasi"
@@ -18,16 +18,18 @@ export function Registrasi() {
 					Hubungi admin kami melalui WhatsApp untuk konsultasi program dan
 					pendaftaran murid baru.
 				</p>
-				<a
-					href={WHATSAPP_URL}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-lg font-semibold text-green-700 shadow-lg transition-transform hover:-translate-y-0.5"
+				<button
+					type="button"
+					onClick={() => setIsFormOpen(true)}
+					className="mt-8 inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-8 py-3.5 text-lg font-semibold text-green-700 shadow-lg transition-transform hover:-translate-y-0.5"
 				>
 					<MessageCircle size={22} />
 					Chat Admin via WhatsApp
-				</a>
+				</button>
 			</Reveal>
+			{isFormOpen && (
+				<RegistrasiFormModal onClose={() => setIsFormOpen(false)} />
+			)}
 		</section>
 	);
 }

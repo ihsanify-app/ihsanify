@@ -41,14 +41,14 @@ function ChatBubble({ testimonial }: { testimonial: Testimonial }) {
 		<div className="relative">
 			<div className="absolute -left-1.5 top-3 h-3 w-3 rotate-45 bg-white" />
 			<div className="relative rounded-2xl bg-white p-4 shadow-sm text-left">
-				<p className="font-heading text-sm font-bold text-green-700">
+				<p className="font-heading text-base font-bold text-green-700">
 					{testimonial.name}
 				</p>
 				<p className="font-handwritten mt-1 whitespace-pre-line text-lg leading-snug text-stone-700">
 					{testimonial.message}
 				</p>
 				<div className="mt-2 flex items-center justify-end gap-1">
-					<span className="text-[11px] text-stone-400">{time}</span>
+					<span className="text-xs text-stone-400">{time}</span>
 					<CheckCheck size={14} className="text-sky-500" />
 				</div>
 			</div>

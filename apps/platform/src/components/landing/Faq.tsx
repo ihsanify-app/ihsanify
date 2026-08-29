@@ -40,7 +40,7 @@ export function Faq() {
 									}`}
 								>
 									<div className="overflow-hidden">
-										<p className="px-5 pb-4 text-sm leading-relaxed text-stone-600">
+										<p className="px-5 pb-4 text-base leading-relaxed text-stone-600">
 											{item.answer}
 										</p>
 									</div>

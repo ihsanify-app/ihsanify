@@ -100,7 +100,7 @@ export function ProgramFasilitas() {
 							<h4 className="mt-3 font-heading font-bold text-green-800">
 								{p.title}
 							</h4>
-							<p className="mt-2 text-sm leading-relaxed text-stone-600">
+							<p className="mt-2 text-base leading-relaxed text-stone-600">
 								{p.description}
 							</p>
 						</div>
@@ -124,7 +124,7 @@ export function ProgramFasilitas() {
 								<h4 className="font-heading font-bold text-green-800">
 									{f.title}
 								</h4>
-								<p className="mt-1 text-sm leading-relaxed text-stone-600">
+								<p className="mt-1 text-base leading-relaxed text-stone-600">
 									{f.description}
 								</p>
 							</div>
@@ -134,7 +134,7 @@ export function ProgramFasilitas() {
 			</div>
 
 			<Reveal delayMs={200}>
-				<div className="mx-auto mt-10 inline-flex items-center gap-2 rounded-full bg-amber-100 px-5 py-2.5 text-sm font-medium text-amber-800">
+				<div className="mx-auto mt-10 inline-flex items-center gap-2 rounded-full bg-amber-100 px-5 py-2.5 text-base font-medium text-amber-800">
 					<CalendarCheck2 size={18} />
 					Jadwal Fleksibel — 4x atau 8x pertemuan sebulan, sesuai kesepakatan
 				</div>

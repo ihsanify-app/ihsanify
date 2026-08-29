@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
+import { Reveal } from "./Reveal";
 
 type PublicStats = {
 	teacherCount: number;
@@ -41,21 +42,26 @@ export function Stats() {
 	];
 
 	return (
-		<div className="flex justify-center">
-			<div className="w-full max-w-4xl px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6 bg-green-700 rounded-3xl shadow-lg shadow-green-700/20">
-				{items.map((s) => (
-					<div key={s.id} className="text-center">
-						{loadState === "loading" ? (
-							<div className="mx-auto h-9 w-12 animate-pulse rounded-lg bg-white/20" />
-						) : (
-							<h2 className="font-heading text-3xl text-white font-extrabold">
-								{s.count}+
-							</h2>
-						)}
-						<p className="text-green-100 text-sm mt-1">{s.title}</p>
-					</div>
-				))}
-			</div>
-		</div>
+		<section id="stats" className="scroll-mt-20 bg-green-50 px-4 py-16 sm:px-6">
+			<Reveal className="flex justify-center">
+				<div className="w-full max-w-4xl px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6 bg-green-700 rounded-3xl shadow-lg shadow-green-700/20">
+					{items.map((s) => (
+						<div
+							key={s.id}
+							className="rounded-2xl px-3 py-4 text-center transition-all duration-200 hover:scale-105 hover:bg-white/10"
+						>
+							{loadState === "loading" ? (
+								<div className="mx-auto h-9 w-12 animate-pulse rounded-lg bg-white/20" />
+							) : (
+								<h2 className="font-heading text-3xl text-white font-extrabold">
+									{s.count}+
+								</h2>
+							)}
+							<p className="text-green-100 text-base mt-1">{s.title}</p>
+						</div>
+					))}
+				</div>
+			</Reveal>
+		</section>
 	);
 }

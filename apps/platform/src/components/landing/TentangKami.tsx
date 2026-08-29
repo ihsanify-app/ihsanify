@@ -1,5 +1,4 @@
 import { Reveal } from "./Reveal";
-import { Stats } from "./Stats";
 
 const TIMELINE = [
 	{
@@ -43,12 +42,12 @@ export function TentangKami() {
 
 			<Reveal delayMs={100}>
 				<div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-green-100 bg-white p-6 text-left shadow-sm sm:p-8">
-					<p className="text-sm leading-relaxed text-stone-600">
+					<p className="text-base leading-relaxed text-stone-600">
 						Madrasatul 'Ilmin Naafi' adalah pusat pembelajaran Islam yang hadir
 						untuk mendampingi tumbuh kembang anak-anak dan orang tua dengan ilmu
 						yang bermanfaat, adab yang mulia, dan cinta kepada Al-Qur'an.
 					</p>
-					<p className="mt-3 text-sm leading-relaxed text-stone-600">
+					<p className="mt-3 text-base leading-relaxed text-stone-600">
 						Kami berkomitmen menciptakan lingkungan belajar yang aman, nyaman,
 						menyenangkan, dan berlandaskan Al-Qur'an dan As-Sunnah sesuai
 						pemahaman Salafus Shalih.
@@ -75,7 +74,7 @@ export function TentangKami() {
 											<span className="font-heading text-lg font-bold text-green-700">
 												{item.year}
 											</span>
-											<p className="mt-1 text-sm leading-relaxed text-stone-600">
+											<p className="mt-1 text-base leading-relaxed text-stone-600">
 												{item.event}
 											</p>
 										</div>
@@ -85,10 +84,6 @@ export function TentangKami() {
 						})}
 					</div>
 				</div>
-			</Reveal>
-
-			<Reveal delayMs={200} className="mt-10">
-				<Stats />
 			</Reveal>
 		</section>
 	);

@@ -47,7 +47,7 @@ export function Navbar() {
 						<a
 							key={item.id}
 							href={`#${item.id}`}
-							className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+							className={`rounded-full px-3.5 py-2 text-base font-medium transition-colors ${
 								activeId === item.id
 									? "bg-green-100 text-green-800"
 									: "text-stone-600 hover:bg-green-50 hover:text-green-700"
@@ -84,7 +84,7 @@ export function Navbar() {
 								key={item.id}
 								href={`#${item.id}`}
 								onClick={() => setIsMenuOpen(false)}
-								className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+								className={`rounded-xl px-4 py-2.5 text-base font-medium transition-colors ${
 									activeId === item.id
 										? "bg-green-100 text-green-800"
 										: "text-stone-600 hover:bg-green-50 hover:text-green-700"

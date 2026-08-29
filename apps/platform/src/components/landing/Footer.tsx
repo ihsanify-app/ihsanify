@@ -8,7 +8,7 @@ export function Footer() {
 					<Sprout size={24} className="text-green-300" />
 					Ihsanify
 				</div>
-				<div className="flex flex-col gap-2 text-sm text-green-200">
+				<div className="flex flex-col gap-2 text-base text-green-200">
 					<a
 						href="https://www.instagram.com/ilmin_naafi/"
 						className="hover:text-white transition-colors"
@@ -29,7 +29,7 @@ export function Footer() {
 					</a>
 				</div>
 			</div>
-			<div className="border-t border-green-800 pt-4 text-center text-sm text-green-300">
+			<div className="border-t border-green-800 pt-4 text-center text-base text-green-300">
 				© 2026 Ihsanify. All rights reserved.
 			</div>
 		</footer>

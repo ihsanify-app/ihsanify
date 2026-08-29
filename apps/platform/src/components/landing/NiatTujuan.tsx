@@ -46,13 +46,13 @@ export function NiatTujuan() {
 								{item.title}
 							</h3>
 							{Array.isArray(item.description) ? (
-								<ol className="mt-2 flex list-decimal flex-col gap-2 pl-4 text-sm leading-relaxed text-stone-600">
+								<ol className="mt-2 flex list-decimal flex-col gap-2 pl-4 text-base leading-relaxed text-stone-600">
 									{item.description.map((point) => (
 										<li key={point}>{point}</li>
 									))}
 								</ol>
 							) : (
-								<p className="mt-2 text-sm leading-relaxed text-stone-600">
+								<p className="mt-2 text-base leading-relaxed text-stone-600">
 									{item.description}
 								</p>
 							)}
