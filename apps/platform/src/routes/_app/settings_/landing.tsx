@@ -153,6 +153,58 @@ function ConfirmDeleteModal({
 	);
 }
 
+function HistoricalHoursEditor() {
+	const [hours, setHours] = useState("0");
+	const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+		"idle",
+	);
+
+	useEffect(() => {
+		apiFetch("/landing-stats").then(({ status, body }) => {
+			if (status !== 200) return;
+			setHours(String(body?.data?.historicalSessionHours ?? 0));
+		});
+	}, []);
+
+	async function save(value: string) {
+		setSaveState("saving");
+		const { body } = await apiFetch("/landing-stats", {
+			method: "PATCH",
+			body: JSON.stringify({ historicalSessionHours: Number(value || 0) }),
+		});
+		setSaveState(body?.success ? "saved" : "idle");
+	}
+
+	return (
+		<div className="mb-6 rounded-2xl border border-green-100 bg-white p-4 shadow-sm max-w-md">
+			<p className="mb-1 text-xs font-semibold text-stone-500">
+				Historical Session Hours
+			</p>
+			<p className="mb-2 text-xs text-stone-400">
+				Real teaching hours from before this LMS existed (since 2021) — added to
+				the live-computed total shown on the public "Jam Pembelajaran" stat.
+			</p>
+			<input
+				type="number"
+				min={0}
+				className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+				value={hours}
+				onChange={(e) => {
+					setHours(e.target.value);
+					setSaveState("idle");
+				}}
+				onBlur={(e) => save(e.target.value)}
+			/>
+			{saveState === "saving" && (
+				<p className="mt-1 text-xs text-stone-400">Saving…</p>
+			)}
+			{saveState === "saved" && (
+				<p className="mt-1 text-xs text-green-600">Saved</p>
+			)}
+		</div>
+	);
+}
+
 function RouteComponent() {
 	const [loadState, setLoadState] = useState<
 		"loading" | "ready" | "unauthorized"
@@ -253,6 +305,8 @@ function RouteComponent() {
 				Settings
 			</h1>
 			<SettingsTabs active="landing" />
+
+			<HistoricalHoursEditor />
 
 			<div className="flex max-sm:flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
 				<p className="text-stone-500 text-sm">
