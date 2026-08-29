@@ -1,0 +1,317 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-08-27T00:00:00.000Z",
+	"title": "Design System: Ihsanify",
+	"extensions": {
+		"colorMeta": {
+			"primary": {
+				"role": "primary",
+				"displayName": "Deep Sage Trust",
+				"canonical": "#15803d",
+				"tonalRamp": [
+					"#0c2c17",
+					"#123f22",
+					"#14522c",
+					"#166534",
+					"#15803d",
+					"#22c55e",
+					"#86efac",
+					"#dcfce7"
+				]
+			},
+			"primary-deep": {
+				"role": "primary",
+				"displayName": "Deep Sage Trust — Shade",
+				"canonical": "#166534",
+				"tonalRamp": [
+					"#0a2313",
+					"#0f3319",
+					"#124020",
+					"#166534",
+					"#1a7a3f",
+					"#22954d",
+					"#5cc584",
+					"#c7f0d6"
+				]
+			},
+			"primary-soft": {
+				"role": "primary",
+				"displayName": "Sage Mist",
+				"canonical": "#f0fdf4",
+				"tonalRamp": [
+					"#0c2c17",
+					"#166534",
+					"#22c55e",
+					"#86efac",
+					"#bbf7d0",
+					"#dcfce7",
+					"#f0fdf4",
+					"#fbfffc"
+				]
+			},
+			"primary-border": {
+				"role": "primary",
+				"displayName": "Sage Whisper",
+				"canonical": "#dcfce7",
+				"tonalRamp": [
+					"#123f22",
+					"#166534",
+					"#22c55e",
+					"#4ade80",
+					"#86efac",
+					"#bbf7d0",
+					"#dcfce7",
+					"#f0fdf4"
+				]
+			},
+			"neutral-ink": {
+				"role": "neutral",
+				"displayName": "Warm Charcoal",
+				"canonical": "#292524",
+				"tonalRamp": [
+					"#0c0a09",
+					"#1c1917",
+					"#292524",
+					"#44403c",
+					"#57534e",
+					"#78716c",
+					"#a8a29e",
+					"#d6d3d1"
+				]
+			},
+			"neutral-muted": {
+				"role": "neutral",
+				"displayName": "Warm Stone",
+				"canonical": "#78716c",
+				"tonalRamp": [
+					"#1c1917",
+					"#292524",
+					"#44403c",
+					"#57534e",
+					"#78716c",
+					"#a8a29e",
+					"#d6d3d1",
+					"#e7e5e4"
+				]
+			},
+			"neutral-border": {
+				"role": "neutral",
+				"displayName": "Warm Stone Border",
+				"canonical": "#d6d3d1",
+				"tonalRamp": [
+					"#44403c",
+					"#57534e",
+					"#78716c",
+					"#a8a29e",
+					"#d6d3d1",
+					"#e7e5e4",
+					"#f5f5f4",
+					"#fafaf9"
+				]
+			},
+			"neutral-paper": {
+				"role": "neutral",
+				"displayName": "Paper White",
+				"canonical": "#ffffff",
+				"tonalRamp": [
+					"#e7e5e4",
+					"#f5f5f4",
+					"#fafaf9",
+					"#ffffff",
+					"#ffffff",
+					"#ffffff",
+					"#ffffff",
+					"#ffffff"
+				]
+			},
+			"accent-alert": {
+				"role": "error",
+				"displayName": "Muted Rose Alert",
+				"canonical": "#e11d48",
+				"tonalRamp": [
+					"#4c0519",
+					"#881337",
+					"#9f1239",
+					"#be123c",
+					"#e11d48",
+					"#f43f5e",
+					"#fda4af",
+					"#ffe4e6"
+				]
+			},
+			"accent-warning": {
+				"role": "warning",
+				"displayName": "Honey Amber",
+				"canonical": "#f59e0b",
+				"tonalRamp": [
+					"#451a03",
+					"#78350f",
+					"#92400e",
+					"#b45309",
+					"#d97706",
+					"#f59e0b",
+					"#fcd34d",
+					"#fef3c7"
+				]
+			},
+			"accent-info": {
+				"role": "info",
+				"displayName": "Soft Sky Info",
+				"canonical": "#0369a1",
+				"tonalRamp": [
+					"#082f49",
+					"#0c4a6e",
+					"#075985",
+					"#0369a1",
+					"#0284c7",
+					"#0ea5e9",
+					"#7dd3fc",
+					"#e0f2fe"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Display (Baloo 2)",
+				"purpose": "h1-h4 headings only — hero headline, section titles, card/modal titles."
+			},
+			"body": {
+				"displayName": "Body (Nunito)",
+				"purpose": "All running copy, form labels, table content, buttons."
+			},
+			"label": {
+				"displayName": "Label (Nunito Bold)",
+				"purpose": "Metadata, stat-card eyebrows, table headers, status chips."
+			}
+		},
+		"shadows": [
+			{
+				"name": "ambient",
+				"value": "0 1px 2px 0 rgba(0,0,0,0.05)",
+				"purpose": "Default resting shadow for every card, table container, and stat tile."
+			},
+			{
+				"name": "signature-glow",
+				"value": "0 10px 25px -5px rgba(22,163,74,0.2)",
+				"purpose": "Reserved for the single primary CTA per screen — colored, brand-tinted glow."
+			},
+			{
+				"name": "modal",
+				"value": "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+				"purpose": "Dialogs/popovers above their scrim."
+			}
+		],
+		"motion": [
+			{
+				"name": "color-transition",
+				"value": "color 0.2s ease, background-color 0.2s ease",
+				"purpose": "Default hover/focus transition for every interactive surface — never abrupt."
+			},
+			{
+				"name": "lift-transition",
+				"value": "transform 0.2s ease",
+				"purpose": "Subtle -translate-y on hover for elevated primary actions (e.g. the WhatsApp registration CTA)."
+			}
+		],
+		"breakpoints": [
+			{ "name": "sm", "value": "640px" },
+			{ "name": "lg", "value": "1024px" }
+		]
+	},
+	"components": [
+		{
+			"name": "Primary Button",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "The system's one true call-to-action shape — a full pill, used for the single most important action on a screen.",
+			"html": "<button class=\"ds-btn-primary\">Mulai Sekarang</button>",
+			"css": ".ds-btn-primary { background: #15803d; color: #ffffff; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1.125rem; padding: 14px 32px; border: none; border-radius: 9999px; cursor: pointer; box-shadow: 0 10px 25px -5px rgba(22,163,74,0.2); transition: background-color 0.2s ease, transform 0.2s ease; } .ds-btn-primary:hover { background: #166534; transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }"
+		},
+		{
+			"name": "Secondary Button",
+			"kind": "button",
+			"refersTo": "button-secondary",
+			"description": "Utility/cancel action — never competes visually with a primary button on the same screen.",
+			"html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+			"css": ".ds-btn-secondary { background: transparent; color: #57534e; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 0.875rem; padding: 10px 20px; border: 1px solid #d6d3d1; border-radius: 12px; cursor: pointer; transition: background-color 0.2s ease; } .ds-btn-secondary:hover { background: #fafaf9; } .ds-btn-secondary:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }"
+		},
+		{
+			"name": "Card",
+			"kind": "card",
+			"refersTo": "card",
+			"description": "The default content container — Sage Whisper border, Ambient shadow, generous rounding.",
+			"html": "<div class=\"ds-card\"><p class=\"ds-card-eyebrow\">Total Revenue</p><p class=\"ds-card-value\">Rp 4.500.000</p></div>",
+			"css": ".ds-card { background: #ffffff; border: 1px solid #dcfce7; border-radius: 16px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); padding: 24px; } .ds-card-eyebrow { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.02em; text-transform: uppercase; color: #78716c; margin: 0 0 4px; } .ds-card-value { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1.25rem; color: #166534; margin: 0; }"
+		},
+		{
+			"name": "Input Field",
+			"kind": "input",
+			"refersTo": "input",
+			"description": "Text input at rest and on focus — border color is the only focus signal, no glow or ring.",
+			"html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Enter your email\" />",
+			"css": ".ds-input { width: 100%; font-family: 'Nunito', sans-serif; font-size: 0.9375rem; color: #292524; background: #ffffff; border: 1px solid #d6d3d1; border-radius: 12px; padding: 12px 16px; transition: border-color 0.2s ease; box-sizing: border-box; } .ds-input::placeholder { color: #a8a29e; } .ds-input:focus { outline: none; border-color: #15803d; }"
+		},
+		{
+			"name": "Nav Item (Active)",
+			"kind": "nav",
+			"refersTo": "nav-item",
+			"description": "Sidebar navigation item in its active state — a filled pill on the dark green rail.",
+			"html": "<div class=\"ds-nav-item ds-nav-item--active\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"></rect></svg><span>Dashboard</span></div>",
+			"css": ".ds-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 80px; padding: 12px 0; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.75rem; color: #bbf7d0; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; } .ds-nav-item:hover { background: #166534; color: #ffffff; } .ds-nav-item--active { background: #15803d; color: #ffffff; }"
+		},
+		{
+			"name": "Status Badge",
+			"kind": "chip",
+			"refersTo": "badge",
+			"description": "Small status/count indicator — reuses the accent colors strictly for their functional meaning (here, warning/urgent).",
+			"html": "<span class=\"ds-badge ds-badge--warning\">3</span>",
+			"css": ".ds-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9999px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.625rem; color: #ffffff; } .ds-badge--warning { background: #f59e0b; } .ds-badge--alert { background: #e11d48; } .ds-badge--info { background: #0369a1; }"
+		}
+	],
+	"narrative": {
+		"northStar": "The Nurturing Garden",
+		"overview": "Ihsanify reads as a place things are grown, not manufactured — a warm, patient, green-forward system built for parents deciding whether to trust their child's Quran education to this school, and for the teachers and staff who tend that education every day afterward. The palette is dominated by a single deep, muted green used with restraint against generous white and warm-stone space; nothing shouts, because trust isn't built by shouting. Corners are soft everywhere — pills for primary actions, gently rounded cards for content — and the system stays almost entirely flat, saving its one moment of visual drama (a soft colored glow) for the single most important action on a screen. Baloo 2's rounded, friendly letterforms carry every heading; Nunito carries everything you actually read.",
+		"keyCharacteristics": [
+			"Deep sage green as the singular brand signal — never diluted by a second competing hue",
+			"Warm stone (not cool gray) for all neutral text and structure",
+			"Flat-by-default surfaces; depth is earned, not decorative",
+			"Generously rounded corners throughout — pills for action, soft rectangles for content",
+			"Small, purposeful accent colors (rose, amber, sky) reserved strictly for status, never decoration"
+		],
+		"rules": [
+			{
+				"name": "The One Green Rule",
+				"body": "Deep Sage Trust is the only color allowed to carry brand meaning. Every other hue (rose, amber, sky) is a status signal, never a decorative choice.",
+				"section": "colors"
+			},
+			{
+				"name": "The Warm Neutral Rule",
+				"body": "Neutrals are always Stone, never Gray. Treat any gray-* class found in the codebase as a defect to fix, not a variant to preserve.",
+				"section": "colors"
+			},
+			{
+				"name": "The Heading-Font Discipline Rule",
+				"body": "Baloo 2 is reserved for h1-h4 and nothing else — buttons, badges, and body copy stay in Nunito even when bold.",
+				"section": "typography"
+			},
+			{
+				"name": "The One Glow Rule",
+				"body": "Only one element per screen may carry the Signature Glow shadow. Two competing glows is a hierarchy problem, not a style choice.",
+				"section": "elevation"
+			}
+		],
+		"dos": [
+			"Do keep Deep Sage Trust as the only color that carries brand/identity meaning.",
+			"Do use the Signature Glow shadow on exactly one primary action per screen, never more.",
+			"Do default every card to rounded-2xl with a Sage Whisper border and Ambient shadow.",
+			"Do keep Baloo 2 confined to headings; everything else stays in Nunito.",
+			"Do reserve rounded-full specifically for primary/urgent actions."
+		],
+		"donts": [
+			"Don't introduce Tailwind's Gray palette for neutrals — Stone is the only neutral family.",
+			"Don't add a second brand-feeling accent color alongside Deep Sage Trust.",
+			"Don't stack shadows or elevate more than one element per screen.",
+			"Don't sharpen corners on primary actions or structural containers."
+		]
+	}
+}

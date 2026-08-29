@@ -1,0 +1,15 @@
+{
+	"detector": {
+		"ignoreRules": [],
+		"ignoreFiles": [],
+		"ignoreValues": [
+			{
+				"rule": "gray-on-color",
+				"value": "*",
+				"files": ["src/components/landing/Navbar.tsx"],
+				"createdAt": "2026-08-29T05:03:07.287Z",
+				"reason": "confirmed false positive: text-stone-600 is the resting-state color, bg-green-50 only appears on :hover alongside hover:text-green-700 in the same ternary, so the pair never actually renders together — detector does static className co-occurrence matching without modeling Tailwind's hover: state pairing (same finding independently confirmed by critique Assessment B on 2026-08-29)"
+			}
+		]
+	}
+}
