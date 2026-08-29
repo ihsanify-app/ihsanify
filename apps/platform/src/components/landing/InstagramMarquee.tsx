@@ -2,38 +2,40 @@ import { Instagram } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 
-// Shown until the weekly Instagram sync has produced real posts.
+// Shown until the weekly Instagram sync has produced real posts. Gradients
+// stay within DESIGN.md's "One Green Rule" (green + stone only, no second
+// brand-feeling hue) — varied by shade/direction, not by introducing color.
 const PLACEHOLDER_POSTS = [
 	{
 		id: 1,
 		label: "Kajian Akbar: Adab Menuntut Ilmu",
-		gradient: "from-pink-400 via-rose-400 to-orange-400",
+		gradient: "from-green-600 via-green-700 to-green-800",
 	},
 	{
 		id: 2,
 		label:
 			"“Sebaik-baik kalian adalah yang belajar Al-Qur'an dan mengajarkannya”",
-		gradient: "from-purple-400 via-fuchsia-400 to-pink-400",
+		gradient: "from-stone-500 via-stone-600 to-stone-700",
 	},
 	{
 		id: 3,
 		label: "Pendaftaran Gelombang Baru Dibuka",
-		gradient: "from-indigo-400 via-purple-400 to-pink-400",
+		gradient: "from-green-500 via-green-600 to-stone-600",
 	},
 	{
 		id: 4,
 		label: "Testimoni Wali Murid Bulan Ini",
-		gradient: "from-amber-400 via-orange-400 to-rose-400",
+		gradient: "from-stone-600 via-green-700 to-green-800",
 	},
 	{
 		id: 5,
 		label: "Jadwal Libur Semester",
-		gradient: "from-emerald-400 via-teal-400 to-cyan-400",
+		gradient: "from-green-700 via-stone-600 to-stone-700",
 	},
 	{
 		id: 6,
 		label: "Tips Mendidik Anak Cinta Al-Qur'an",
-		gradient: "from-fuchsia-400 via-pink-400 to-red-400",
+		gradient: "from-stone-500 via-green-600 to-green-700",
 	},
 ];
 
@@ -100,7 +102,7 @@ export function InstagramMarquee() {
 	return (
 		<section className="overflow-hidden bg-white py-10">
 			<div className="mb-5 flex items-center justify-center gap-2 px-4">
-				<Instagram size={18} className="text-pink-500" />
+				<Instagram size={18} className="text-green-700" />
 				<p className="text-sm font-medium text-stone-500">
 					Update terbaru dari Instagram kami
 				</p>
