@@ -25,6 +25,11 @@ via the root `package.json` `version` field.
   sections.
 - Assignments menu now shows a "Coming Soon" placeholder pointing to the
   existing per-group Assignments tab, ahead of a dedicated cross-group hub.
+- Landing page — a structured registration form (name, gender, domicile,
+  subject(s), and how they heard about us) that opens from the "Daftar
+  Sekarang" and "Chat Admin via WhatsApp" buttons and hands off a
+  pre-filled WhatsApp message to the admin, backed by a new public
+  subjects endpoint.
 
 ### Changed
 
@@ -35,6 +40,20 @@ via the root `package.json` `version` field.
 - Removed the redundant `status` field from the `Session` model, superseded
   by `attendanceRecorded`.
 - Removed unused sections from the landing page.
+- Landing page section order: Stats now has its own section right after
+  the Hero (previously buried inside "Tentang Kami"), and FAQ now comes
+  before the Registrasi call-to-action so objections are addressed before
+  the ask.
+- Landing page stats now show class count (all groups, active and
+  inactive) instead of subject count, reordered to Jam Pembelajaran, Kelas,
+  Pembelajar, Pengajar, and light up on hover.
+- Landing page body copy switched to the Nunito font family and bumped up
+  a size step for a friendlier, more readable feel.
+- Landing page navbar now shows the real uploaded organization logo and
+  "Madrasatul 'Ilmin Naafi'" instead of the placeholder icon and
+  "Ihsanify".
+- Admin WhatsApp number moved to an environment variable
+  (`VITE_ADMIN_WHATSAPP_NUMBER`) instead of being hardcoded.
 
 ## [1.0.0] - 2026-08-21
 
