@@ -1,3 +1,4 @@
+import { compare, hash } from "bcryptjs";
 import { Hono } from "hono";
 import { requireAuth } from "../utils/auth";
 import { prisma } from "../utils/prisma";
@@ -193,6 +194,60 @@ profileRouter.patch("/profile", requireAuth, async (c) => {
 
 	const data = await serializeProfile(authUser.id);
 	return c.json({ success: true, data });
+});
+
+// Self-service password change — requires the current password (unlike the
+// admin reset in users.ts) so an unattended, still-logged-in session can't
+// be used to lock the real owner out by silently swapping their password.
+profileRouter.patch("/profile/password", requireAuth, async (c) => {
+	const authUser = c.get("authUser");
+	const body = (await c.req.json()) as {
+		currentPassword?: string;
+		newPassword?: string;
+	};
+
+	if (!body.currentPassword || !body.newPassword) {
+		return c.json(
+			{
+				success: false,
+				message: "currentPassword and newPassword are required.",
+			},
+			400,
+		);
+	}
+
+	if (body.newPassword.length < 6) {
+		return c.json(
+			{
+				success: false,
+				message: "New password must be at least 6 characters.",
+			},
+			400,
+		);
+	}
+
+	const user = await prisma.user.findUnique({ where: { id: authUser.id } });
+	if (!user) {
+		return c.json({ success: false, message: "User not found." }, 404);
+	}
+
+	const isCurrentPasswordValid = await compare(
+		body.currentPassword,
+		user.password,
+	);
+	if (!isCurrentPasswordValid) {
+		return c.json(
+			{ success: false, message: "Current password is incorrect." },
+			400,
+		);
+	}
+
+	await prisma.user.update({
+		where: { id: authUser.id },
+		data: { password: await hash(body.newPassword, 10) },
+	});
+
+	return c.json({ success: true });
 });
 
 profileRouter.post("/profile/teaching-history", requireAuth, async (c) => {
