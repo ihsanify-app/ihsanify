@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Download, Eye, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
 
@@ -284,6 +285,7 @@ function ViewReportModal({
 	report: ReportRow;
 	onClose: () => void;
 }) {
+	const toast = useToast();
 	const [downloadError, setDownloadError] = useState("");
 
 	async function handleDownload() {
@@ -292,7 +294,9 @@ function ViewReportModal({
 			`/groups/${report.groupId}/reports/${report.reportId}/pdf`,
 			`report-${report.year}-${String(report.month).padStart(2, "0")}-${report.studentName ?? report.reportId}.pdf`,
 		);
-		if (!result.ok) {
+		if (result.ok) {
+			toast.success("Report PDF downloaded.");
+		} else {
 			setDownloadError(result.message ?? "Could not download PDF.");
 		}
 	}

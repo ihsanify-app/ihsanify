@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Ban, Download, PlusCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
 import { mockUser } from "../../lib/mockAuth";
 
@@ -360,6 +361,7 @@ function ConfirmDeleteModal({
 }
 
 function RouteComponent() {
+	const toast = useToast();
 	const [loadState, setLoadState] = useState<"loading" | "ready" | "denied">(
 		"loading",
 	);
@@ -419,7 +421,9 @@ function RouteComponent() {
 			`/invoices/${invoice.invoiceId}/pdf`,
 			`invoice-${invoice.year}-${String(invoice.month).padStart(2, "0")}-${invoice.studentName ?? invoice.invoiceId}.pdf`,
 		);
-		if (!result.ok) {
+		if (result.ok) {
+			toast.success("Invoice PDF downloaded.");
+		} else {
 			setErrorMessage(result.message ?? "Could not download invoice PDF.");
 		}
 	}

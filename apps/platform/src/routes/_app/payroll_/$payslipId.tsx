@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Download } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useToast } from "../../../components/Toast";
 import { apiFetch, downloadFile } from "../../../lib/apiClient";
 
 export const Route = createFileRoute("/_app/payroll_/$payslipId")({
@@ -52,6 +53,7 @@ type PayslipDetail = {
 };
 
 function RouteComponent() {
+	const toast = useToast();
 	const { payslipId } = useParams({ from: "/_app/payroll_/$payslipId" });
 	const [loadState, setLoadState] = useState<"loading" | "ready" | "denied">(
 		"loading",
@@ -99,7 +101,9 @@ function RouteComponent() {
 			`/payroll/payslips/${payslip.payslipId}/pdf`,
 			`payslip-${payslip.year}-${String(payslip.month).padStart(2, "0")}-${payslip.teacherName}.pdf`,
 		);
-		if (!result.ok) {
+		if (result.ok) {
+			toast.success("Payslip PDF downloaded.");
+		} else {
 			setErrorMessage(result.message ?? "Could not download payslip PDF.");
 		}
 	}

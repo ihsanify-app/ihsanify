@@ -9,6 +9,7 @@ import {
 	Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
 
 export const Route = createFileRoute("/_app/payroll")({
@@ -319,6 +320,7 @@ function ConfirmDeleteModal({
 }
 
 function RouteComponent() {
+	const toast = useToast();
 	const now = new Date();
 	const [month, setMonth] = useState(now.getMonth() + 1);
 	const [year, setYear] = useState(now.getFullYear());
@@ -355,7 +357,9 @@ function RouteComponent() {
 			`/payroll/payslips/${payslip.payslipId}/pdf`,
 			`payslip-${year}-${String(month).padStart(2, "0")}-${payslip.teacherName}.pdf`,
 		);
-		if (!result.ok) {
+		if (result.ok) {
+			toast.success("Payslip PDF downloaded.");
+		} else {
 			setErrorMessage(result.message ?? "Could not download payslip PDF.");
 		}
 	}
