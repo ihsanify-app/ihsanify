@@ -460,11 +460,13 @@ function EditUserModal({
 		name: string;
 		email: string;
 		gender: "male" | "female";
+		avatarUrl?: string | null;
 	}) => void;
 }) {
 	const [name, setName] = useState(user.name);
 	const [email, setEmail] = useState(user.email);
 	const [gender, setGender] = useState(user.gender ?? "male");
+	const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
 
 	return (
 		<div
@@ -480,6 +482,28 @@ function EditUserModal({
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">Edit User</h2>
+				<div className="flex flex-col items-center gap-2 mb-3">
+					<div className="h-20 w-20 overflow-hidden rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center text-green-700 font-heading font-bold text-xl">
+						{avatarUrl ? (
+							<img
+								src={avatarUrl}
+								alt="Avatar preview"
+								className="h-full w-full object-cover"
+							/>
+						) : (
+							initials(name || "?")
+						)}
+					</div>
+					{avatarUrl && (
+						<button
+							type="button"
+							className="text-xs text-rose-500 hover:text-rose-600 cursor-pointer font-normal"
+							onClick={() => setAvatarUrl(null)}
+						>
+							Remove photo
+						</button>
+					)}
+				</div>
 				<form>
 					<div className="flex flex-col gap-2">
 						<input
@@ -515,7 +539,7 @@ function EditUserModal({
 					</button>
 					<button
 						type="button"
-						onClick={() => onSubmit({ name, email, gender })}
+						onClick={() => onSubmit({ name, email, gender, avatarUrl })}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						Save Changes
@@ -582,7 +606,12 @@ function RouteComponent() {
 
 	async function handleUpdate(
 		userId: string,
-		payload: { name: string; email: string; gender: "male" | "female" },
+		payload: {
+			name: string;
+			email: string;
+			gender: "male" | "female";
+			avatarUrl?: string | null;
+		},
 	) {
 		const { body } = await apiFetch(`/users/${userId}`, {
 			method: "PATCH",
