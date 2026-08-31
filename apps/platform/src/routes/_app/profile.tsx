@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PlusCircle, Trash2, Upload } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../components/Toast";
 import { apiFetch } from "../../lib/apiClient";
 
 export const Route = createFileRoute("/_app/profile")({
@@ -189,6 +190,89 @@ function TeachingHistoryEditor({
 				</div>
 				{error && <p className="mt-2 text-xs text-rose-500">{error}</p>}
 			</div>
+		</div>
+	);
+}
+
+function ChangePasswordSection() {
+	const toast = useToast();
+	const [currentPassword, setCurrentPassword] = useState("");
+	const [newPassword, setNewPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+	const [error, setError] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	async function handleSubmit() {
+		if (!currentPassword || !newPassword || !confirmPassword) {
+			setError("All fields are required.");
+			return;
+		}
+		if (newPassword.length < 6) {
+			setError("New password must be at least 6 characters.");
+			return;
+		}
+		if (newPassword !== confirmPassword) {
+			setError("New password and confirmation do not match.");
+			return;
+		}
+		setError("");
+		setIsSubmitting(true);
+		const { body } = await apiFetch("/profile/password", {
+			method: "PATCH",
+			body: JSON.stringify({ currentPassword, newPassword }),
+		});
+		setIsSubmitting(false);
+		if (body?.success) {
+			toast.success("Password changed.");
+			setCurrentPassword("");
+			setNewPassword("");
+			setConfirmPassword("");
+		} else {
+			setError(body?.message ?? "Could not change password.");
+		}
+	}
+
+	return (
+		<div className="mt-8 border-t border-stone-200 pt-6">
+			<h2 className="font-heading text-lg font-bold text-green-800 mb-2">
+				Change Password
+			</h2>
+			{error && (
+				<p className="mb-3 text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
+					{error}
+				</p>
+			)}
+			<div className="flex flex-col gap-2 max-w-sm">
+				<input
+					type="password"
+					placeholder="Current password"
+					className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+					value={currentPassword}
+					onChange={(e) => setCurrentPassword(e.target.value)}
+				/>
+				<input
+					type="password"
+					placeholder="New password (min. 6 characters)"
+					className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+					value={newPassword}
+					onChange={(e) => setNewPassword(e.target.value)}
+				/>
+				<input
+					type="password"
+					placeholder="Confirm new password"
+					className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+					value={confirmPassword}
+					onChange={(e) => setConfirmPassword(e.target.value)}
+				/>
+			</div>
+			<button
+				type="button"
+				disabled={isSubmitting}
+				onClick={handleSubmit}
+				className="mt-3 cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{isSubmitting ? "Changing…" : "Change Password"}
+			</button>
 		</div>
 	);
 }
@@ -529,6 +613,8 @@ function RouteComponent() {
 					onDelete={handleDeleteHistory}
 				/>
 			)}
+
+			<ChangePasswordSection />
 		</section>
 	);
 }
