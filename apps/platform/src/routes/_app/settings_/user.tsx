@@ -1,14 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Ban,
+	Check,
 	CheckCircle,
+	Copy,
+	KeyRound,
 	Pencil,
+	PlusCircle,
+	Upload,
 	User,
 	UserCheck,
 	XCircle,
 } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { SettingsTabs } from "../../../components/dashboard/SettingsTabs";
+import { useToast } from "../../../components/Toast";
 import { apiFetch } from "../../../lib/apiClient";
 
 export const Route = createFileRoute("/_app/settings_/user")({
@@ -123,6 +130,325 @@ function initials(name: string) {
 	return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
+const MAX_AVATAR_BYTES = 300 * 1024;
+const ACCEPTED_AVATAR_TYPES = [
+	"image/png",
+	"image/jpeg",
+	"image/webp",
+	"image/gif",
+];
+
+function fileToDataUrl(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(reader.result as string);
+		reader.onerror = () => reject(reader.error);
+		reader.readAsDataURL(file);
+	});
+}
+
+function CreateUserModal({
+	onClose,
+	onSubmit,
+}: {
+	onClose: () => void;
+	onSubmit: (payload: {
+		name: string;
+		email: string;
+		password: string;
+		role: "teacher" | "student";
+		gender: "male" | "female";
+		avatarUrl?: string | null;
+	}) => Promise<boolean>;
+}) {
+	const [name, setName] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [role, setRole] = useState("");
+	const [gender, setGender] = useState("");
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+	const [avatarError, setAvatarError] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	const canSubmit =
+		name.trim().length > 0 &&
+		email.trim().length > 0 &&
+		password.length >= 6 &&
+		(role === "teacher" || role === "student") &&
+		(gender === "male" || gender === "female");
+
+	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file) return;
+
+		if (!ACCEPTED_AVATAR_TYPES.includes(file.type)) {
+			setAvatarError("Only PNG, JPEG, WEBP, or GIF images are allowed.");
+			return;
+		}
+		if (file.size > MAX_AVATAR_BYTES) {
+			setAvatarError("Image must be smaller than 300KB.");
+			return;
+		}
+		setAvatarError("");
+		setAvatarUrl(await fileToDataUrl(file));
+	}
+
+	async function handleSubmit() {
+		if (!canSubmit) return;
+		setIsSubmitting(true);
+		await onSubmit({
+			name: name.trim(),
+			email: email.trim(),
+			password,
+			role: role as "teacher" | "student",
+			gender: gender as "male" | "female",
+			avatarUrl,
+		});
+		setIsSubmitting(false);
+	}
+
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-full max-w-md gap-1 shadow-xl max-h-[90vh] overflow-y-auto"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="font-heading text-lg text-green-800 mb-3">
+					Create User
+				</h2>
+				<form>
+					<div className="flex flex-col items-center gap-2 mb-3">
+						<div className="relative">
+							<div className="h-20 w-20 overflow-hidden rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center text-green-700 font-heading font-bold text-xl">
+								{avatarUrl ? (
+									<img
+										src={avatarUrl}
+										alt="Avatar preview"
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									initials(name || "?")
+								)}
+							</div>
+							<label className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-green-600 text-white shadow-sm hover:bg-green-700 transition-colors">
+								<Upload size={14} />
+								<input
+									type="file"
+									accept={ACCEPTED_AVATAR_TYPES.join(",")}
+									className="hidden"
+									onChange={handleAvatarChange}
+								/>
+							</label>
+						</div>
+						{avatarUrl && (
+							<button
+								type="button"
+								className="text-xs text-rose-500 hover:text-rose-600 cursor-pointer font-normal"
+								onClick={() => setAvatarUrl(null)}
+							>
+								Remove photo
+							</button>
+						)}
+						{avatarError && (
+							<span className="text-xs text-rose-500 font-normal">
+								{avatarError}
+							</span>
+						)}
+						<span className="text-xs text-stone-400 font-normal">
+							PNG, JPEG, WEBP, or GIF. Max 300KB.
+						</span>
+					</div>
+					<div className="flex flex-col gap-2">
+						<input
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							placeholder="e.g. Ibrahim"
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+						/>
+						<input
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							placeholder="e.g. ibrahim@ihsanify.com"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+						/>
+						<input
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							placeholder="Initial password (min. 6 characters)"
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						/>
+						<select
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							value={role}
+							onChange={(e) => setRole(e.target.value as "teacher" | "student")}
+						>
+							<option value="">Select Role</option>
+							<option value="teacher">Teacher</option>
+							<option value="student">Student</option>
+						</select>
+						<select
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							value={gender}
+							onChange={(e) => setGender(e.target.value as "male" | "female")}
+						>
+							<option value="">Select Gender</option>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+						</select>
+					</div>
+				</form>
+				<div className="flex justify-end gap-2 mt-4">
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						disabled={!canSubmit || isSubmitting}
+						onClick={handleSubmit}
+						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{isSubmitting ? "Creating…" : "Create"}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function ResetPasswordModal({
+	userName,
+	onClose,
+	onGenerate,
+}: {
+	userName: string;
+	onClose: () => void;
+	onGenerate: () => Promise<{
+		ok: boolean;
+		temporaryPassword?: string;
+		message?: string;
+	}>;
+}) {
+	const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
+		null,
+	);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState("");
+	const [copied, setCopied] = useState(false);
+
+	async function handleGenerate() {
+		setIsSubmitting(true);
+		const result = await onGenerate();
+		setIsSubmitting(false);
+		if (result.ok && result.temporaryPassword) {
+			setTemporaryPassword(result.temporaryPassword);
+		} else {
+			setError(result.message ?? "Could not reset password.");
+		}
+	}
+
+	async function handleCopy() {
+		if (!temporaryPassword) return;
+		await navigator.clipboard.writeText(temporaryPassword);
+		setCopied(true);
+	}
+
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{temporaryPassword ? (
+					<>
+						<h2 className="font-heading text-lg text-green-800 mb-2">
+							New password for {userName}
+						</h2>
+						<p className="text-sm font-normal text-stone-500 mb-3">
+							Share this with them now — it won't be shown again.
+						</p>
+						<div className="flex items-center gap-2 mb-4">
+							<code className="flex-1 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 text-base font-mono font-bold text-green-800 tracking-wide">
+								{temporaryPassword}
+							</code>
+							<button
+								type="button"
+								onClick={handleCopy}
+								className="shrink-0 cursor-pointer rounded-xl border border-stone-300 p-2.5 text-stone-600 hover:bg-stone-50 transition-colors"
+								aria-label="Copy password"
+							>
+								{copied ? (
+									<Check size={16} className="text-green-600" />
+								) : (
+									<Copy size={16} />
+								)}
+							</button>
+						</div>
+						<button
+							type="button"
+							onClick={onClose}
+							className="w-full cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
+						>
+							Done
+						</button>
+					</>
+				) : (
+					<>
+						<h2 className="font-heading text-lg text-green-800 mb-2">
+							Reset password?
+						</h2>
+						<p className="text-sm font-normal text-stone-500 mb-4">
+							This immediately invalidates {userName}'s current password. A new
+							one will be generated for you to share with them.
+						</p>
+						{error && (
+							<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3 font-normal">
+								{error}
+							</p>
+						)}
+						<div className="flex justify-end gap-2">
+							<button
+								type="button"
+								onClick={onClose}
+								className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								disabled={isSubmitting}
+								onClick={handleGenerate}
+								className="cursor-pointer rounded-xl bg-rose-600 text-white px-4 py-2 hover:bg-rose-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								{isSubmitting ? "Generating…" : "Reset Password"}
+							</button>
+						</div>
+					</>
+				)}
+			</div>
+		</div>
+	);
+}
+
 function EditUserModal({
 	user,
 	onClose,
@@ -201,12 +527,15 @@ function EditUserModal({
 }
 
 function RouteComponent() {
+	const toast = useToast();
 	const [loadState, setLoadState] = useState<
 		"loading" | "ready" | "unauthorized"
 	>("loading");
 	const [users, setUsers] = useState<AppUser[]>([]);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+	const [resettingUser, setResettingUser] = useState<AppUser | null>(null);
 
 	useEffect(() => {
 		apiFetch("/users").then(({ status, body }) => {
@@ -218,6 +547,38 @@ function RouteComponent() {
 			setLoadState("ready");
 		});
 	}, []);
+
+	async function handleCreate(payload: {
+		name: string;
+		email: string;
+		password: string;
+		role: "teacher" | "student";
+		gender: "male" | "female";
+		avatarUrl?: string | null;
+	}) {
+		const { body } = await apiFetch("/users", {
+			method: "POST",
+			body: JSON.stringify(payload),
+		});
+		if (body?.success) {
+			setUsers((prev) => [...prev, body.data]);
+			setIsCreateModalOpen(false);
+			toast.success("User created.");
+			return true;
+		}
+		toast.error(body?.message ?? "Could not create user.");
+		return false;
+	}
+
+	async function handleResetPassword(userId: string) {
+		const { body } = await apiFetch(`/users/${userId}/reset-password`, {
+			method: "POST",
+		});
+		if (body?.success) {
+			return { ok: true, temporaryPassword: body.data.temporaryPassword };
+		}
+		return { ok: false, message: body?.message ?? "Could not reset password." };
+	}
 
 	async function handleUpdate(
 		userId: string,
@@ -289,6 +650,19 @@ function RouteComponent() {
 					onSubmit={(payload) => handleUpdate(editingUser.userId, payload)}
 				/>
 			)}
+			{isCreateModalOpen && (
+				<CreateUserModal
+					onClose={() => setIsCreateModalOpen(false)}
+					onSubmit={handleCreate}
+				/>
+			)}
+			{resettingUser && (
+				<ResetPasswordModal
+					userName={resettingUser.name}
+					onClose={() => setResettingUser(null)}
+					onGenerate={() => handleResetPassword(resettingUser.userId)}
+				/>
+			)}
 
 			<h1 className="font-heading text-2xl font-bold text-green-800 mb-1">
 				Settings
@@ -300,6 +674,17 @@ function RouteComponent() {
 					{errorMessage}
 				</p>
 			)}
+
+			<div className="flex justify-end mb-4">
+				<button
+					type="button"
+					className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
+					onClick={() => setIsCreateModalOpen(true)}
+				>
+					<PlusCircle size={18} />
+					Create User
+				</button>
+			</div>
 
 			{loadState === "loading" ? (
 				<p className="text-stone-400">Loading…</p>
@@ -436,6 +821,14 @@ function RouteComponent() {
 												>
 													<Pencil size={16} />
 													<span>Edit</span>
+												</button>
+												<button
+													type="button"
+													className="flex items-center gap-1 text-amber-600 hover:text-amber-700 cursor-pointer"
+													onClick={() => setResettingUser(u)}
+												>
+													<KeyRound size={16} />
+													<span>Reset Password</span>
 												</button>
 												<button
 													type="button"
