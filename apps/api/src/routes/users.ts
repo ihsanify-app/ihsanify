@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import { hash } from "bcryptjs";
 import { Hono } from "hono";
 import { requireAuth, requireRole } from "../utils/auth";
@@ -7,6 +8,18 @@ import { prisma } from "../utils/prisma";
 export const usersRouter = new Hono();
 
 const MAX_AVATAR_BYTES = 300 * 1024;
+// Excludes visually-ambiguous characters (0/O, 1/l/I) since this is read off
+// a screen and typed/copied by hand during an admin-to-user handoff.
+const TEMP_PASSWORD_CHARSET =
+	"ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+
+function generateTemporaryPassword(length = 10): string {
+	let result = "";
+	for (let i = 0; i < length; i++) {
+		result += TEMP_PASSWORD_CHARSET[randomInt(TEMP_PASSWORD_CHARSET.length)];
+	}
+	return result;
+}
 const AVATAR_DATA_URL_PATTERN =
 	/^data:image\/(png|jpe?g|webp|gif);base64,([a-zA-Z0-9+/]+=*)$/;
 
@@ -248,5 +261,31 @@ usersRouter.patch(
 			}
 			return c.json({ success: false, message: "Internal server error." }, 500);
 		}
+	},
+);
+
+// Admin-initiated reset for a user who forgot their password — generates a
+// fresh one server-side rather than letting the admin pick it, so a weak or
+// guessable password never enters the system. The plaintext is returned
+// exactly once here for the admin to relay out-of-band (e.g. WhatsApp); it is
+// never stored, logged, or retrievable again after this response.
+usersRouter.post(
+	"/users/:id/reset-password",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const userId = c.req.param("id");
+		const existing = await prisma.user.findUnique({ where: { id: userId } });
+		if (!existing) {
+			return c.json({ success: false, message: "User not found." }, 404);
+		}
+
+		const temporaryPassword = generateTemporaryPassword();
+		await prisma.user.update({
+			where: { id: userId },
+			data: { password: await hash(temporaryPassword, 10) },
+		});
+
+		return c.json({ success: true, data: { temporaryPassword } });
 	},
 );
