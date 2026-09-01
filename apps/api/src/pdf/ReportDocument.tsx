@@ -13,8 +13,11 @@ import {
 	ASSETS_DIR,
 	buildFooterParts,
 	buildSharedStyles,
+	EMOJI_RUN_PATTERN,
+	emojiToCodepointHex,
 	FONT_FAMILY,
 	FooterIcon,
+	fetchEmojiDataUri,
 	HeaderPatternOverlay,
 	type ReportFont,
 	type ReportHeaderPattern,
@@ -92,45 +95,113 @@ const ARABIC_RUN_PATTERN = new RegExp(
 	"g",
 );
 
-function splitMixedScriptRuns(
-	text: string,
-): { text: string; arabic: boolean }[] {
-	const segments: { text: string; arabic: boolean }[] = [];
+type ScriptSegment =
+	| { kind: "plain" | "arabic"; text: string }
+	| { kind: "emoji"; text: string; codepointHex: string };
+
+// One combined pass rather than two separate ones — running the Arabic and
+// emoji patterns independently would need extra bookkeeping to merge two
+// sets of possibly-overlapping-in-position matches back into order.
+const MIXED_SCRIPT_PATTERN = new RegExp(
+	`(${ARABIC_RUN_PATTERN.source})|(${EMOJI_RUN_PATTERN.source})`,
+	"gu",
+);
+
+function splitMixedScriptRuns(text: string): ScriptSegment[] {
+	const segments: ScriptSegment[] = [];
 	let lastIndex = 0;
-	for (const match of text.matchAll(ARABIC_RUN_PATTERN)) {
+	for (const match of text.matchAll(MIXED_SCRIPT_PATTERN)) {
 		const start = match.index ?? 0;
 		if (start > lastIndex) {
-			segments.push({ text: text.slice(lastIndex, start), arabic: false });
+			segments.push({ kind: "plain", text: text.slice(lastIndex, start) });
 		}
-		segments.push({ text: match[0], arabic: true });
+		if (match[1] !== undefined) {
+			segments.push({ kind: "arabic", text: match[1] });
+		} else {
+			segments.push({
+				kind: "emoji",
+				text: match[2],
+				codepointHex: emojiToCodepointHex(match[2]),
+			});
+		}
 		lastIndex = start + match[0].length;
 	}
 	if (lastIndex < text.length) {
-		segments.push({ text: text.slice(lastIndex), arabic: false });
+		segments.push({ kind: "plain", text: text.slice(lastIndex) });
 	}
 	return segments;
+}
+
+// Every unique emoji codepoint sequence found across a report's free-text
+// fields, fetched once up front — MixedScriptText renders synchronously
+// (it's a plain component, not async), so this has to resolve before the
+// document tree is built, not while rendering it.
+async function collectEmojiImages(
+	texts: string[],
+): Promise<Map<string, string>> {
+	const codepointHexes = new Set<string>();
+	for (const text of texts) {
+		for (const match of text.matchAll(EMOJI_RUN_PATTERN)) {
+			codepointHexes.add(emojiToCodepointHex(match[0]));
+		}
+	}
+	const images = new Map<string, string>();
+	await Promise.all(
+		Array.from(codepointHexes).map(async (codepointHex) => {
+			const dataUri = await fetchEmojiDataUri(codepointHex);
+			if (dataUri) images.set(codepointHex, dataUri);
+		}),
+	);
+	return images;
 }
 
 function MixedScriptText({
 	text,
 	style,
 	baseFontFamily,
+	emojiImages,
 }: {
 	text: string;
 	style: ReturnType<typeof StyleSheet.create>[string];
 	baseFontFamily: string;
+	emojiImages: Map<string, string>;
 }) {
 	const segments = splitMixedScriptRuns(text);
+	const emojiSize = typeof style.fontSize === "number" ? style.fontSize : 11;
 	return (
 		<Text style={style}>
-			{segments.map((seg, i) => (
-				<Text
-					key={`${i}-${seg.text.slice(0, 8)}`}
-					style={{ fontFamily: seg.arabic ? "Amiri" : baseFontFamily }}
-				>
-					{seg.text}
-				</Text>
-			))}
+			{segments.map((seg, i) => {
+				const key = `${i}-${seg.text.slice(0, 8)}`;
+				if (seg.kind === "emoji") {
+					const dataUri = emojiImages.get(seg.codepointHex);
+					// Falls back to the raw character (renders as a missing-glyph
+					// box in these fonts) rather than dropping it silently — a
+					// CDN hiccup or an unmapped sequence shouldn't make report
+					// text look like it's missing a word.
+					if (dataUri) {
+						return (
+							<Image
+								key={key}
+								src={dataUri}
+								style={{
+									width: emojiSize,
+									height: emojiSize,
+								}}
+							/>
+						);
+					}
+				}
+				return (
+					<Text
+						key={key}
+						style={{
+							fontFamily: seg.kind === "arabic" ? "Amiri" : baseFontFamily,
+						}}
+					>
+						{seg.text}
+					</Text>
+				);
+			})}
 		</Text>
 	);
 }
@@ -290,7 +361,8 @@ export function ReportDocument({
 	font,
 	headerPattern,
 	coverImageUrl,
-}: ReportDocumentProps) {
+	emojiImages,
+}: ReportDocumentProps & { emojiImages: Map<string, string> }) {
 	const period = `${MONTH_NAMES[month - 1] ?? month} ${year}`;
 	const styles = buildStyles(FONT_FAMILY[font]);
 	const progressTextStyle = {
@@ -380,6 +452,7 @@ export function ReportDocument({
 							text={progress}
 							style={progressTextStyle}
 							baseFontFamily={FONT_FAMILY[font]}
+							emojiImages={emojiImages}
 						/>
 					</View>
 
@@ -389,6 +462,7 @@ export function ReportDocument({
 							text={advice}
 							style={adviceTextStyle}
 							baseFontFamily={FONT_FAMILY[font]}
+							emojiImages={emojiImages}
 						/>
 					</View>
 
@@ -436,7 +510,10 @@ export function ReportDocument({
 export async function renderReportPdf(
 	props: ReportDocumentProps,
 ): Promise<Buffer> {
-	const stream = await pdf(<ReportDocument {...props} />).toBuffer();
+	const emojiImages = await collectEmojiImages([props.progress, props.advice]);
+	const stream = await pdf(
+		<ReportDocument {...props} emojiImages={emojiImages} />,
+	).toBuffer();
 	const chunks: Buffer[] = [];
 	for await (const chunk of stream) {
 		chunks.push(chunk as Buffer);

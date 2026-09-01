@@ -44,6 +44,63 @@ Font.register({
 
 export const DEFAULT_THEME_COLOR = "#166534";
 
+// react-pdf's font embedding (via fontkit) only supports single-color
+// vector outlines — it can't render the color glyph tables (COLR/CBDT)
+// that real emoji fonts use, so any emoji typed into a free-text field
+// (report progress/advice) would otherwise show as a missing-glyph box.
+// Rendered as small inline <Image> bitmaps instead, sourced from Twemoji
+// and cached in memory — pinned to a specific tag (not @latest) so the
+// asset filenames this maps to don't shift under us.
+const TWEMOJI_BASE_URL =
+	"https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/72x72";
+
+// Matches a whole emoji sequence — not just one code point — so multi-part
+// emoji (flags, skin-tone modifiers, ZWJ-joined sequences like "👨‍💻")
+// resolve to one image instead of splitting into separate/broken pieces.
+export const EMOJI_RUN_PATTERN =
+	/(?:\p{Regional_Indicator}{2})|(?:\p{Extended_Pictographic}\u{FE0F}?(?:[\u{1F3FB}-\u{1F3FF}])?(?:\u{200D}\p{Extended_Pictographic}\u{FE0F}?(?:[\u{1F3FB}-\u{1F3FF}])?)*)/gu;
+
+// Twemoji filenames drop a lone U+FE0F variation selector for an
+// otherwise-single-codepoint emoji (e.g. "❤️" -> "2764", not "2764-fe0f"),
+// but keep it inside multi-codepoint ZWJ sequences. This is an
+// approximation of Twemoji's actual naming rule, not a from-spec
+// implementation — good enough for everyday emoji; anything it gets wrong
+// just fails to fetch below and quietly falls back to plain text.
+export function emojiToCodepointHex(sequence: string): string {
+	const codepoints = Array.from(sequence).map(
+		(ch) => ch.codePointAt(0) as number,
+	);
+	const hasZwj = codepoints.includes(0x200d);
+	const kept = hasZwj ? codepoints : codepoints.filter((cp) => cp !== 0xfe0f);
+	return kept.map((cp) => cp.toString(16)).join("-");
+}
+
+const emojiImageCache = new Map<string, Promise<string | null>>();
+
+// Cached for the life of the process — the same handful of emoji recur
+// across many reports, so after the first report that uses "👍" every
+// later one reuses the already-fetched image instead of hitting the CDN
+// again.
+export function fetchEmojiDataUri(
+	codepointHex: string,
+): Promise<string | null> {
+	const cached = emojiImageCache.get(codepointHex);
+	if (cached) return cached;
+
+	const promise = (async () => {
+		try {
+			const res = await fetch(`${TWEMOJI_BASE_URL}/${codepointHex}.png`);
+			if (!res.ok) return null;
+			const buffer = Buffer.from(await res.arrayBuffer());
+			return `data:image/png;base64,${buffer.toString("base64")}`;
+		} catch {
+			return null;
+		}
+	})();
+	emojiImageCache.set(codepointHex, promise);
+	return promise;
+}
+
 export type ReportFont = "HELVETICA" | "POPPINS" | "PT_SERIF";
 export type ReportHeaderPattern =
 	| "NONE"
