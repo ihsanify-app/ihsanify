@@ -1,6 +1,10 @@
 import { Hono } from "hono";
-import { DEFAULT_THEME_COLOR, renderReportPdf } from "../pdf/ReportDocument";
-import { requireAuth } from "../utils/auth";
+import {
+	DEFAULT_THEME_COLOR,
+	renderMultiReportPdf,
+	renderReportPdf,
+} from "../pdf/ReportDocument";
+import { requireAuth, requireRole } from "../utils/auth";
 import {
 	canManageGroup,
 	canUserAccessGroup,
@@ -167,6 +171,124 @@ reportsRouter.get("/reports", requireAuth, async (c) => {
 	const data = await Promise.all(reports.map(serializeReport));
 	return c.json({ success: true, data });
 });
+
+// Admin-only: one student can be enrolled in several groups taught by
+// different teachers (e.g. Bahasa Inggris with Teacher A, Tahsin with
+// Teacher B) — this bundles every one of that student's submitted reports
+// for a given month/year into a single PDF (one shared cover page, then
+// one content page per report) instead of making the admin download each
+// report separately. Admin-only rather than teacher-accessible: a teacher
+// can only ever see their own groups' reports (enforced above and in
+// `/groups/:id/reports`), and bundling across teachers here would leak
+// one teacher's report content to another if it weren't gated this way —
+// admin already has full cross-group visibility today, so no new
+// visibility rule is introduced, just a new admin-only way to fetch it.
+reportsRouter.get(
+	"/reports/bulk-pdf",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const studentId = c.req.query("studentId");
+		const month = Number(c.req.query("month"));
+		const year = Number(c.req.query("year"));
+
+		if (!studentId || !month || !year) {
+			return c.json(
+				{
+					success: false,
+					message: "studentId, month, and year are required.",
+				},
+				400,
+			);
+		}
+
+		// Only submitted reports — a draft isn't meant to leave the admin/
+		// teacher's hands yet, and the actual use case for this feature
+		// (handing one combined file to a parent) only makes sense for
+		// reports that are already final.
+		const reports = await prisma.report.findMany({
+			where: { studentId, month, year, submittedAt: { not: null } },
+			orderBy: { createdAt: "asc" },
+		});
+
+		if (reports.length === 0) {
+			return c.json(
+				{
+					success: false,
+					message:
+						"No submitted reports found for that student in that month/year.",
+				},
+				404,
+			);
+		}
+
+		const [student, reportSettings] = await Promise.all([
+			prisma.student.findUnique({
+				where: { id: studentId },
+				include: { user: true },
+			}),
+			prisma.reportSettings.findFirst(),
+		]);
+
+		const entries = await Promise.all(
+			reports.map(async (report) => {
+				const [group, teacher] = await Promise.all([
+					prisma.group.findUnique({
+						where: { id: report.groupId },
+						include: { subject: { include: { reportTheme: true } } },
+					}),
+					prisma.teacher.findUnique({
+						where: { id: report.teacherId },
+						include: { user: true },
+					}),
+				]);
+				const grade = deriveGrade(report.score);
+				return {
+					subjectName: group?.subject.name ?? "-",
+					groupTypeLabel: groupTypeLabel(group?.groupType),
+					teacherName: teacher?.user.name ?? "-",
+					month: report.month,
+					year: report.year,
+					progress: report.progress,
+					advice: report.advice,
+					score: report.score,
+					scoreDenominator: SCORE_DENOMINATOR,
+					gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
+					submittedAtLabel: report.submittedAt
+						? report.submittedAt.toLocaleDateString("en-GB", {
+								day: "numeric",
+								month: "long",
+								year: "numeric",
+							})
+						: null,
+					primaryColor:
+						group?.subject.reportTheme?.primaryColor ?? DEFAULT_THEME_COLOR,
+				};
+			}),
+		);
+
+		const buffer = await renderMultiReportPdf({
+			studentName: student?.user.name ?? "-",
+			studentGenderLabel: genderLabel(student?.user.gender ?? null),
+			documentTitle: reportSettings?.title ?? "Laporan Belajar",
+			organizationName: reportSettings?.organizationName ?? "Ihsanify",
+			logoUrl: reportSettings?.logoUrl ?? null,
+			websiteUrl: reportSettings?.websiteUrl ?? null,
+			footerPhone: reportSettings?.footerPhone ?? null,
+			footerEmail: reportSettings?.footerEmail ?? null,
+			footerInstagram: reportSettings?.footerInstagram ?? null,
+			font: reportSettings?.font ?? "HELVETICA",
+			headerPattern: reportSettings?.headerPattern ?? "NONE",
+			coverImageUrl: reportSettings?.coverImageUrl ?? null,
+			reports: entries,
+		});
+
+		return c.body(new Uint8Array(buffer), 200, {
+			"Content-Type": "application/pdf",
+			"Content-Disposition": `attachment; filename="reports-${year}-${month}-${student?.user.name ?? studentId}.pdf"`,
+		});
+	},
+);
 
 reportsRouter.get("/groups/:id/reports", requireAuth, async (c) => {
 	const authUser = c.get("authUser");

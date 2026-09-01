@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Download, Eye, Pencil, PlusCircle } from "lucide-react";
+import { Download, Eye, FolderDown, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
@@ -385,24 +385,153 @@ function ViewReportModal({
 	);
 }
 
+function BulkDownloadModal({
+	students,
+	onClose,
+	onDownload,
+}: {
+	students: Option[];
+	onClose: () => void;
+	onDownload: (payload: {
+		studentId: string;
+		month: number;
+		year: number;
+	}) => Promise<{ ok: boolean; message?: string }>;
+}) {
+	const now = new Date();
+	const [studentId, setStudentId] = useState(students[0]?.studentId ?? "");
+	const [month, setMonth] = useState(now.getMonth() + 1);
+	const [year, setYear] = useState(now.getFullYear());
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState("");
+
+	async function handleSubmit() {
+		if (!studentId) return;
+		setError("");
+		setIsSubmitting(true);
+		const result = await onDownload({ studentId, month, year });
+		setIsSubmitting(false);
+		if (result.ok) {
+			onClose();
+		} else {
+			setError(result.message ?? "Could not download reports.");
+		}
+	}
+
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="font-heading text-lg text-green-800 mb-1">
+					Bulk Download
+				</h2>
+				<p className="text-sm font-normal text-stone-500 mb-3">
+					Combines every submitted report this student has for the chosen
+					month/year — across every subject and teacher — into one PDF.
+				</p>
+				<div className="flex flex-col gap-2">
+					<label className="text-xs font-normal text-stone-500">
+						Student
+						<select
+							className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+							value={studentId}
+							onChange={(e) => setStudentId(e.target.value)}
+						>
+							{students.length === 0 && <option value="">No students</option>}
+							{students.map((s) => (
+								<option key={s.studentId} value={s.studentId}>
+									{s.studentName}
+								</option>
+							))}
+						</select>
+					</label>
+					<div className="flex gap-2">
+						<label className="text-xs font-normal text-stone-500 flex-1">
+							Month
+							<select
+								className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+								value={month}
+								onChange={(e) => setMonth(Number(e.target.value))}
+							>
+								{MONTH_NAMES.map((name, i) => (
+									<option key={name} value={i + 1}>
+										{name}
+									</option>
+								))}
+							</select>
+						</label>
+						<label className="text-xs font-normal text-stone-500 w-24">
+							Year
+							<input
+								className="mt-1 w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors font-normal"
+								type="number"
+								value={year}
+								onChange={(e) => setYear(Number(e.target.value))}
+							/>
+						</label>
+					</div>
+				</div>
+				{error && (
+					<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mt-3 font-normal">
+						{error}
+					</p>
+				)}
+				<div className="flex justify-end gap-2 mt-4">
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						disabled={!studentId || isSubmitting}
+						onClick={handleSubmit}
+						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{isSubmitting ? "Downloading…" : "Download"}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function RouteComponent() {
+	const toast = useToast();
 	const [loadState, setLoadState] = useState<"loading" | "ready" | "denied">(
 		"loading",
 	);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [reports, setReports] = useState<ReportRow[]>([]);
 	const [groups, setGroups] = useState<GroupOption[]>([]);
+	const [students, setStudents] = useState<Option[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 	const [editingReport, setEditingReport] = useState<ReportRow | null>(null);
 	const [viewingReport, setViewingReport] = useState<ReportRow | null>(null);
 
 	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
+	const isAdmin = mockUser.role === "admin";
 
 	const load = useCallback(async () => {
-		const [reportsRes, groupsRes] = await Promise.all([
+		const [reportsRes, groupsRes, studentsRes] = await Promise.all([
 			apiFetch("/reports"),
 			canManage
 				? apiFetch("/groups")
+				: Promise.resolve({ status: 200, body: null }),
+			isAdmin
+				? apiFetch("/students")
 				: Promise.resolve({ status: 200, body: null }),
 		]);
 		if (reportsRes.status === 401 || reportsRes.status === 403) {
@@ -412,8 +541,9 @@ function RouteComponent() {
 		}
 		setReports(reportsRes.body?.data ?? []);
 		setGroups(groupsRes.body?.data ?? []);
+		setStudents(studentsRes.body?.data ?? []);
 		setLoadState("ready");
-	}, [canManage]);
+	}, [canManage, isAdmin]);
 
 	useEffect(() => {
 		load();
@@ -495,6 +625,25 @@ function RouteComponent() {
 		}
 	}
 
+	async function handleBulkDownload(payload: {
+		studentId: string;
+		month: number;
+		year: number;
+	}) {
+		const studentName =
+			students.find((s) => s.studentId === payload.studentId)?.studentName ??
+			payload.studentId;
+		const result = await downloadFile(
+			`/reports/bulk-pdf?studentId=${payload.studentId}&month=${payload.month}&year=${payload.year}`,
+			`reports-${payload.year}-${String(payload.month).padStart(2, "0")}-${studentName}.pdf`,
+		);
+		if (result.ok) {
+			toast.success("Reports downloaded.");
+			return { ok: true as const };
+		}
+		return { ok: false as const, message: result.message };
+	}
+
 	if (loadState === "denied") {
 		return (
 			<section className="p-6 text-center text-stone-500">
@@ -529,22 +678,42 @@ function RouteComponent() {
 					onClose={() => setViewingReport(null)}
 				/>
 			)}
+			{isBulkModalOpen && (
+				<BulkDownloadModal
+					students={students}
+					onClose={() => setIsBulkModalOpen(false)}
+					onDownload={handleBulkDownload}
+				/>
+			)}
 
 			<h1 className="font-heading text-2xl font-bold text-green-800 mb-4">
 				Reports
 			</h1>
 
-			{canManage && (
-				<div className="flex justify-items-start mb-4">
-					<button
-						type="button"
-						disabled={groups.length === 0}
-						className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-						onClick={() => setIsModalOpen(true)}
-					>
-						<PlusCircle size={18} />
-						Add Report
-					</button>
+			{(canManage || isAdmin) && (
+				<div className="flex flex-wrap justify-items-start gap-2 mb-4">
+					{canManage && (
+						<button
+							type="button"
+							disabled={groups.length === 0}
+							className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+							onClick={() => setIsModalOpen(true)}
+						>
+							<PlusCircle size={18} />
+							Add Report
+						</button>
+					)}
+					{isAdmin && (
+						<button
+							type="button"
+							disabled={students.length === 0}
+							className="flex font-semibold items-center gap-2 cursor-pointer text-green-700 border border-green-600 hover:bg-green-50 transition-colors rounded-xl px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+							onClick={() => setIsBulkModalOpen(true)}
+						>
+							<FolderDown size={18} />
+							Bulk Download
+						</button>
+					)}
 				</div>
 			)}
 
