@@ -506,6 +506,92 @@ _Added 2026-08-05 — work that grew organically per-feature (schema → API →
 
 ---
 
+## Future Work — Live Classroom Feature (Zoom-like)
+_Added 2026-09-01 — not started yet. This is a forward-looking plan, unlike Post-Plan Additions above (a log of completed work) — kept in its own section so the two don't get confused._
+
+**Status:** Not started. **Target start: October 2026.**
+
+**How we'll work on this — different from everything else in this plan:** the user asked explicitly to go slow here and be treated as a mentee, not a client — the goal is for the user to actually learn real-time video/media architecture and earn the "scar tissue" of building it, not just receive a finished feature. When this phase starts:
+- Don't write the implementation wholesale. Explain the concept, point at the relevant SDK docs/section, let the user attempt it first.
+- Let real dead-ends and bugs happen before jumping to the fix — that's the point, not a failure mode to prevent.
+- Prioritize the user's understanding over completion speed. Ask them to explain their approach back before proceeding, the way a senior engineer would in a real mentorship, not just a pair-programming session.
+- This is the same underlying instinct as the Socratic-quizzing practice already used elsewhere in this project, sustained across a whole feature build instead of a post-hoc quiz.
+
+**Scope:** camera + screen share + chat for live sessions between teachers and students, wrapping the existing `apps/api` (HonoJS) backend and this project's existing role/group model.
+
+**Sequencing — web first; native mobile is a later, non-guaranteed follow-on:**
+1. **Web** (`apps/platform`) — embed a chosen video SDK as a "Live Session" page, run real sessions with real students, see if it's actually wanted and if the chosen vendor holds up. This *is* "Phase 0" in the mobile roadmap below, not a separate plan — that roadmap already frames "prove it on web first" as the validation gate before any mobile investment.
+2. **Mobile** (Android, then iOS) — only pursued if Phase 0 actually proves out. Full phased roadmap below (written by Claude on claude.ai, pasted in by the user 2026-09-01) — kept here as reference since its "build vs buy" split and phase structure apply to the web build too, not just the native app.
+
+**Build vs buy, the split that governs both the web and mobile build:**
+- **Commodity — buy an SDK, don't build:** real-time media transport (WebRTC signaling, SFU/media server, TURN/STUN, adaptive bitrate), screen-share encoding, reconnection/network-quality handling. Candidates: LiveKit (open-source, self-hostable, good React/React Native SDKs), Agora, 100ms, Daily.co, Stream Video, Twilio Video.
+- **Core — build ourselves:** session ↔ group/cohort linking (who's allowed in which room, using this project's existing `Group`/enrollment model), attendance tracking tied to the existing audit-log model, in-session roles mapped to existing admin/teacher/student roles, recording tied back to lesson content, moderation wired to existing authorization rules.
+
+### Reference: the original mobile app roadmap (for the later, non-guaranteed mobile phase)
+
+> Pasted from Claude (web) 2026-09-01, lightly cleaned up (dash/encoding artifacts only, no content changes). Its own "Phase 0" is the web build described above — everything from "Phase 1" onward here is the native-mobile-specific follow-on, gated on Phase 0 actually proving out.
+
+**Goal:** Ship a mobile app (Android first, then iOS) that lets students and instructors join live classes with camera + screen share, wrapping the existing `ihsanify` backend (HonoJS API).
+
+**Scope assumption:** instructor typically broadcasts screen + camera from web/desktop during a live session; the mobile app lets students (and mobile instructors) join, watch, use their own camera/mic, and chat. Revisit "Phase 3" below if phone-to-phone screen sharing specifically is needed.
+
+**Phase 0 — Validate before building a native app (1–2 weeks)**
+Don't build the mobile app first. Prove the feature is wanted and prove the video vendor works.
+- Pick a video SDK vendor (see build-vs-buy above) and embed it in the existing web platform (`apps/platform`) as a "Live Session" page.
+- Run 2–3 real live sessions with actual students through the web embed.
+- Track: did students show up? Did anyone complain about connection quality? Did instructors actually use screen share?
+- Decide: is this worth the mobile investment, or is "web on a mobile browser" good enough for now? ("Web is good enough" is a legitimate outcome of this phase, not a failure to avoid.)
+
+**Phase 1 — Mobile fundamentals (3–4 weeks)**
+React Native with Expo — shortest path given existing React/TypeScript familiarity, keeps the same mental model and can reuse some logic/types from the web app.
+- Expo + TypeScript project setup; understand managed vs. bare workflow (bare/dev client likely needed once a native video SDK is added)
+- Navigation (`expo-router` or React Navigation)
+- Auth flow: reuse the existing API's auth, store tokens securely (`expo-secure-store`)
+- Permissions model: camera, microphone, notifications
+- Push notifications (`expo-notifications`) — needed later for "class starting soon"
+- Understand the build pipeline: EAS Build, dev builds vs. production builds, over-the-air updates
+
+**Phase 2 — MVP app skeleton (2–3 weeks)**
+No video yet — just prove the app is a real client of the existing backend.
+- Login/register screens hitting `apps/api` (HonoJS)
+- Course/cohort list, lesson viewer (read-only content)
+- Assignment submission (reuse existing API contracts)
+- Basic profile/settings screen
+- Ship to a handful of testers via Expo/TestFlight-equivalent internal distribution, even before live video exists
+
+**Phase 3 — Live session integration (3–5 weeks)**
+- Integrate the chosen SDK's React Native package (e.g. `@livekit/react-native`)
+- Build the "Join Session" screen: token fetched from the API (the backend mints the room token — this is where authorization/role logic lives)
+- Camera/mic controls, participant list, basic chat
+- Viewing a shared screen (much simpler than *sending* one)
+- If phone-to-phone screen share is truly needed: iOS uses ReplayKit (broadcast extension, non-trivial setup), Android uses MediaProjection — both need extra native config and have real App Store/Play Store review implications. Treat as a stretch goal, not MVP.
+- Handle the unglamorous states: poor connection, permission denied, session ended, background/foreground transitions (mobile OSes kill camera/mic access aggressively when backgrounded)
+
+**Phase 4 — Testing & internal distribution (1–2 weeks)**
+- Android: Play Console Internal testing track (fastest feedback loop, no review wait)
+- iOS: TestFlight internal testing
+- Test on real low-end Android devices, not just a dev phone — this is where most "works on my machine" video bugs show up
+- Crash reporting (Sentry) and basic analytics from day one
+
+**Phase 5 — Play Store & App Store submission (1–3 weeks, mostly waiting)**
+Live video/streaming apps get extra scrutiny — budget time for this.
+- Privacy policy covering camera/mic/screen data — required, not optional, for this category
+- Play Console Data Safety form — be precise about what's collected and why
+- Justify sensitive permissions (camera, mic, and especially `MediaProjection`/screen capture) clearly in the listing
+- App signing setup (Play App Signing)
+- Store listing: screenshots, feature graphic, short/long description
+- Submit to Android first (faster review, more forgiving); iOS App Store review tends to be stricter about live-streaming/education apps and takes longer
+- Expect at least one rejection round — build slack into the timeline for it
+
+**Phase 6 — Post-launch (ongoing)**
+- Monitor crash rates and call-quality metrics from the SDK's dashboard
+- Add recording playback tied to lessons
+- Iterate based on actual usage, not assumptions
+
+**Rough timeline:** treat the mobile phase as a 10–16 week side-project at a sustainable pace once it starts, not a sprint — Phase 0 is the cheapest way to find out if it's worth the other phases at all.
+
+---
+
 ## Data Model Decisions
 _Last updated: 2026-04-30_
 
