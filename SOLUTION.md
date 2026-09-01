@@ -2,6 +2,24 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-01 — Line spacing typed in the report edit modal still disappeared in the generated PDF
+
+**Issue:** After the previous fix below, a single Enter press in the Progress/Saran fields still didn't show up as a line break in the PDF — only a full blank line (double Enter) did, since `normalizeFreeText()` couldn't tell a deliberately-typed newline apart from a hard-wrap-from-paste artifact once both were just `\n` characters in the same stored string.
+
+**Solution:** Moved the hard-wrap cleanup to where the ambiguity actually originates — pasting — instead of guessing after the fact. The report edit modal's Progress/Saran textareas now normalize pasted text on paste (collapsing its internal hard-wrap newlines, preserving its own real paragraph breaks) before it ever reaches the field; an actual Enter keypress never goes through that path. With paste artifacts handled at the door, `normalizeFreeText()` in `ReportDocument.tsx` now trusts every `\n` in storage and renders it as a real line break — matching the edit modal 1:1. Trade-off: a handful of already-stored reports that were pasted in before this fix (with pre-existing hard-wrap `\n` runs) will still render with the old wasted-space symptom until re-saved.
+
+## 2026-09-01 — Deliberate paragraph breaks in Progress/Saran were being erased along with hard-wrap artifacts
+
+**Issue:** The earlier `normalizeFreeText()` fix (see the "overflowed to an extra page" entry below) collapsed *every* newline into a space, including a teacher's deliberate blank-line paragraph break (e.g. a report writing "Tahsin: ..." and "Tahfizh: ..." as two visually separated notes) — losing real structure the same fix was meant to preserve for hard-wrapped paste text.
+
+**Solution:** `normalizeFreeText()` now splits on a blank line (2+ consecutive newlines — Enter pressed twice) first, treating that as a genuine paragraph break and keeping one literal `\n` between paragraphs (which `react-pdf`'s `<Text>` renders as a real line break). Within each paragraph, all other whitespace — including single newlines, which are indistinguishable from hard-wrap paste artifacts — still collapses into single spaces as before. Verified by rendering both the original hard-wrap regression case (still reflows, no wasted space) and a real double-newline paragraph case (now renders as two separate lines) to PNG. (Superseded by the fix directly above.)
+
+## 2026-09-01 — Report grade labels were gender-agreed with no real-world basis for it
+
+**Issue:** `deriveGradeLabel` produced a different label for female students (Jayyidah Jiddan, Mumtaazah, Maqbulah, Dhaifah) than male ones (Jayyid Jiddan, Mumtaz, Maqbul, Dhaif). The base terms are real, standard Arabic academic grades — but the gendered variants had never actually been confirmed against how this school's real reports write them, and the user had never heard of the feminine forms being used this way.
+
+**Solution:** Removed the gender branching entirely — `GRADE_LABEL` is now a flat `Record<ReportGrade, string>`, same label for every student regardless of gender. `deriveGradeLabel` no longer takes a gender argument; all three call sites updated.
+
 ## 2026-09-01 — Saran still rendered visibly bigger than Progress despite the combined-length fix
 
 **Issue:** A real report (Tahsin/Tahfizh progress notes) still showed Saran in a noticeably larger font than Progress — the exact mismatch the combined-length sizing fix was supposed to prevent.
