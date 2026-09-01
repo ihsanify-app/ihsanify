@@ -30,6 +30,10 @@ via the root `package.json` `version` field.
   Sekarang" and "Chat Admin via WhatsApp" buttons and hands off a
   pre-filled WhatsApp message to the admin, backed by a new public
   subjects endpoint.
+- Report PDF's "Dibuat oleh Pengajar" now shows the teacher's honorific:
+  "Ustadz"/"Ustadzah" (or "Mister"/"Miss" for Bahasa Inggris) as a prefix,
+  and the Arabic du'a "حَفِظَهُ اللهُ"/"حَفِظَهَا اللهُ" as a suffix, based on
+  the teacher's gender and subject.
 
 ### Changed
 
