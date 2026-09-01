@@ -239,13 +239,68 @@ usersRouter.patch(
 					...(body.avatarUrl !== undefined && { avatarUrl: body.avatarUrl }),
 				},
 			});
+
+			// Two students can't hold the same number at once (unique constraint),
+			// so re-numbering one to a value another already has would otherwise
+			// fail outright. Detect that case and swap the two numbers instead —
+			// via a temporary null step, since neither target update can run
+			// first without momentarily colliding with the other's current value.
+			let swappedUser: Awaited<ReturnType<typeof serializeUser>> | null = null;
 			if (body.studentNumber !== undefined) {
-				await prisma.student.update({
+				const currentStudent = await prisma.student.findUnique({
 					where: { userId },
-					data: { studentNumber: body.studentNumber },
 				});
+				if (!currentStudent) {
+					return c.json(
+						{ success: false, message: "Student record not found." },
+						404,
+					);
+				}
+
+				const conflicting =
+					body.studentNumber === null
+						? null
+						: await prisma.student.findFirst({
+								where: {
+									studentNumber: body.studentNumber,
+									userId: { not: userId },
+								},
+							});
+
+				if (conflicting) {
+					await prisma.$transaction([
+						prisma.student.update({
+							where: { id: conflicting.id },
+							data: { studentNumber: null },
+						}),
+						prisma.student.update({
+							where: { userId },
+							data: { studentNumber: body.studentNumber },
+						}),
+						prisma.student.update({
+							where: { id: conflicting.id },
+							data: { studentNumber: currentStudent.studentNumber },
+						}),
+					]);
+					const conflictingUser = await prisma.user.findUnique({
+						where: { id: conflicting.userId },
+					});
+					swappedUser = conflictingUser
+						? await serializeUser(conflictingUser)
+						: null;
+				} else {
+					await prisma.student.update({
+						where: { userId },
+						data: { studentNumber: body.studentNumber },
+					});
+				}
 			}
-			return c.json({ success: true, data: await serializeUser(user) });
+
+			return c.json({
+				success: true,
+				data: await serializeUser(user),
+				swappedUser,
+			});
 		} catch (error: any) {
 			if (error.code === "P2025") {
 				return c.json({ success: false, message: "User not found." }, 404);

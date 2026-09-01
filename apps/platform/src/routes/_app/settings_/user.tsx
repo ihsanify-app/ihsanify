@@ -648,8 +648,17 @@ function RouteComponent() {
 			body: JSON.stringify({ studentNumber }),
 		});
 		if (body?.success) {
+			// If the requested number belonged to another student, the backend
+			// swaps the two instead of rejecting the change — reflect both
+			// rows' new numbers here, not just the one that was edited.
 			setUsers((prev) =>
-				prev.map((u) => (u.userId === userId ? body.data : u)),
+				prev.map((u) => {
+					if (u.userId === userId) return body.data;
+					if (body.swappedUser && u.userId === body.swappedUser.userId) {
+						return body.swappedUser;
+					}
+					return u;
+				}),
 			);
 			setErrorMessage("");
 		} else {
