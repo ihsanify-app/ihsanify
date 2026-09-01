@@ -216,17 +216,20 @@ function MixedScriptText({
 // stopping well short of the page's actual width — instead of using the
 // full line width available. Collapsing all whitespace runs (including
 // those line breaks) into single spaces lets it reflow naturally.
-// A blank line (two or more consecutive newlines — Enter pressed twice)
-// is treated as a deliberate paragraph break and kept as one literal "\n",
-// which react-pdf's <Text> renders as a real line break. A single newline
-// is indistinguishable from a hard-wrap artifact left over from pasted
-// text, so it's collapsed into a space along with all other whitespace.
+// Newlines are preserved literally — react-pdf's <Text> renders "\n" as a
+// real line break, so whatever line breaks are actually in the stored text
+// show up in the PDF the same way they do in the report edit modal. The
+// hard-wrap-from-pasted-text artifacts this was originally built to erase
+// are now stripped at entry time instead (the report edit modal's paste
+// handler), so a "\n" reaching this function is trusted as something the
+// teacher actually typed. Only other whitespace (repeated spaces/tabs)
+// still collapses.
 function normalizeFreeText(text: string): string {
 	return text
-		.split(/\n\s*\n/)
-		.map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
-		.filter((paragraph) => paragraph.length > 0)
-		.join("\n");
+		.split("\n")
+		.map((line) => line.replace(/[^\S\n]+/g, " ").trim())
+		.join("\n")
+		.trim();
 }
 
 function buildStyles(fontFamily: string) {
@@ -522,7 +525,12 @@ function ContentPage({
 				<View style={styles.footerRow}>
 					<View>
 						<Text style={styles.footerLabel}>Dibuat oleh Pengajar</Text>
-						<Text style={styles.footerValue}>{teacherName}</Text>
+						<MixedScriptText
+							text={teacherName}
+							style={styles.footerValue}
+							baseFontFamily={FONT_FAMILY[font]}
+							emojiImages={emojiImages}
+						/>
 					</View>
 					{submittedAtLabel && (
 						<View>

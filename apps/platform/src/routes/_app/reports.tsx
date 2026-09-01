@@ -71,6 +71,45 @@ const STATUS_BADGE_CLASS: Record<ReportRow["statusKind"], string> = {
 	read: "bg-green-100 text-green-700",
 };
 
+// Pasted text (e.g. from WhatsApp or Word) often arrives already hard-wrapped
+// at some fixed column width, with a literal line break at every wrap point.
+// The report PDF renders every "\n" in Progress/Advice as a real line break,
+// so a hard-wrapped paste would otherwise show up as a wall of short lines
+// instead of reflowing. Stripped here, at the point the text enters the
+// field, rather than guessed at render time — an actual Enter keypress by
+// the teacher never goes through this, so it's untouched.
+function normalizePastedFreeText(text: string): string {
+	return text
+		.split(/\n\s*\n/)
+		.map((paragraph) =>
+			paragraph
+				.split("\n")
+				.map((line) => line.trim())
+				.join(" ")
+				.replace(/\s+/g, " ")
+				.trim(),
+		)
+		.filter((paragraph) => paragraph.length > 0)
+		.join("\n\n");
+}
+
+function handleFreeTextPaste(
+	e: React.ClipboardEvent<HTMLTextAreaElement>,
+	setValue: (value: string) => void,
+) {
+	e.preventDefault();
+	const target = e.currentTarget;
+	const pasted = normalizePastedFreeText(e.clipboardData.getData("text"));
+	const { selectionStart, selectionEnd, value } = target;
+	const nextValue =
+		value.slice(0, selectionStart) + pasted + value.slice(selectionEnd);
+	const cursor = selectionStart + pasted.length;
+	setValue(nextValue);
+	requestAnimationFrame(() => {
+		target.setSelectionRange(cursor, cursor);
+	});
+}
+
 function ReportFormModal({
 	initialData,
 	groups,
@@ -216,12 +255,14 @@ function ReportFormModal({
 								placeholder="Progress"
 								value={progress}
 								onChange={(e) => setProgress(e.target.value)}
+								onPaste={(e) => handleFreeTextPaste(e, setProgress)}
 							/>
 							<textarea
 								className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-32"
 								placeholder="Advice"
 								value={advice}
 								onChange={(e) => setAdvice(e.target.value)}
+								onPaste={(e) => handleFreeTextPaste(e, setAdvice)}
 							/>
 						</div>
 						<label className="text-xs font-normal text-stone-500">
