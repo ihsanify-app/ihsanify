@@ -206,21 +206,6 @@ function MixedScriptText({
 	);
 }
 
-// Shrinks Progress/Saran's font as the two fields' combined length grows,
-// so a long entry is less likely to push the section (wrap={false} keeps
-// it from being sliced mid-border) onto a third page. Both fields share
-// one page's vertical budget, so they're sized off their *combined*
-// length rather than independently — otherwise a short Saran next to an
-// already-long Progress renders at a size that assumes plenty of room is
-// still free, when Progress already used most of it. Linear between two
-// anchors — 50 characters -> 25pt, 200 characters -> 18pt — extrapolated
-// a bit past each end and clamped so it never gets comically large or
-// unreadably small.
-const FONT_SIZE_ANCHOR_SHORT = { length: 50, size: 25 };
-const FONT_SIZE_ANCHOR_LONG = { length: 200, size: 18 };
-const CONTENT_FONT_SIZE_MIN = 13;
-const CONTENT_FONT_SIZE_MAX = 28;
-
 // Progress/advice text is often pasted in from elsewhere (Word, WhatsApp,
 // Notes) already hard-wrapped at some fixed column width — every one of
 // those line breaks is a real "\n" character, not just how the source
@@ -232,19 +217,6 @@ const CONTENT_FONT_SIZE_MAX = 28;
 // those line breaks) into single spaces lets it reflow naturally.
 function normalizeFreeText(text: string): string {
 	return text.replace(/\s+/g, " ").trim();
-}
-
-function deriveContentFontSize(length: number): number {
-	const slope =
-		(FONT_SIZE_ANCHOR_LONG.size - FONT_SIZE_ANCHOR_SHORT.size) /
-		(FONT_SIZE_ANCHOR_LONG.length - FONT_SIZE_ANCHOR_SHORT.length);
-	const raw =
-		FONT_SIZE_ANCHOR_SHORT.size +
-		slope * (length - FONT_SIZE_ANCHOR_SHORT.length);
-	return Math.min(
-		CONTENT_FONT_SIZE_MAX,
-		Math.max(CONTENT_FONT_SIZE_MIN, Math.round(raw)),
-	);
 }
 
 function buildStyles(fontFamily: string) {
@@ -392,17 +364,6 @@ export function ReportDocument({
 	const styles = buildStyles(FONT_FAMILY[font]);
 	const normalizedProgress = normalizeFreeText(progress);
 	const normalizedAdvice = normalizeFreeText(advice);
-	const contentFontSize = deriveContentFontSize(
-		normalizedProgress.length + normalizedAdvice.length,
-	);
-	const progressTextStyle = {
-		...styles.sectionText,
-		fontSize: contentFontSize,
-	};
-	const adviceTextStyle = {
-		...styles.sectionText,
-		fontSize: contentFontSize,
-	};
 	const footerParts = buildFooterParts({
 		footerPhone,
 		footerEmail,
@@ -480,7 +441,7 @@ export function ReportDocument({
 						<Text style={styles.sectionLabel}>Progress</Text>
 						<MixedScriptText
 							text={normalizedProgress}
-							style={progressTextStyle}
+							style={styles.sectionText}
 							baseFontFamily={FONT_FAMILY[font]}
 							emojiImages={emojiImages}
 						/>
@@ -490,7 +451,7 @@ export function ReportDocument({
 						<Text style={styles.sectionLabel}>Saran</Text>
 						<MixedScriptText
 							text={normalizedAdvice}
-							style={adviceTextStyle}
+							style={styles.sectionText}
 							baseFontFamily={FONT_FAMILY[font]}
 							emojiImages={emojiImages}
 						/>

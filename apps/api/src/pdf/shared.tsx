@@ -424,7 +424,7 @@ export function buildSharedStyles(fontFamily: string) {
 			marginBottom: 6,
 		},
 		sectionText: {
-			fontSize: 17,
+			fontSize: 15,
 			lineHeight: 1.5,
 			color: "#292524",
 		},
