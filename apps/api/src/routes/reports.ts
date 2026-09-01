@@ -48,19 +48,20 @@ function deriveGrade(score: number): ReportGrade {
 	return "DHAIF";
 }
 
-const GRADE_LABEL: Record<ReportGrade, { male: string; female: string }> = {
-	MUMTAZ: { male: "Mumtaz", female: "Mumtaazah" },
-	JAYYID_JIDDAN: { male: "Jayyid Jiddan", female: "Jayyidah Jiddan" },
-	JAYYID: { male: "Jayyid", female: "Jayyidah" },
-	MAQBUL: { male: "Maqbul", female: "Maqbulah" },
-	DHAIF: { male: "Dhaif", female: "Dhaifah" },
+// Same label regardless of the student's gender — not gender-agreed like
+// the grammatically-valid feminine Arabic adjective forms would be
+// (jayyidah, mumtaazah, etc.), since that's not how these grades are
+// actually written on this school's real reports.
+const GRADE_LABEL: Record<ReportGrade, string> = {
+	MUMTAZ: "Mumtaz",
+	JAYYID_JIDDAN: "Jayyid Jiddan",
+	JAYYID: "Jayyid",
+	MAQBUL: "Maqbul",
+	DHAIF: "Dhaif",
 };
 
-function deriveGradeLabel(
-	grade: ReportGrade,
-	gender: "MALE" | "FEMALE" | null,
-) {
-	return GRADE_LABEL[grade][gender === "FEMALE" ? "female" : "male"];
+function deriveGradeLabel(grade: ReportGrade) {
+	return GRADE_LABEL[grade];
 }
 
 type ReportRecord = {
@@ -124,7 +125,7 @@ async function serializeReport(report: ReportRecord) {
 		score: report.score,
 		scoreDenominator: SCORE_DENOMINATOR,
 		grade,
-		gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
+		gradeLabel: deriveGradeLabel(grade),
 		statusKind,
 		statusLabel,
 		submittedAt: report.submittedAt ? report.submittedAt.toISOString() : null,
@@ -253,7 +254,7 @@ reportsRouter.get(
 					advice: report.advice,
 					score: report.score,
 					scoreDenominator: SCORE_DENOMINATOR,
-					gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
+					gradeLabel: deriveGradeLabel(grade),
 					submittedAtLabel: report.submittedAt
 						? report.submittedAt.toLocaleDateString("en-GB", {
 								day: "numeric",
@@ -713,7 +714,7 @@ reportsRouter.get(
 			advice: report.advice,
 			score: report.score,
 			scoreDenominator: SCORE_DENOMINATOR,
-			gradeLabel: deriveGradeLabel(grade, student?.user.gender ?? null),
+			gradeLabel: deriveGradeLabel(grade),
 			submittedAtLabel: report.submittedAt
 				? report.submittedAt.toLocaleDateString("en-GB", {
 						day: "numeric",
