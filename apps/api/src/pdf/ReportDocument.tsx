@@ -206,12 +206,16 @@ function MixedScriptText({
 	);
 }
 
-// Shrinks Progress/Saran's font as the teacher writes more, so a long
-// entry is less likely to push the section (wrap={false} keeps it from
-// being sliced mid-border) onto a third page. Linear between two anchors —
-// 50 characters -> 25pt, 200 characters -> 18pt — extrapolated a bit past
-// each end and clamped so it never gets comically large or unreadably
-// small.
+// Shrinks Progress/Saran's font as the two fields' combined length grows,
+// so a long entry is less likely to push the section (wrap={false} keeps
+// it from being sliced mid-border) onto a third page. Both fields share
+// one page's vertical budget, so they're sized off their *combined*
+// length rather than independently — otherwise a short Saran next to an
+// already-long Progress renders at a size that assumes plenty of room is
+// still free, when Progress already used most of it. Linear between two
+// anchors — 50 characters -> 25pt, 200 characters -> 18pt — extrapolated
+// a bit past each end and clamped so it never gets comically large or
+// unreadably small.
 const FONT_SIZE_ANCHOR_SHORT = { length: 50, size: 25 };
 const FONT_SIZE_ANCHOR_LONG = { length: 200, size: 18 };
 const CONTENT_FONT_SIZE_MIN = 13;
@@ -230,8 +234,7 @@ function normalizeFreeText(text: string): string {
 	return text.replace(/\s+/g, " ").trim();
 }
 
-function deriveContentFontSize(text: string): number {
-	const length = text.trim().length;
+function deriveContentFontSize(length: number): number {
 	const slope =
 		(FONT_SIZE_ANCHOR_LONG.size - FONT_SIZE_ANCHOR_SHORT.size) /
 		(FONT_SIZE_ANCHOR_LONG.length - FONT_SIZE_ANCHOR_SHORT.length);
@@ -389,13 +392,16 @@ export function ReportDocument({
 	const styles = buildStyles(FONT_FAMILY[font]);
 	const normalizedProgress = normalizeFreeText(progress);
 	const normalizedAdvice = normalizeFreeText(advice);
+	const contentFontSize = deriveContentFontSize(
+		normalizedProgress.length + normalizedAdvice.length,
+	);
 	const progressTextStyle = {
 		...styles.sectionText,
-		fontSize: deriveContentFontSize(normalizedProgress),
+		fontSize: contentFontSize,
 	};
 	const adviceTextStyle = {
 		...styles.sectionText,
-		fontSize: deriveContentFontSize(normalizedAdvice),
+		fontSize: contentFontSize,
 	};
 	const footerParts = buildFooterParts({
 		footerPhone,
