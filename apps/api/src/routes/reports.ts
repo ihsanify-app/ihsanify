@@ -244,10 +244,15 @@ reportsRouter.get(
 					}),
 				]);
 				const grade = deriveGrade(report.score);
+				const subjectName = group?.subject.name ?? "-";
 				return {
-					subjectName: group?.subject.name ?? "-",
+					subjectName,
 					groupTypeLabel: groupTypeLabel(group?.groupType),
-					teacherName: teacher?.user.name ?? "-",
+					teacherName: formatTeacherName(
+						teacher?.user.name ?? "-",
+						teacher?.user.gender ?? null,
+						subjectName,
+					),
 					month: report.month,
 					year: report.year,
 					progress: report.progress,
@@ -647,6 +652,32 @@ function genderLabel(gender: "MALE" | "FEMALE" | null) {
 	return "-";
 }
 
+// English uses the Mister/Miss convention instead of Ustadz/Ustadzah since
+// that's the honorific actually used for that subject's teachers.
+const ENGLISH_SUBJECT_NAME = "Bahasa Inggris";
+
+// "Dibuat oleh Pengajar" on the report PDF — a plain name has no gender or
+// subject context on its own, so this builds the honorific prefix and the
+// Arabic du'a suffix around it. Gender is unset for some accounts, so both
+// pieces are simply omitted rather than guessed.
+function formatTeacherName(
+	name: string,
+	gender: "MALE" | "FEMALE" | null,
+	subjectName: string,
+) {
+	if (!gender) return name;
+	const isEnglish = subjectName === ENGLISH_SUBJECT_NAME;
+	const prefix = isEnglish
+		? gender === "FEMALE"
+			? "Miss"
+			: "Mister"
+		: gender === "FEMALE"
+			? "Ustadzah"
+			: "Ustadz";
+	const suffix = gender === "FEMALE" ? "حَفِظَهَا اللهُ" : "حَفِظَهُ اللهُ";
+	return `${prefix} ${name} ${suffix}`;
+}
+
 function groupTypeLabel(
 	groupType: "GROUP" | "PRIVATE" | "SEMI_PRIVATE" | undefined,
 ) {
@@ -702,12 +733,17 @@ reportsRouter.get(
 		]);
 
 		const grade = deriveGrade(report.score);
+		const subjectName = group?.subject.name ?? "-";
 		const buffer = await renderReportPdf({
 			studentName: student?.user.name ?? "-",
 			studentGenderLabel: genderLabel(student?.user.gender ?? null),
-			subjectName: group?.subject.name ?? "-",
+			subjectName,
 			groupTypeLabel: groupTypeLabel(group?.groupType),
-			teacherName: teacher?.user.name ?? "-",
+			teacherName: formatTeacherName(
+				teacher?.user.name ?? "-",
+				teacher?.user.gender ?? null,
+				subjectName,
+			),
 			month: report.month,
 			year: report.year,
 			progress: report.progress,
