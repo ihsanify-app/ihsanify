@@ -216,8 +216,17 @@ function MixedScriptText({
 // stopping well short of the page's actual width — instead of using the
 // full line width available. Collapsing all whitespace runs (including
 // those line breaks) into single spaces lets it reflow naturally.
+// A blank line (two or more consecutive newlines — Enter pressed twice)
+// is treated as a deliberate paragraph break and kept as one literal "\n",
+// which react-pdf's <Text> renders as a real line break. A single newline
+// is indistinguishable from a hard-wrap artifact left over from pasted
+// text, so it's collapsed into a space along with all other whitespace.
 function normalizeFreeText(text: string): string {
-	return text.replace(/\s+/g, " ").trim();
+	return text
+		.split(/\n\s*\n/)
+		.map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
+		.filter((paragraph) => paragraph.length > 0)
+		.join("\n");
 }
 
 function buildStyles(fontFamily: string) {
