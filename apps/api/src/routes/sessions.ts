@@ -110,7 +110,10 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 	const authUser = c.get("authUser");
 	const groupId = c.req.param("id");
 
-	const group = await prisma.group.findUnique({ where: { id: groupId } });
+	const group = await prisma.group.findUnique({
+		where: { id: groupId },
+		include: { subject: true },
+	});
 	if (!group) {
 		return c.json({ success: false, message: "Group not found." }, 404);
 	}
@@ -129,6 +132,7 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 	const body = (await c.req.json()) as {
 		date?: string;
 		durationMinutes?: number;
+		studentIds?: string[];
 	};
 
 	if (!body.date || !body.durationMinutes) {
@@ -143,21 +147,58 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 			groupId,
 			date: new Date(body.date),
 			durationMinutes: body.durationMinutes,
+			...(body.studentIds !== undefined && { attendanceRecorded: true }),
 		},
 	});
+
+	const rosterStudentIds = await getCurrentStudentIds(groupId);
+	if (body.studentIds !== undefined) {
+		const validStudentIds = body.studentIds.filter((id) =>
+			rosterStudentIds.includes(id),
+		);
+		for (const studentId of validStudentIds) {
+			await prisma.sessionAttendance.create({
+				data: { sessionId: session.id, studentId },
+			});
+		}
+	}
+
+	const teacherId = await getCurrentTeacherId(groupId);
+	const teacher = teacherId
+		? await prisma.teacher.findUnique({
+				where: { id: teacherId },
+				include: { user: true },
+			})
+		: null;
+	const rosterStudents = await prisma.student.findMany({
+		where: { id: { in: rosterStudentIds } },
+		include: { user: true },
+	});
+	const attendance = await prisma.sessionAttendance.findMany({
+		where: { sessionId: session.id },
+		include: { student: { include: { user: true } } },
+	});
+	const attendees = session.attendanceRecorded
+		? attendance.map((a) => ({
+				studentId: a.studentId,
+				studentName: a.student.user.name,
+			}))
+		: rosterStudents.map((st) => ({
+				studentId: st.id,
+				studentName: st.user.name,
+			}));
 
 	return c.json(
 		{
 			success: true,
-			data: {
-				sessionId: session.id,
-				year: session.date.getFullYear(),
-				month: session.date.getMonth() + 1,
-				day: session.date.getDate(),
-				date: session.date.toISOString(),
-				attendanceRecorded: session.attendanceRecorded,
-				durationMinutes: session.durationMinutes,
-			},
+			data: serializeSession(
+				session,
+				teacherId,
+				teacher?.user.name ?? null,
+				group.subjectId,
+				group.subject.name,
+				attendees,
+			),
 		},
 		201,
 	);

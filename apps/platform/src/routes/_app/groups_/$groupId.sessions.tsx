@@ -25,14 +25,35 @@ type SessionRow = {
 };
 
 function CreateSessionModal({
+	roster,
 	onClose,
 	onSubmit,
 }: {
+	roster: Option[];
 	onClose: () => void;
-	onSubmit: (payload: { date: string; durationMinutes: number }) => void;
+	onSubmit: (payload: {
+		date: string;
+		durationMinutes: number;
+		studentIds: string[];
+	}) => void;
 }) {
 	const [date, setDate] = useState("");
 	const [durationMinutes, setDurationMinutes] = useState(60);
+	// Defaults to the whole roster checked, unlike EditSessionModal's
+	// empty default — there, an unchecked start avoids implying "these are
+	// already-confirmed attendees" for an existing session that looks like
+	// it might have real saved data. A brand-new session has no such
+	// look-alike risk, so defaulting to "everyone attended, uncheck absentees"
+	// matches the common case and needs fewer clicks.
+	const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>(
+		roster.map((s) => s.studentId),
+	);
+
+	function toggleStudent(id: string) {
+		setSelectedStudentIds((prev) =>
+			prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
+		);
+	}
 
 	return (
 		<div
@@ -66,6 +87,24 @@ function CreateSessionModal({
 							value={durationMinutes}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
+						<div className="border border-stone-200 rounded-xl p-2">
+							<p className="text-xs text-stone-500 mb-1">Students present</p>
+							<div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
+								{roster.map((s) => (
+									<label
+										key={s.studentId}
+										className="flex items-center gap-2 text-sm cursor-pointer text-stone-600 hover:text-green-700"
+									>
+										<input
+											type="checkbox"
+											checked={selectedStudentIds.includes(s.studentId)}
+											onChange={() => toggleStudent(s.studentId)}
+										/>
+										{s.studentName}
+									</label>
+								))}
+							</div>
+						</div>
 					</div>
 				</form>
 				<div className="flex justify-end gap-2 mt-4">
@@ -78,7 +117,13 @@ function CreateSessionModal({
 					</button>
 					<button
 						type="button"
-						onClick={() => onSubmit({ date, durationMinutes })}
+						onClick={() =>
+							onSubmit({
+								date,
+								durationMinutes,
+								studentIds: selectedStudentIds,
+							})
+						}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						Save
@@ -284,6 +329,7 @@ function RouteComponent() {
 	async function handleCreate(payload: {
 		date: string;
 		durationMinutes: number;
+		studentIds: string[];
 	}) {
 		const { body } = await apiFetch(`/groups/${groupId}/sessions`, {
 			method: "POST",
@@ -352,6 +398,7 @@ function RouteComponent() {
 		<section className="max-sm:p-3 sm:p-6">
 			{isModalOpen && (
 				<CreateSessionModal
+					roster={roster}
 					onClose={() => setIsModalOpen(false)}
 					onSubmit={handleCreate}
 				/>
