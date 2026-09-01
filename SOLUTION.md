@@ -2,6 +2,12 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-01 — Report PDF's Progress/Saran text sometimes overflowed to an extra page for no obvious reason
+
+**Issue:** A shorter Saran (advice) text pushed the report onto a 3rd page, while a longer one didn't — counter-intuitive, since the font-size-by-length heuristic alone would predict the opposite.
+
+**Solution:** Both texts had been pasted in from elsewhere already hard-wrapped at a fixed column width — every wrapped line was a literal `\n`, and `react-pdf`'s `<Text>` preserves `\n` as a forced line break instead of reflowing it. So the text was rendering at its original ~80-character line width instead of the page's actual full width, wasting most of each line. Added `normalizeFreeText()` in `ReportDocument.tsx` to collapse all whitespace runs (including embedded newlines) into single spaces before font-size derivation and rendering, letting the text reflow naturally. Verified by reproducing both exact reported texts and confirming the shorter one now fits back on a single content page.
+
 ## 2026-09-01 — Org logo overlapping "Tipe Kelas" in report header
 
 **Issue:** The organization logo in the report PDF header was too large and overlapped the "Tipe Kelas" biodata column — reports have 4 biodata columns (the other PDF templates built on this shared header only use 2), so there wasn't enough clearance for the logo's fixed top-right box.
