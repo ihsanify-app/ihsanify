@@ -409,8 +409,8 @@ export function buildSharedStyles(fontFamily: string) {
 			// page — react-pdf doesn't replay a fragmented container's own
 			// top padding on continuation pages, but a child's own margin
 			// still applies wherever it's placed.
-			marginTop: 20,
-			marginBottom: 16,
+			marginTop: 5,
+			marginBottom: 4,
 			borderWidth: 1,
 			borderColor: "#d6d3d1",
 			borderRadius: 10,
