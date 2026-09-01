@@ -2,6 +2,18 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-01 — Saran still rendered visibly bigger than Progress despite the combined-length fix
+
+**Issue:** A real report (Tahsin/Tahfizh progress notes) still showed Saran in a noticeably larger font than Progress — the exact mismatch the combined-length sizing fix was supposed to prevent.
+
+**Solution:** Removed the dynamic font-size mechanism (`deriveContentFontSize` and its length-based anchors) entirely — Progress and Saran now both use the shared, fixed `sectionText` style (17pt) unconditionally. Requested directly after seeing the mismatch persist in practice; going forward, a long report simply takes as many pages as it needs rather than shrinking text to try to avoid it. Verified by rendering the exact reported case — both fields now render at the identical size.
+
+## 2026-09-01 — Advice's font rendered too big relative to a long Progress, still risking a 3rd page
+
+**Issue:** Progress and Saran (advice) were each sized from their *own* character count independently. A long Progress could already be shrunk to the smallest allowed font while a short Saran next to it still rendered at a much bigger size — as if it didn't know Progress had already used up most of the page's room.
+
+**Solution:** Changed `deriveContentFontSize()` in `ReportDocument.tsx` to take both fields' *combined* length, so they're now sized off one shared budget instead of two independent ones — a short Saran next to a long Progress now shrinks along with it. Considered a fixed font size instead, but rejected it: it would either force every short/simple report to look unnecessarily small, or (if kept large) remove the only existing protection against long entries overflowing. Note: this narrows the overflow risk but doesn't eliminate it — a report where *both* fields are individually very long (confirmed by testing an 818-character real Progress field) can still need a 3rd page purely on content volume, which is an inherent capacity limit of the fixed-section layout, not a bug this fix addresses.
+
 ## 2026-09-01 — Report PDF's Progress/Saran text sometimes overflowed to an extra page for no obvious reason
 
 **Issue:** A shorter Saran (advice) text pushed the report onto a 3rd page, while a longer one didn't — counter-intuitive, since the font-size-by-length heuristic alone would predict the opposite.
