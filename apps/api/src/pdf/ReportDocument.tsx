@@ -217,6 +217,19 @@ const FONT_SIZE_ANCHOR_LONG = { length: 200, size: 18 };
 const CONTENT_FONT_SIZE_MIN = 13;
 const CONTENT_FONT_SIZE_MAX = 28;
 
+// Progress/advice text is often pasted in from elsewhere (Word, WhatsApp,
+// Notes) already hard-wrapped at some fixed column width — every one of
+// those line breaks is a real "\n" character, not just how the source
+// happened to display it. react-pdf's <Text> preserves "\n" as a forced
+// line break rather than reflowing it, so a paragraph that was wrapped at
+// ~80 columns in its source renders as ~80-column lines here too — each
+// stopping well short of the page's actual width — instead of using the
+// full line width available. Collapsing all whitespace runs (including
+// those line breaks) into single spaces lets it reflow naturally.
+function normalizeFreeText(text: string): string {
+	return text.replace(/\s+/g, " ").trim();
+}
+
 function deriveContentFontSize(text: string): number {
 	const length = text.trim().length;
 	const slope =
@@ -374,13 +387,15 @@ export function ReportDocument({
 }: ReportDocumentProps & { emojiImages: Map<string, string> }) {
 	const period = `${MONTH_NAMES[month - 1] ?? month} ${year}`;
 	const styles = buildStyles(FONT_FAMILY[font]);
+	const normalizedProgress = normalizeFreeText(progress);
+	const normalizedAdvice = normalizeFreeText(advice);
 	const progressTextStyle = {
 		...styles.sectionText,
-		fontSize: deriveContentFontSize(progress),
+		fontSize: deriveContentFontSize(normalizedProgress),
 	};
 	const adviceTextStyle = {
 		...styles.sectionText,
-		fontSize: deriveContentFontSize(advice),
+		fontSize: deriveContentFontSize(normalizedAdvice),
 	};
 	const footerParts = buildFooterParts({
 		footerPhone,
@@ -458,7 +473,7 @@ export function ReportDocument({
 					<View style={styles.section} wrap={false}>
 						<Text style={styles.sectionLabel}>Progress</Text>
 						<MixedScriptText
-							text={progress}
+							text={normalizedProgress}
 							style={progressTextStyle}
 							baseFontFamily={FONT_FAMILY[font]}
 							emojiImages={emojiImages}
@@ -468,7 +483,7 @@ export function ReportDocument({
 					<View style={styles.section} wrap={false}>
 						<Text style={styles.sectionLabel}>Saran</Text>
 						<MixedScriptText
-							text={advice}
+							text={normalizedAdvice}
 							style={adviceTextStyle}
 							baseFontFamily={FONT_FAMILY[font]}
 							emojiImages={emojiImages}
