@@ -365,8 +365,8 @@ export function buildSharedStyles(fontFamily: string) {
 			position: "absolute",
 			top: 28,
 			right: 36,
-			width: 80,
-			height: 80,
+			width: 60,
+			height: 60,
 			borderRadius: 8,
 		},
 		headerTitle: {

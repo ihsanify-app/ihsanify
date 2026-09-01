@@ -232,8 +232,17 @@ function deriveContentFontSize(text: string): number {
 }
 
 function buildStyles(fontFamily: string) {
+	const shared = buildSharedStyles(fontFamily);
 	return StyleSheet.create({
-		...buildSharedStyles(fontFamily),
+		...shared,
+		// Report's biodata row packs 4 columns (the other documents built on
+		// this shared header only use 2), so the org logo's absolutely-
+		// positioned box in the header's top-right corner needs dedicated
+		// clearance here or the last column's text runs under it.
+		biodataRow: {
+			...shared.biodataRow,
+			paddingRight: 70,
+		},
 		coverPage: {
 			fontFamily,
 			backgroundColor: "#ffffff",
