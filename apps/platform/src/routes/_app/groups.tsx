@@ -156,7 +156,12 @@ function CreateGroupModal({
 	const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState<
 		true | false
 	>(false);
+	const [studentSearch, setStudentSearch] = useState("");
 	const dropdownRef = useRef<HTMLDivElement>(null);
+
+	const filteredStudents = students.filter((s) =>
+		s.name.toLowerCase().includes(studentSearch.trim().toLowerCase()),
+	);
 
 	function toggleStudent(id: string) {
 		setSelectedStudentIds((prev) =>
@@ -188,6 +193,7 @@ function CreateGroupModal({
 				!dropdownRef.current.contains(e.target as Node)
 			) {
 				setIsStudentDropdownOpen(false);
+				setStudentSearch("");
 			}
 		}
 		if (isStudentDropdownOpen) {
@@ -248,10 +254,16 @@ function CreateGroupModal({
 							<button
 								type="button"
 								tabIndex={0}
-								onClick={() => setIsStudentDropdownOpen((prev) => !prev)}
-								onKeyDown={(e) =>
-									e.key === "Enter" && setIsStudentDropdownOpen((prev) => !prev)
-								}
+								onClick={() => {
+									setIsStudentDropdownOpen((prev) => !prev);
+									setStudentSearch("");
+								}}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										setIsStudentDropdownOpen((prev) => !prev);
+										setStudentSearch("");
+									}
+								}}
 								className="border border-stone-300 rounded-xl p-2 text-sm cursor-pointer min-h-9 w-full text-left"
 							>
 								{selectedStudentIds.length === 0
@@ -262,22 +274,37 @@ function CreateGroupModal({
 											.join(", ")}
 							</button>
 							{isStudentDropdownOpen && (
-								<div className="border border-stone-200 rounded-xl mt-1 p-2 grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-30 overflow-y-auto">
-									{students.map((s) => (
-										<label
-											key={s.id}
-											onClick={(e) => e.stopPropagation()}
-											onKeyDown={(e) => e.stopPropagation()}
-											className="flex items-center gap-2 text-sm cursor-pointer text-stone-600 hover:text-green-700"
-										>
-											<input
-												type="checkbox"
-												onChange={() => toggleStudent(s.id)}
-												checked={selectedStudentIds.includes(s.id)}
-											/>
-											{s.name}
-										</label>
-									))}
+								<div className="border border-stone-200 rounded-xl mt-1 p-2">
+									<input
+										type="text"
+										placeholder="Search students…"
+										value={studentSearch}
+										onClick={(e) => e.stopPropagation()}
+										onChange={(e) => setStudentSearch(e.target.value)}
+										className="w-full border border-stone-300 focus:border-green-500 rounded-lg p-1.5 mb-2 text-sm outline-none transition-colors font-normal"
+									/>
+									<div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-30 overflow-y-auto">
+										{filteredStudents.length === 0 && (
+											<p className="col-span-full text-xs text-stone-400 italic font-normal">
+												No students match "{studentSearch}".
+											</p>
+										)}
+										{filteredStudents.map((s) => (
+											<label
+												key={s.id}
+												onClick={(e) => e.stopPropagation()}
+												onKeyDown={(e) => e.stopPropagation()}
+												className="flex items-center gap-2 text-sm cursor-pointer text-stone-600 hover:text-green-700"
+											>
+												<input
+													type="checkbox"
+													onChange={() => toggleStudent(s.id)}
+													checked={selectedStudentIds.includes(s.id)}
+												/>
+												{s.name}
+											</label>
+										))}
+									</div>
 								</div>
 							)}
 						</div>
