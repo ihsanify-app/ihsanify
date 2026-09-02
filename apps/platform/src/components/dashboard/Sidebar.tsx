@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
 	BarChart3,
-	BookOpen,
 	ClipboardList,
+	GraduationCap,
 	LayoutDashboard,
 	LineChart,
 	Receipt,
@@ -16,7 +16,7 @@ import { mockUser } from "../../lib/mockAuth";
 
 const navItems = [
 	{ id: 1, icon: LayoutDashboard, title: "Dashboard", path: "/dashboard" },
-	{ id: 2, icon: BookOpen, title: "Groups", path: "/groups" },
+	{ id: 2, icon: GraduationCap, title: "Groups", path: "/groups" },
 	{
 		id: 3,
 		icon: ClipboardList,
