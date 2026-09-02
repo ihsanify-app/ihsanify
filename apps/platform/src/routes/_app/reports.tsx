@@ -53,6 +53,7 @@ type ReportRow = {
 	statusLabel: string;
 	submittedAt: string | null;
 	readAt: string | null;
+	isSent: boolean;
 };
 
 type ReportFormPayload = {
@@ -134,7 +135,7 @@ function ReportFormModal({
 	const [year, setYear] = useState(initialData?.year ?? now.getFullYear());
 	const [progress, setProgress] = useState(initialData?.progress ?? "");
 	const [advice, setAdvice] = useState(initialData?.advice ?? "");
-	const [score, setScore] = useState(initialData?.score ?? 0);
+	const [score, setScore] = useState<number | "">(initialData?.score ?? 0);
 
 	// A report's group can't be changed once created (the backend's edit
 	// endpoint is scoped to a fixed groupId) — only which student within
@@ -152,7 +153,15 @@ function ReportFormModal({
 		setStudentId(nextGroup?.studentIds[0]?.studentId ?? "");
 	}
 
-	const payload = { groupId, studentId, month, year, progress, advice, score };
+	const payload = {
+		groupId,
+		studentId,
+		month,
+		year,
+		progress,
+		advice,
+		score: score === "" ? 0 : score,
+	};
 
 	return (
 		<div
@@ -274,7 +283,17 @@ function ReportFormModal({
 									min={0}
 									max={100}
 									value={score}
-									onChange={(e) => setScore(Number(e.target.value))}
+									onFocus={() => {
+										if (score === 0) setScore("");
+									}}
+									onBlur={() => {
+										if (score === "") setScore(0);
+									}}
+									onChange={(e) =>
+										setScore(
+											e.target.value === "" ? "" : Number(e.target.value),
+										)
+									}
 								/>
 								<span className="font-semibold text-stone-500">/</span>
 								<input
@@ -650,6 +669,20 @@ function RouteComponent() {
 		}
 	}
 
+	async function handleToggleSent(report: ReportRow) {
+		const { body } = await apiFetch(
+			`/groups/${report.groupId}/reports/${report.reportId}`,
+			{ method: "PATCH", body: JSON.stringify({ isSent: !report.isSent }) },
+		);
+		if (body?.success) {
+			setReports((prev) =>
+				prev.map((r) => (r.reportId === report.reportId ? body.data : r)),
+			);
+		} else {
+			setErrorMessage(body?.message ?? "Could not update report.");
+		}
+	}
+
 	async function handleView(report: ReportRow) {
 		setViewingReport(report);
 		if (report.statusKind === "submitted" && mockUser.role === "student") {
@@ -775,6 +808,7 @@ function RouteComponent() {
 								<th className="px-4 py-3 text-left">Subject</th>
 								<th className="px-4 py-3 text-left">Score</th>
 								<th className="px-4 py-3 text-left">Status</th>
+								{canManage && <th className="px-4 py-3 text-left">Sent</th>}
 								<th className="px-4 py-3 text-left">Action</th>
 							</tr>
 						</thead>
@@ -782,7 +816,7 @@ function RouteComponent() {
 							{reports.length === 0 && (
 								<tr>
 									<td
-										colSpan={7}
+										colSpan={canManage ? 8 : 7}
 										className="px-4 py-6 text-center text-stone-400 italic"
 									>
 										No reports yet.
@@ -807,6 +841,16 @@ function RouteComponent() {
 											{r.statusLabel}
 										</span>
 									</td>
+									{canManage && (
+										<td className="px-4 py-3">
+											<input
+												type="checkbox"
+												className="w-4 h-4 accent-green-700 cursor-pointer"
+												checked={r.isSent}
+												onChange={() => handleToggleSent(r)}
+											/>
+										</td>
+									)}
 									<td className="px-4 py-3">
 										<div className="flex flex-row gap-3">
 											<button

@@ -319,6 +319,10 @@ model Report {
   score       Int
   submittedAt DateTime?
   readAt      DateTime?
+  // Manually ticked once the admin/teacher has handed the exported PDF to
+  // the student/parent outside the app (e.g. WhatsApp) — not derived from
+  // any other field, since the app has no way to know that happened.
+  isSent      Boolean   @default(false)
   createdAt   DateTime  @default(now())
   group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   student     Student   @relation(fields: [studentId], references: [id])

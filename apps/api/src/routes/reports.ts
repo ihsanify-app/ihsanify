@@ -76,6 +76,7 @@ type ReportRecord = {
 	score: number;
 	submittedAt: Date | null;
 	readAt: Date | null;
+	isSent: boolean;
 	createdAt: Date;
 };
 
@@ -130,6 +131,7 @@ async function serializeReport(report: ReportRecord) {
 		statusLabel,
 		submittedAt: report.submittedAt ? report.submittedAt.toISOString() : null,
 		readAt: report.readAt ? report.readAt.toISOString() : null,
+		isSent: report.isSent,
 	};
 }
 
@@ -470,6 +472,7 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 		progress?: string;
 		advice?: string;
 		score?: number;
+		isSent?: boolean;
 	};
 
 	if (body.studentId !== undefined) {
@@ -512,6 +515,7 @@ reportsRouter.patch("/groups/:id/reports/:reportId", requireAuth, async (c) => {
 			...(body.progress !== undefined && { progress: body.progress }),
 			...(body.advice !== undefined && { advice: body.advice }),
 			...(body.score !== undefined && { score: body.score }),
+			...(body.isSent !== undefined && { isSent: body.isSent }),
 			// Re-targeting to a different student invalidates any existing
 			// submitted/read state, which described the old student.
 			...(retargetingStudent && { submittedAt: null, readAt: null }),
