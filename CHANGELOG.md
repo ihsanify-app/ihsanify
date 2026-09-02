@@ -34,6 +34,13 @@ via the root `package.json` `version` field.
   "Ustadz"/"Ustadzah" (or "Mister"/"Miss" for Bahasa Inggris) as a prefix,
   and the Arabic du'a "حَفِظَهُ اللهُ"/"حَفِظَهَا اللهُ" as a suffix, based on
   the teacher's gender and subject.
+- Reports now track a manually-ticked "Sent" checkbox (`isSent`), for an
+  admin/teacher to mark once they've handed the exported PDF to the
+  student/parent outside the app (e.g. WhatsApp). Visible and toggleable
+  by admin/teacher on both the top-level Reports page and a group's
+  Reports tab.
+- `/users` now has a "Group" column showing which group(s) a student is
+  currently enrolled in or a teacher is currently assigned to teach.
 
 ### Changed
 
