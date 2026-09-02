@@ -2,6 +2,18 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-02 — Group-scoped Reports table still didn't scroll horizontally on mobile
+
+**Issue:** The earlier `min-w-*` fix (below) worked on the top-level `/reports` page but not on `/groups/:id/reports` — narrow columns still squeezed/wrapped instead of scrolling.
+
+**Solution:** The two pages nested their wrapper `div`s in the opposite order. The working page has `overflow-x-auto` as the *inner* wrapper directly around `<table>`, with the rounded-corner `overflow-hidden` card outside it — so the table can be wider than its scroll container and get a scrollbar. The group-scoped page had it backwards: `overflow-hidden` was the inner wrapper immediately around the table, clipping (discarding) the overflow before the outer `overflow-x-auto` ever saw anything to scroll to. Swapped the nesting order to match.
+
+## 2026-09-02 — `pnpm dev` kept failing with EADDRINUSE on 8000/4000/42070
+
+**Issue:** Local `pnpm dev` repeatedly failed to start `apps/api` and `apps/admin` with `EADDRINUSE`, even right after a previous failed attempt. Two stacked leftover process groups were squatting on the ports: a stray `apps/api` tsx-watch process orphaned from earlier local testing (never actually died despite a `pkill` + `ps aux | grep ... | grep -v grep` check reporting it gone), plus an admin+api pair orphaned from a prior `pnpm dev` invocation whose parent shell had already exited while the children kept running detached.
+
+**Solution:** Diagnosed with `lsof -i :<port>` per port (3000/4000/8000/42069/42070) instead of trusting a command-name grep, confirmed each PID's identity with `ps -p <PID> -o pid,ppid,etime,cmd`, then `kill -9`'d the whole set and re-verified every port was actually free via `lsof` again before calling it done. The earlier `pkill -f "..."` + `ps aux | grep ... | grep -v grep` check is unreliable for this — it only proves no process's command line matches the grep pattern, not that the port's socket is actually released (a respawned child or a slightly different command string slips past it); `lsof -i :<port>` (or `ss -ltnp`) checks the thing that actually matters.
+
 ## 2026-09-02 — Score input in the report form made you delete the default "0" by hand
 
 **Issue:** The Score field always started at 0. Clicking in and typing a real score (e.g. "85") produced "085" unless the user first manually selected/deleted the "0" — an annoying extra step on every single report.
