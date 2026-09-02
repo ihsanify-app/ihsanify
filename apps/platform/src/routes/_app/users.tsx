@@ -20,6 +20,7 @@ type AppUser = {
 	role: "teacher" | "student";
 	gender: "male" | "female" | null;
 	subjectIds: { subjectId: string; subjectName: string }[];
+	groupIds: { groupId: string; groupName: string }[];
 	isActive: boolean;
 	avatarUrl: string | null;
 };
@@ -66,6 +67,7 @@ function RouteComponent() {
 									<th className="px-4 py-3 text-left">Email</th>
 									<th className="px-4 py-3 text-left">Role</th>
 									<th className="px-4 py-3 text-left">Subject</th>
+									<th className="px-4 py-3 text-left">Group</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-stone-100">
@@ -113,6 +115,20 @@ function RouteComponent() {
 																}
 															>
 																{s.subjectName}
+															</div>
+														))
+													: "-"}
+											</div>
+										</td>
+										<td className="px-4 py-3">
+											<div className="grid grid-rows gap-1">
+												{u.groupIds.length > 0
+													? u.groupIds.map((g) => (
+															<div
+																key={g.groupId}
+																className="bg-stone-100 text-stone-700 w-fit px-2 py-1 rounded-full text-xs font-medium"
+															>
+																{g.groupName}
 															</div>
 														))
 													: "-"}

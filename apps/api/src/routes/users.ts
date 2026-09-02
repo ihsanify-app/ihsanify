@@ -2,7 +2,10 @@ import { randomInt } from "node:crypto";
 import { hash } from "bcryptjs";
 import { Hono } from "hono";
 import { requireAuth, requireRole } from "../utils/auth";
-import { getCurrentGroupIdsForStudent } from "../utils/groupState";
+import {
+	getCurrentGroupIdsForStudent,
+	getCurrentGroupIdsForTeacher,
+} from "../utils/groupState";
 import { prisma } from "../utils/prisma";
 
 export const usersRouter = new Hono();
@@ -44,6 +47,7 @@ async function serializeUser(user: {
 	let studentId: string | null = null;
 	let studentNumber: number | null = null;
 	let subjectIds: { subjectId: string; subjectName: string }[] = [];
+	let groupIds: { groupId: string; groupName: string }[] = [];
 
 	if (user.role === "TEACHER") {
 		const teacher = await prisma.teacher.findUnique({
@@ -56,6 +60,13 @@ async function serializeUser(user: {
 				subjectId: ts.subject.id,
 				subjectName: ts.subject.name,
 			})) ?? [];
+		if (teacher) {
+			const teachingGroupIds = await getCurrentGroupIdsForTeacher(teacher.id);
+			const groups = await prisma.group.findMany({
+				where: { id: { in: teachingGroupIds } },
+			});
+			groupIds = groups.map((g) => ({ groupId: g.id, groupName: g.name }));
+		}
 	}
 
 	if (user.role === "STUDENT") {
@@ -65,11 +76,12 @@ async function serializeUser(user: {
 		studentId = student?.id ?? null;
 		studentNumber = student?.studentNumber ?? null;
 		if (student) {
-			const groupIds = await getCurrentGroupIdsForStudent(student.id);
+			const enrolledGroupIds = await getCurrentGroupIdsForStudent(student.id);
 			const groups = await prisma.group.findMany({
-				where: { id: { in: groupIds } },
+				where: { id: { in: enrolledGroupIds } },
 				include: { subject: true },
 			});
+			groupIds = groups.map((g) => ({ groupId: g.id, groupName: g.name }));
 			const seen = new Set<string>();
 			for (const g of groups) {
 				if (!seen.has(g.subject.id)) {
@@ -93,6 +105,7 @@ async function serializeUser(user: {
 		studentId,
 		studentNumber,
 		subjectIds,
+		groupIds,
 		isActive: user.isActive,
 		avatarUrl: user.avatarUrl,
 	};
