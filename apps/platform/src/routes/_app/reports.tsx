@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Download, Eye, FolderDown, Pencil, PlusCircle } from "lucide-react";
+import {
+	Ban,
+	Download,
+	Eye,
+	FolderDown,
+	Pencil,
+	PlusCircle,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
@@ -445,6 +452,50 @@ function ViewReportModal({
 	);
 }
 
+function ConfirmDeleteModal({
+	onConfirm,
+	onClose,
+}: {
+	onConfirm: () => void;
+	onClose: () => void;
+}) {
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4 shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="text-stone-800">
+					Are you sure you want to delete this record?
+				</h2>
+				<div className="flex flex-col gap-2">
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl bg-rose-600 text-white p-2 hover:bg-rose-700 transition-colors"
+						onClick={onConfirm}
+					>
+						Confirm
+					</button>
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 p-2 hover:bg-stone-50 transition-colors"
+						onClick={onClose}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function BulkDownloadModal({
 	students,
 	onClose,
@@ -580,6 +631,7 @@ function RouteComponent() {
 	const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 	const [editingReport, setEditingReport] = useState<ReportRow | null>(null);
 	const [viewingReport, setViewingReport] = useState<ReportRow | null>(null);
+	const [deletingReport, setDeletingReport] = useState<ReportRow | null>(null);
 
 	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
 	const isAdmin = mockUser.role === "admin";
@@ -683,6 +735,19 @@ function RouteComponent() {
 		}
 	}
 
+	async function handleDelete(report: ReportRow) {
+		const { body } = await apiFetch(
+			`/groups/${report.groupId}/reports/${report.reportId}`,
+			{ method: "DELETE" },
+		);
+		if (body?.success) {
+			setReports((prev) => prev.filter((r) => r.reportId !== report.reportId));
+			setDeletingReport(null);
+		} else {
+			setErrorMessage(body?.message ?? "Could not delete report.");
+		}
+	}
+
 	async function handleView(report: ReportRow) {
 		setViewingReport(report);
 		if (report.statusKind === "submitted" && mockUser.role === "student") {
@@ -752,6 +817,12 @@ function RouteComponent() {
 					onClose={() => setViewingReport(null)}
 				/>
 			)}
+			{deletingReport && (
+				<ConfirmDeleteModal
+					onConfirm={() => handleDelete(deletingReport)}
+					onClose={() => setDeletingReport(null)}
+				/>
+			)}
 			{isBulkModalOpen && (
 				<BulkDownloadModal
 					students={students}
@@ -799,7 +870,7 @@ function RouteComponent() {
 
 			<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
 				<div className="overflow-x-auto">
-					<table className="w-full">
+					<table className="w-full min-w-180">
 						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
 								<th className="px-4 py-3 text-left">Period</th>
@@ -861,13 +932,22 @@ function RouteComponent() {
 												<Eye size={16} />
 											</button>
 											{canManage && (
-												<button
-													type="button"
-													className="text-green-700 hover:text-green-800 cursor-pointer"
-													onClick={() => setEditingReport(r)}
-												>
-													<Pencil size={16} />
-												</button>
+												<>
+													<button
+														type="button"
+														className="text-green-700 hover:text-green-800 cursor-pointer"
+														onClick={() => setEditingReport(r)}
+													>
+														<Pencil size={16} />
+													</button>
+													<button
+														type="button"
+														className="text-rose-500 hover:text-rose-600 cursor-pointer"
+														onClick={() => setDeletingReport(r)}
+													>
+														<Ban size={16} />
+													</button>
+												</>
 											)}
 										</div>
 									</td>

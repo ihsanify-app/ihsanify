@@ -636,7 +636,7 @@ function RouteComponent() {
 
 			<div className="overflow-x-auto">
 				<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
-					<table className="w-full">
+					<table className="w-full min-w-140">
 						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
 								<th className="px-4 py-3 text-left">Period</th>
