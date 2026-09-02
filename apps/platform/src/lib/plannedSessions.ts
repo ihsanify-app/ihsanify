@@ -163,15 +163,34 @@ export function computeAxisHourRange(events: PlannedEvent[]): {
 	return { startHour, endHour: Math.max(endHour, startHour + 1) };
 }
 
-// Greedy side-by-side lane assignment for events that overlap in time
-// within the same day column.
+// Groups events into overlap clusters (classic merge-overlapping-intervals
+// sweep) and assigns each a lane *within its own cluster* — lane numbering
+// restarts at 0 per cluster, rather than persisting across the whole day,
+// so a cluster's members stack cleanly from the top regardless of what
+// came before them. `clusterStartMinutes` lets the caller anchor a whole
+// cluster's vertical stack at its earliest event's time position, so
+// overlapping events can be rendered as a compact, fully-readable vertical
+// list instead of ever-narrower side-by-side columns.
 export function assignLanes<
 	T extends { startMinutes: number; endMinutes: number },
->(events: T[]): (T & { lane: number; laneCount: number })[] {
+>(
+	events: T[],
+): (T & { lane: number; laneCount: number; clusterStartMinutes: number })[] {
 	const sorted = [...events].sort((a, b) => a.startMinutes - b.startMinutes);
 	const laneEnds: number[] = [];
-	const placed: (T & { lane: number })[] = [];
+	const placed: (T & { lane: number; clusterIndex: number })[] = [];
+	const clusterStarts: number[] = [];
+	let clusterIndex = -1;
+	let clusterEnd = Number.NEGATIVE_INFINITY;
 	for (const ev of sorted) {
+		if (ev.startMinutes >= clusterEnd) {
+			clusterIndex++;
+			clusterStarts[clusterIndex] = ev.startMinutes;
+			clusterEnd = ev.endMinutes;
+			laneEnds.length = 0;
+		} else {
+			clusterEnd = Math.max(clusterEnd, ev.endMinutes);
+		}
 		let lane = laneEnds.findIndex((end) => end <= ev.startMinutes);
 		if (lane === -1) {
 			lane = laneEnds.length;
@@ -179,10 +198,20 @@ export function assignLanes<
 		} else {
 			laneEnds[lane] = ev.endMinutes;
 		}
-		placed.push({ ...ev, lane });
+		placed.push({ ...ev, lane, clusterIndex });
 	}
-	const laneCount = Math.max(1, laneEnds.length);
-	return placed.map((p) => ({ ...p, laneCount }));
+	const clusterLaneCount = new Map<number, number>();
+	for (const p of placed) {
+		clusterLaneCount.set(
+			p.clusterIndex,
+			Math.max(clusterLaneCount.get(p.clusterIndex) ?? 0, p.lane + 1),
+		);
+	}
+	return placed.map((p) => ({
+		...p,
+		laneCount: clusterLaneCount.get(p.clusterIndex) ?? 1,
+		clusterStartMinutes: clusterStarts[p.clusterIndex],
+	}));
 }
 
 // The soonest upcoming occurrence (today if its time hasn't passed yet,

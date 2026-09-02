@@ -20,6 +20,11 @@ import {
 type ViewMode = "daily" | "weekly" | "monthly";
 
 const ROW_HEIGHT_PX = 56;
+// Fixed row height used only for events that overlap another event in
+// time — stacked vertically at the cluster's start position instead of
+// narrowing into ever-thinner side-by-side columns, so labels stay
+// readable regardless of how many sessions land at the same time.
+const CLUSTERED_ROW_HEIGHT_PX = 30;
 
 function buildMonthGrid(monthAnchor: Date): Date[] {
 	const firstOfMonth = new Date(
@@ -260,12 +265,24 @@ function EventBlock({
 	event,
 	startHour,
 }: {
-	event: PlannedEvent & { lane: number; laneCount: number };
+	event: PlannedEvent & {
+		lane: number;
+		laneCount: number;
+		clusterStartMinutes: number;
+	};
 	startHour: number;
 }) {
-	const top = ((event.startMinutes - startHour * 60) / 60) * ROW_HEIGHT_PX;
-	const height = ((event.endMinutes - event.startMinutes) / 60) * ROW_HEIGHT_PX;
-	const widthPercent = 100 / event.laneCount;
+	const isClustered = event.laneCount > 1;
+	const top = isClustered
+		? ((event.clusterStartMinutes - startHour * 60) / 60) * ROW_HEIGHT_PX +
+			event.lane * CLUSTERED_ROW_HEIGHT_PX
+		: ((event.startMinutes - startHour * 60) / 60) * ROW_HEIGHT_PX;
+	const height = isClustered
+		? CLUSTERED_ROW_HEIGHT_PX - 2
+		: Math.max(
+				((event.endMinutes - event.startMinutes) / 60) * ROW_HEIGHT_PX,
+				24,
+			) - 2;
 	const timeLabel = formatTime(
 		`${String(Math.floor(event.startMinutes / 60)).padStart(2, "0")}:${String(
 			event.startMinutes % 60,
@@ -282,22 +299,29 @@ function EventBlock({
 		<Link
 			to="/groups/$groupId/sessions"
 			params={{ groupId: event.groupId }}
-			className="absolute overflow-hidden rounded-lg px-2 py-1 text-white shadow-sm transition-opacity hover:opacity-90"
+			className="absolute left-0 overflow-hidden rounded-lg px-2 py-1 text-white shadow-sm transition-opacity hover:opacity-90"
 			style={{
 				top,
-				height: Math.max(height, 24) - 2,
-				left: `${event.lane * widthPercent}%`,
-				width: `calc(${widthPercent}% - 4px)`,
+				height,
+				width: "calc(100% - 4px)",
 				backgroundColor: event.cardColor || "#0f766e",
 			}}
 			title={`${event.groupName} · ${timeLabel}${description ? ` · ${description}` : ""}`}
 		>
-			<p className="truncate text-[11px] font-semibold leading-tight">
-				{event.groupName}
-			</p>
-			<p className="truncate text-[10px] opacity-85">{timeLabel}</p>
-			{description && (
-				<p className="truncate text-[10px] opacity-80">{description}</p>
+			{isClustered ? (
+				<p className="truncate text-[11px] font-semibold leading-tight">
+					{event.groupName} · {timeLabel}
+				</p>
+			) : (
+				<>
+					<p className="truncate text-[11px] font-semibold leading-tight">
+						{event.groupName}
+					</p>
+					<p className="truncate text-[10px] opacity-85">{timeLabel}</p>
+					{description && (
+						<p className="truncate text-[10px] opacity-80">{description}</p>
+					)}
+				</>
 			)}
 		</Link>
 	);
