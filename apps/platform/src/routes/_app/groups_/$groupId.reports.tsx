@@ -634,8 +634,8 @@ function RouteComponent() {
 				</p>
 			)}
 
-			<div className="overflow-x-auto">
-				<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+			<div className="border border-green-100 rounded-2xl overflow-hidden bg-white shadow-sm">
+				<div className="overflow-x-auto">
 					<table className="w-full min-w-140">
 						<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 							<tr>
