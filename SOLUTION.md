@@ -2,6 +2,18 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-02 — Score input in the report form made you delete the default "0" by hand
+
+**Issue:** The Score field always started at 0. Clicking in and typing a real score (e.g. "85") produced "085" unless the user first manually selected/deleted the "0" — an annoying extra step on every single report.
+
+**Solution:** The Score field (in both the top-level and group-scoped report forms) now clears itself on focus if it's still showing the default 0, and falls back to 0 on blur if left empty — so clicking in and typing immediately gives the right value, but the field can never end up stuck empty or invalid.
+
+## 2026-09-02 — Reported "Edit/View report disabled for teacher" turned out not to be a code bug
+
+**Issue:** User reported the Edit/View report buttons under a group's Reports tab needed to be re-enabled for the teacher role.
+
+**Investigation:** Traced every gate on that page (`canManage` in both `reports.tsx` and `groups_/$groupId.reports.tsx`, the `GroupTabs` tab visibility, and the backend's `canManageGroup`/`canUserAccessGroup`) — all of them already permit "teacher," and git history shows this was never restricted to admin-only. No change made; flagged back to the user in conversation as likely a stale deployed build rather than a source bug, since that exact failure mode (fixed in code, not yet live) recurred earlier this session with the TanStack devtools/PM2 issue.
+
 ## 2026-09-01 — Line spacing typed in the report edit modal still disappeared in the generated PDF
 
 **Issue:** After the previous fix below, a single Enter press in the Progress/Saran fields still didn't show up as a line break in the PDF — only a full blank line (double Enter) did, since `normalizeFreeText()` couldn't tell a deliberately-typed newline apart from a hard-wrap-from-paste artifact once both were just `\n` characters in the same stored string.
