@@ -2,6 +2,12 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-03 — Log Session's date field started blank instead of defaulting to today
+
+**Issue:** Clicking "Log Session" under a group's Sessions tab always opened with an empty date field, forcing a manual pick every time even though the overwhelming common case is logging today's session.
+
+**Solution:** `CreateSessionModal` now defaults its date state to today's date via a small `todayAsDateInputValue()` helper that builds the `YYYY-MM-DD` string from local date parts (`getFullYear`/`getMonth`/`getDate`) rather than `Date#toISOString()`, which converts to UTC first and can land on the wrong calendar day near midnight depending on the browser's timezone. `EditSessionModal` was already correct (it defaults from the session's own saved date).
+
 ## 2026-09-03 — No way to log out anywhere in the app
 
 **Issue:** `/profile` (and every other page) had no logout button. Turned out there was no logout mechanism at all in the codebase — `mockAuth.ts` had `setStoredAuth` but no way to clear it.
