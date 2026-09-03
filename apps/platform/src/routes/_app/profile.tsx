@@ -430,7 +430,7 @@ function RouteComponent() {
 				<button
 					type="button"
 					onClick={handleLogout}
-					className="flex items-center gap-1.5 cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-3 py-2 text-sm hover:bg-stone-50 transition-colors"
+					className="flex items-center gap-1.5 cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-3 py-2 text-sm hover:bg-red-400 hover:text-white transition-colors"
 				>
 					<LogOut size={16} />
 					Log Out
