@@ -26,6 +26,11 @@ function generateTemporaryPassword(length = 10): string {
 const AVATAR_DATA_URL_PATTERN =
 	/^data:image\/(png|jpe?g|webp|gif);base64,([a-zA-Z0-9+/]+=*)$/;
 
+// How recent lastActiveAt has to be to count as "online" — deliberately
+// wider than requireAuth's 60s write-throttle, so someone who's been
+// continuously active doesn't flicker offline between throttled writes.
+const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
+
 function isValidAvatarDataUrl(value: string): boolean {
 	const match = AVATAR_DATA_URL_PATTERN.exec(value);
 	if (!match) return false;
@@ -42,6 +47,7 @@ async function serializeUser(user: {
 	gender: "MALE" | "FEMALE" | null;
 	isActive: boolean;
 	avatarUrl: string | null;
+	lastActiveAt: Date | null;
 }) {
 	let teacherId: string | null = null;
 	let studentId: string | null = null;
@@ -108,6 +114,10 @@ async function serializeUser(user: {
 		groupIds,
 		isActive: user.isActive,
 		avatarUrl: user.avatarUrl,
+		isOnline: user.lastActiveAt
+			? Date.now() - user.lastActiveAt.getTime() < ONLINE_THRESHOLD_MS
+			: false,
+		lastActiveAt: user.lastActiveAt ? user.lastActiveAt.toISOString() : null,
 	};
 }
 

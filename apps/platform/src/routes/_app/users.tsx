@@ -13,6 +13,18 @@ function initials(name: string) {
 	return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
+function formatLastActive(iso: string | null) {
+	if (!iso) return "Never active";
+	const diffMs = Date.now() - new Date(iso).getTime();
+	const minutes = Math.floor(diffMs / 60_000);
+	if (minutes < 1) return "Active just now";
+	if (minutes < 60) return `Active ${minutes}m ago`;
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return `Active ${hours}h ago`;
+	const days = Math.floor(hours / 24);
+	return `Active ${days}d ago`;
+}
+
 type AppUser = {
 	userId: string;
 	name: string;
@@ -23,6 +35,8 @@ type AppUser = {
 	groupIds: { groupId: string; groupName: string }[];
 	isActive: boolean;
 	avatarUrl: string | null;
+	isOnline: boolean;
+	lastActiveAt: string | null;
 };
 
 function RouteComponent() {
@@ -64,6 +78,7 @@ function RouteComponent() {
 							<thead className="bg-green-700 text-white uppercase text-xs tracking-wide">
 								<tr>
 									<th className="px-4 py-3 text-left">Name</th>
+									<th className="px-4 py-3 text-left">Status</th>
 									<th className="px-4 py-3 text-left">Email</th>
 									<th className="px-4 py-3 text-left">Role</th>
 									<th className="px-4 py-3 text-left">Subject</th>
@@ -78,19 +93,40 @@ function RouteComponent() {
 									>
 										<td className="px-4 py-3">
 											<div className="flex items-center gap-2">
-												<div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-green-200 bg-green-50 flex items-center justify-center text-green-700 text-xs font-heading font-bold">
-													{u.avatarUrl ? (
-														<img
-															src={u.avatarUrl}
-															alt={u.name}
-															className="h-full w-full object-cover"
-														/>
-													) : (
-														initials(u.name)
+												<div className="relative h-8 w-8 shrink-0">
+													<div className="h-8 w-8 overflow-hidden rounded-full border border-green-200 bg-green-50 flex items-center justify-center text-green-700 text-xs font-heading font-bold">
+														{u.avatarUrl ? (
+															<img
+																src={u.avatarUrl}
+																alt={u.name}
+																className="h-full w-full object-cover"
+															/>
+														) : (
+															initials(u.name)
+														)}
+													</div>
+													{u.isOnline && (
+														<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-white" />
 													)}
 												</div>
 												{u.name}
 											</div>
+										</td>
+										<td className="px-4 py-3">
+											<span
+												className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+													u.isOnline ? "text-green-700" : "text-stone-400"
+												}`}
+											>
+												<span
+													className={`h-1.5 w-1.5 rounded-full ${
+														u.isOnline ? "bg-green-500" : "bg-stone-300"
+													}`}
+												/>
+												{u.isOnline
+													? "Online"
+													: formatLastActive(u.lastActiveAt)}
+											</span>
 										</td>
 										<td className="px-4 py-3">{u.email}</td>
 										<td className="px-4 py-3 capitalize">{u.role}</td>

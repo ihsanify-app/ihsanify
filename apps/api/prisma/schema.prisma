@@ -63,6 +63,7 @@ model User {
   teacher       Teacher?
   student       Student?
   notifications Notification[]
+  lastActiveAt DateTime?
 }
 
 enum NotificationType {

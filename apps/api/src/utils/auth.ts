@@ -19,6 +19,11 @@ declare module "hono" {
 	}
 }
 
+// requireAuth runs on every authenticated request, so writing lastActiveAt
+// unconditionally would mean a DB write per click. Throttled to at most once
+// per this window instead.
+const LAST_ACTIVE_THROTTLE_MS = 60_000;
+
 export const requireAuth = createMiddleware(async (c, next) => {
 	const authHeader = c.req.header("Authorization");
 	if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -36,6 +41,20 @@ export const requireAuth = createMiddleware(async (c, next) => {
 				401,
 			);
 		}
+		// Best-effort, not awaited: this is bookkeeping, not something
+		// that should add latency to every authenticated request or
+		// (since it's inside this function's try/catch) turn a
+		// transient DB hiccup here into a false "Invalid or expired
+		// token" response.
+		if (
+			!user.lastActiveAt ||
+			Date.now() - user.lastActiveAt.getTime() > LAST_ACTIVE_THROTTLE_MS
+		) {
+			prisma.user
+				.update({ where: { id: user.id }, data: { lastActiveAt: new Date() } })
+				.catch(() => {});
+		}
+
 		c.set("authUser", {
 			id: user.id,
 			email: user.email,
