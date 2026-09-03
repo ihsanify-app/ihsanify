@@ -41,6 +41,15 @@ via the root `package.json` `version` field.
   Reports tab.
 - `/users` now has a "Group" column showing which group(s) a student is
   currently enrolled in or a teacher is currently assigned to teach.
+- Group cards on `/groups` now show an overlapping avatar stack (photo or
+  initials) plus each student's name, instead of just a student count, and
+  a row of "This Month's Sessions" circles — one per session logged for
+  that group in the current month, each marked with a checkmark and its
+  day of the month.
+- Online/last-seen presence: `User.lastActiveAt` is updated by `requireAuth`
+  on any authenticated request (throttled to once per 60s). `/users` now
+  shows it — a green dot on the avatar plus an "Online" / "Active Xm ago" /
+  "Never active" status, computed with a 2-minute online threshold.
 
 ### Changed
 
