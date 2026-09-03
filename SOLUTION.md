@@ -2,6 +2,12 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-03 — A `flex` base class silently resists any `lg:` override in this Tailwind build
+
+**Issue:** While making the landing page's mobile-screenshot carousel show all 4 images in a static grid on desktop instead of paging one at a time, `className="flex ... lg:grid ..."` on the same element never actually switched to `grid` at desktop widths — confirmed directly in a real browser (`getComputedStyle` kept reporting `display: flex` even on a completely fresh, unrelated test element with viewport width well past the `lg` breakpoint). `hidden`/`block`/`grid` bases all correctly yield to a later responsive override (`hidden lg:grid`, `block lg:grid`, `grid lg:flex` all work); a `flex` base specifically does not yield to *any* later override (`lg:grid` or `lg:hidden`), for reasons not fully root-caused (the generated CSS's source order looks correct — the `lg:` rule really does come later — so this looks like a cascade/nesting quirk in this project's Tailwind v4 + Lightning CSS build, not a misunderstanding of Tailwind's normal behavior).
+
+**Solution:** Never rely on a responsive variant to switch a `flex` element to something else on this project. Worked around it in `AppScreenshots.tsx` by rendering two separate subtrees instead of one element that changes shape — a carousel subtree with its own permanent, unconditional `flex` track (no override ever attempts to touch its `display`), toggled via `lg:hidden` on its wrapping `div` (which has no base display class of its own), alongside a completely separate grid subtree toggled via `hidden lg:grid` on *its* wrapper. Toggling visibility on a neutral wrapper — rather than asking one `flex` element to become something else — sidesteps the bug entirely. Worth remembering if this recurs elsewhere: swap `flex` for `grid` (or vice versa) at the *base*, and put the override on the *unconditional* side, never the other way around.
+
 ## 2026-09-02 — Group-scoped Reports table still didn't scroll horizontally on mobile
 
 **Issue:** The earlier `min-w-*` fix (below) worked on the top-level `/reports` page but not on `/groups/:id/reports` — narrow columns still squeezed/wrapped instead of scrolling.
