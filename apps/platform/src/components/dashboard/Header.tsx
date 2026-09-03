@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 
 function initials(name: string) {
 	const parts = name.trim().split(/\s+/);
@@ -36,7 +36,7 @@ type NotificationItem = {
 
 export function Header() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [name, setName] = useState(mockUser.name);
+	const [name, setName] = useState(authUser.name);
 	const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 	const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 	const [unreadCount, setUnreadCount] = useState(0);
@@ -53,7 +53,7 @@ export function Header() {
 	useEffect(() => {
 		apiFetch("/profile").then(({ status, body }) => {
 			if (status !== 200) return;
-			setName(body?.data?.name ?? mockUser.name);
+			setName(body?.data?.name ?? authUser.name);
 			setAvatarUrl(body?.data?.avatarUrl ?? null);
 		});
 		loadNotifications();

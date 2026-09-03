@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SettingsTabs } from "../../../components/dashboard/SettingsTabs";
 import { apiFetch } from "../../../lib/apiClient";
-import { mockUser } from "../../../lib/mockAuth";
+import { authUser } from "../../../lib/auth";
 
 export const Route = createFileRoute("/_app/settings_/group")({
 	component: RouteComponent,
@@ -30,7 +30,7 @@ function RouteComponent() {
 		// their own groups) rather than admin-only, so it never 401/403s them —
 		// this page still needs its own gate to stay admin-only like the rest
 		// of Settings.
-		if (mockUser.role !== "admin") {
+		if (authUser.role !== "admin") {
 			setLoadState("unauthorized");
 			return;
 		}

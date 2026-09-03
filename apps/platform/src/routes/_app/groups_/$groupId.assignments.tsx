@@ -3,7 +3,7 @@ import { Ban, Pencil, PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { GroupTabs } from "../../../components/dashboard/GroupTabs";
 import { apiFetch } from "../../../lib/apiClient";
-import { mockUser } from "../../../lib/mockAuth";
+import { authUser } from "../../../lib/auth";
 
 export const Route = createFileRoute("/_app/groups_/$groupId/assignments")({
 	component: RouteComponent,
@@ -158,7 +158,7 @@ function RouteComponent() {
 		string | null
 	>(null);
 
-	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
+	const canManage = authUser.role === "admin" || authUser.role === "teacher";
 
 	const loadAssignments = useCallback(async () => {
 		const { status, body } = await apiFetch(`/groups/${groupId}/assignments`);

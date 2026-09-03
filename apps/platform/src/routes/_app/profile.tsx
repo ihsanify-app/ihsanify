@@ -4,7 +4,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch } from "../../lib/apiClient";
-import { clearStoredAuth } from "../../lib/mockAuth";
+import { clearStoredAuth } from "../../lib/auth";
 
 export const Route = createFileRoute("/_app/profile")({
 	component: RouteComponent,
@@ -387,7 +387,7 @@ function RouteComponent() {
 
 	function handleLogout() {
 		clearStoredAuth();
-		// Full page navigation, not router.navigate — mockUser is read once at
+		// Full page navigation, not router.navigate — authUser is read once at
 		// module load (see login.tsx), so only a fresh page load picks up the
 		// now-cleared auth instead of leaving the stale logged-in identity in
 		// memory.

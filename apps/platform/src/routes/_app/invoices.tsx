@@ -3,7 +3,7 @@ import { Ban, Download, PlusCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 
 export const Route = createFileRoute("/_app/invoices")({
 	component: RouteComponent,
@@ -374,7 +374,7 @@ function RouteComponent() {
 		null,
 	);
 
-	const isAdmin = mockUser.role === "admin";
+	const isAdmin = authUser.role === "admin";
 
 	useEffect(() => {
 		apiFetch("/invoices").then(({ status, body }) => {

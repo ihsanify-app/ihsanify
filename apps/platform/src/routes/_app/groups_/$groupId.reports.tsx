@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { GroupTabs } from "../../../components/dashboard/GroupTabs";
 import { useToast } from "../../../components/Toast";
 import { apiFetch, downloadFile } from "../../../lib/apiClient";
-import { mockUser } from "../../../lib/mockAuth";
+import { authUser } from "../../../lib/auth";
 
 export const Route = createFileRoute("/_app/groups_/$groupId/reports")({
 	component: RouteComponent,
@@ -433,7 +433,7 @@ function RouteComponent() {
 	const [viewingReport, setViewingReport] = useState<ReportRow | null>(null);
 	const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
 
-	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
+	const canManage = authUser.role === "admin" || authUser.role === "teacher";
 
 	const loadReports = useCallback(async () => {
 		const [reportsRes, groupsRes] = await Promise.all([
@@ -545,7 +545,7 @@ function RouteComponent() {
 
 	async function handleView(report: ReportRow) {
 		setViewingReport(report);
-		if (report.statusKind === "submitted" && mockUser.role === "student") {
+		if (report.statusKind === "submitted" && authUser.role === "student") {
 			const { body } = await apiFetch(
 				`/groups/${groupId}/reports/${report.reportId}/read`,
 				{ method: "POST" },

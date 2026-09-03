@@ -35,7 +35,7 @@ export function getAuthToken(): string | null {
 // role-gated UI (nav items, tabs) keeps working unchanged. Real API calls
 // (groups, users) still get gated server-side by the JWT, regardless of
 // what this fallback claims.
-export const mockUser: AuthUser = getStoredAuth()?.user ?? {
+export const authUser: AuthUser = getStoredAuth()?.user ?? {
 	id: "",
 	teacherId: null,
 	studentId: null,

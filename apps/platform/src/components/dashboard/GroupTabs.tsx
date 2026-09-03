@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 
 const TABS = [
 	{
@@ -39,7 +39,7 @@ export function GroupTabs({
 				<ArrowLeft size={20} />
 			</Link>
 			<div className="flex gap-1 border-b border-stone-200 flex-1 overflow-x-auto">
-				{TABS.filter((tab) => !tab.adminOnly || mockUser.role === "admin").map(
+				{TABS.filter((tab) => !tab.adminOnly || authUser.role === "admin").map(
 					(tab) => (
 						<Link
 							key={tab.key}

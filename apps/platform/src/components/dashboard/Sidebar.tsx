@@ -12,7 +12,7 @@ import {
 	Users,
 	Wallet,
 } from "lucide-react";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 
 const navItems = [
 	{ id: 1, icon: LayoutDashboard, title: "Dashboard", path: "/dashboard" },
@@ -74,7 +74,7 @@ const navItems = [
 export function Sidebar() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const visibleNavItems = navItems.filter(
-		(n) => !n.adminOnly || mockUser.role === "admin",
+		(n) => !n.adminOnly || authUser.role === "admin",
 	);
 
 	return (

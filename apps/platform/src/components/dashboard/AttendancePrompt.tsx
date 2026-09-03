@@ -1,7 +1,7 @@
 import { AlertTriangle, BellRing, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 import {
 	DEFAULT_BLOCK_MINUTES,
 	findTodaysStartedSession,
@@ -59,7 +59,7 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 		};
 	}, [targetGroupId]);
 
-	if (mockUser.role === "student" || !target) return null;
+	if (authUser.role === "student" || !target) return null;
 
 	async function handleRecordAttendance() {
 		if (!target) return;

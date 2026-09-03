@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Eye, EyeOff, Sprout } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "../lib/apiClient";
-import { setStoredAuth } from "../lib/mockAuth";
+import { setStoredAuth } from "../lib/auth";
 
 export const Route = createFileRoute("/login")({
 	component: LoginPage,
@@ -43,7 +43,7 @@ function LoginPage() {
 				},
 				body.data.token,
 			);
-			// Full page navigation so mockUser (read once at module load) picks up
+			// Full page navigation so authUser (read once at module load) picks up
 			// the freshly stored auth instead of the stale pre-login value.
 			window.location.href = "/dashboard";
 		} catch {

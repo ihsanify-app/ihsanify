@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ban, Calendar, Clock, Pencil, PlusCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 
 export const Route = createFileRoute("/_app/groups")({
 	component: RouteComponent,
@@ -433,7 +433,7 @@ function RouteComponent() {
 			setLoadState("ready");
 		});
 
-		if (mockUser.role === "admin") {
+		if (authUser.role === "admin") {
 			apiFetch("/subjects").then(
 				({
 					body,
@@ -578,7 +578,7 @@ function RouteComponent() {
 					className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors w-full sm:w-auto"
 				/>
 			</div>
-			{mockUser.role === "admin" && (
+			{authUser.role === "admin" && (
 				<div className="flex justify-items-start mb-4">
 					<button
 						type="button"
@@ -668,7 +668,7 @@ function RouteComponent() {
 										{g.studentIds.length === 1 ? "Student" : "Students"}
 									</span>
 								</div>
-								{mockUser.role === "admin" && (
+								{authUser.role === "admin" && (
 									<div className="flex gap-3 text-green-100">
 										<Pencil
 											size="18"

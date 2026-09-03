@@ -10,7 +10,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
-import { mockUser } from "../../lib/mockAuth";
+import { authUser } from "../../lib/auth";
 
 export const Route = createFileRoute("/_app/reports")({
 	component: RouteComponent,
@@ -633,8 +633,8 @@ function RouteComponent() {
 	const [viewingReport, setViewingReport] = useState<ReportRow | null>(null);
 	const [deletingReport, setDeletingReport] = useState<ReportRow | null>(null);
 
-	const canManage = mockUser.role === "admin" || mockUser.role === "teacher";
-	const isAdmin = mockUser.role === "admin";
+	const canManage = authUser.role === "admin" || authUser.role === "teacher";
+	const isAdmin = authUser.role === "admin";
 
 	const load = useCallback(async () => {
 		const [reportsRes, groupsRes, studentsRes] = await Promise.all([
@@ -750,7 +750,7 @@ function RouteComponent() {
 
 	async function handleView(report: ReportRow) {
 		setViewingReport(report);
-		if (report.statusKind === "submitted" && mockUser.role === "student") {
+		if (report.statusKind === "submitted" && authUser.role === "student") {
 			const { body } = await apiFetch(
 				`/groups/${report.groupId}/reports/${report.reportId}/read`,
 				{ method: "POST" },
