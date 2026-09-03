@@ -2,6 +2,12 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-03 — No way to log out anywhere in the app
+
+**Issue:** `/profile` (and every other page) had no logout button. Turned out there was no logout mechanism at all in the codebase — `mockAuth.ts` had `setStoredAuth` but no way to clear it.
+
+**Solution:** Added `clearStoredAuth()` to `mockAuth.ts` (removes the `ihsanify_auth` localStorage key) and a "Log Out" button on `/profile` that calls it, then does a full `window.location.href = "/login"` navigation rather than a client-side route change — `mockUser` is read once at module load (the same constraint `login.tsx` already works around), so only a fresh page load picks up the now-cleared auth. No backend call needed: auth is a stateless JWT with no server-side session to invalidate. Verified end-to-end against a real logged-in session — clicking it clears storage, lands on `/login`, and a subsequent visit to `/profile` correctly shows the logged-out state.
+
 ## 2026-09-03 — A `flex` base class silently resists any `lg:` override in this Tailwind build
 
 **Issue:** While making the landing page's mobile-screenshot carousel show all 4 images in a static grid on desktop instead of paging one at a time, `className="flex ... lg:grid ..."` on the same element never actually switched to `grid` at desktop widths — confirmed directly in a real browser (`getComputedStyle` kept reporting `display: flex` even on a completely fresh, unrelated test element with viewport width well past the `lg` breakpoint). `hidden`/`block`/`grid` bases all correctly yield to a later responsive override (`hidden lg:grid`, `block lg:grid`, `grid lg:flex` all work); a `flex` base specifically does not yield to *any* later override (`lg:grid` or `lg:hidden`), for reasons not fully root-caused (the generated CSS's source order looks correct — the `lg:` rule really does come later — so this looks like a cascade/nesting quirk in this project's Tailwind v4 + Lightning CSS build, not a misunderstanding of Tailwind's normal behavior).
