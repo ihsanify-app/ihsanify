@@ -1,8 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ban, Calendar, Clock, Pencil, PlusCircle, X } from "lucide-react";
+import {
+	Ban,
+	Calendar,
+	Check,
+	Clock,
+	Pencil,
+	PlusCircle,
+	X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { authUser } from "../../lib/auth";
+import { formatNameList } from "../../lib/plannedSessions";
 
 export const Route = createFileRoute("/_app/groups")({
 	component: RouteComponent,
@@ -47,6 +56,22 @@ function formatDateRange(start: string, end: string | null) {
 	return `${formatDate(start)} → ${end ? formatDate(end) : "Ongoing"}`;
 }
 
+function initials(name: string) {
+	const parts = name.trim().split(/\s+/);
+	if (parts.length === 0 || !parts[0]) return "?";
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+	return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+// The avatar stack's border has to match each card's own background (not a
+// fixed color) for the classic overlapping-circle cutout look — cards use a
+// custom cardColor when set, falling back to the same stone/green tokens as
+// the card background itself.
+function cardBackgroundHex(cardColor: string | null, isActive: boolean) {
+	if (cardColor) return cardColor;
+	return isActive === false ? "#a8a29e" : "#15803d";
+}
+
 type PlannedSession = { dayOfWeek: string; time: string };
 
 type Group = {
@@ -61,8 +86,13 @@ type Group = {
 	endDate: string | null;
 	cardColor: string | null;
 	groupType: "group" | "private" | "semi-private";
-	studentIds: { studentId: string; studentName: string }[];
+	studentIds: {
+		studentId: string;
+		studentName: string;
+		avatarUrl: string | null;
+	}[];
 	plannedSessions: PlannedSession[];
+	currentMonthSessionDays: number[];
 };
 type Option = { id: string; name: string };
 
@@ -659,14 +689,80 @@ function RouteComponent() {
 								)}
 							</div>
 
-							<div className="flex items-center justify-between mt-auto pt-3 border-t border-white/20">
-								<div className="flex items-baseline gap-2">
-									<span className="text-3xl font-bold">
-										{g.studentIds.length}
+							<div>
+								<p className="text-xs text-green-100 mb-1.5">
+									This Month's Sessions
+								</p>
+								{g.currentMonthSessionDays.length === 0 ? (
+									<span className="text-xs text-green-200 italic">
+										No sessions logged yet
 									</span>
-									<span className="text-sm">
-										{g.studentIds.length === 1 ? "Student" : "Students"}
-									</span>
+								) : (
+									<div className="flex flex-wrap gap-2">
+										{g.currentMonthSessionDays.map((day) => (
+											<div
+												key={day}
+												className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-sm font-bold"
+											>
+												{day}
+												<div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400 text-emerald-950">
+													<Check size={10} strokeWidth={3} />
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+
+							<div className="flex items-center justify-between mt-auto pt-3 border-t border-white/20 gap-3">
+								<div className="flex min-w-0 items-center gap-2">
+									{g.studentIds.length === 0 ? (
+										<span className="text-sm">No students yet</span>
+									) : (
+										<>
+											<div className="flex shrink-0 items-center">
+												{g.studentIds.slice(0, 4).map((s) => (
+													<div
+														key={s.studentId}
+														className="-ml-2.5 first:ml-0 h-8 w-8 overflow-hidden rounded-full border-2 bg-white/25 flex items-center justify-center text-[10px] font-bold"
+														style={{
+															borderColor: cardBackgroundHex(
+																g.cardColor,
+																g.isActive,
+															),
+														}}
+														title={s.studentName}
+													>
+														{s.avatarUrl ? (
+															<img
+																src={s.avatarUrl}
+																alt={s.studentName}
+																className="h-full w-full object-cover"
+															/>
+														) : (
+															initials(s.studentName)
+														)}
+													</div>
+												))}
+												{g.studentIds.length > 4 && (
+													<div
+														className="-ml-2.5 h-8 w-8 rounded-full border-2 bg-white/40 flex items-center justify-center text-[10px] font-bold"
+														style={{
+															borderColor: cardBackgroundHex(
+																g.cardColor,
+																g.isActive,
+															),
+														}}
+													>
+														+{g.studentIds.length - 4}
+													</div>
+												)}
+											</div>
+											<p className="truncate text-xs text-green-100">
+												{formatNameList(g.studentIds.map((s) => s.studentName))}
+											</p>
+										</>
+									)}
 								</div>
 								{authUser.role === "admin" && (
 									<div className="flex gap-3 text-green-100">

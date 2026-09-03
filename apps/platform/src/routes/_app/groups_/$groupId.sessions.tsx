@@ -11,6 +11,17 @@ export const Route = createFileRoute("/_app/groups_/$groupId/sessions")({
 
 type Option = { studentId: string; studentName: string };
 
+// YYYY-MM-DD in the browser's local timezone, matching what a `type="date"`
+// input expects — `Date#toISOString()` converts to UTC first, which can
+// land on the wrong day for anyone west/east of UTC near midnight.
+function todayAsDateInputValue() {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, "0");
+	const day = String(now.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
 type SessionRow = {
 	sessionId: string;
 	year: number;
@@ -37,7 +48,7 @@ function CreateSessionModal({
 		studentIds: string[];
 	}) => void;
 }) {
-	const [date, setDate] = useState("");
+	const [date, setDate] = useState(todayAsDateInputValue());
 	const [durationMinutes, setDurationMinutes] = useState(60);
 	// Defaults to the whole roster checked, unlike EditSessionModal's
 	// empty default — there, an unchecked start avoids implying "these are

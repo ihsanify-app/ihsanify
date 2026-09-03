@@ -98,6 +98,18 @@ async function serializeGroup(group: {
 		where: { groupId: group.id },
 	});
 
+	// Which days this month already have a logged session — surfaced on the
+	// group card as a quick "sessions held so far" indicator, distinct from
+	// plannedSessions (the recurring weekly template, not what's actually
+	// happened).
+	const now = new Date();
+	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+	const sessionsThisMonth = await prisma.session.findMany({
+		where: { groupId: group.id, date: { gte: monthStart, lt: monthEnd } },
+		orderBy: { date: "asc" },
+	});
+
 	return {
 		groupId: group.id,
 		groupName: group.name,
@@ -121,6 +133,7 @@ async function serializeGroup(group: {
 			dayOfWeek: p.dayOfWeek.toLowerCase(),
 			time: p.time,
 		})),
+		currentMonthSessionDays: sessionsThisMonth.map((s) => s.date.getDate()),
 	};
 }
 
