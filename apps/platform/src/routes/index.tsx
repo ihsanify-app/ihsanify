@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AppScreenshots } from "../components/landing/AppScreenshots";
 import { Faq } from "../components/landing/Faq";
 import { Footer } from "../components/landing/Footer";
 import { Hero } from "../components/landing/Hero";
@@ -23,6 +24,7 @@ function App() {
 			<TentangKami />
 			<NiatTujuan />
 			<ProgramFasilitas />
+			<AppScreenshots />
 			<Testimonials />
 			<Faq />
 			<Registrasi />
