@@ -23,6 +23,10 @@ export function setStoredAuth(user: AuthUser, token: string) {
 	localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }));
 }
 
+export function clearStoredAuth() {
+	localStorage.removeItem(STORAGE_KEY);
+}
+
 export function getAuthToken(): string | null {
 	return getStoredAuth()?.token ?? null;
 }

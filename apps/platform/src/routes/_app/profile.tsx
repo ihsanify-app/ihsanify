@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlusCircle, Trash2, Upload } from "lucide-react";
+import { LogOut, PlusCircle, Trash2, Upload } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch } from "../../lib/apiClient";
+import { clearStoredAuth } from "../../lib/mockAuth";
 
 export const Route = createFileRoute("/_app/profile")({
 	component: RouteComponent,
@@ -384,6 +385,15 @@ function RouteComponent() {
 		}
 	}
 
+	function handleLogout() {
+		clearStoredAuth();
+		// Full page navigation, not router.navigate — mockUser is read once at
+		// module load (see login.tsx), so only a fresh page load picks up the
+		// now-cleared auth instead of leaving the stale logged-in identity in
+		// memory.
+		window.location.href = "/login";
+	}
+
 	async function handleDeleteHistory(id: string) {
 		const { status, body } = await apiFetch(`/profile/teaching-history/${id}`, {
 			method: "DELETE",
@@ -413,9 +423,19 @@ function RouteComponent() {
 
 	return (
 		<section className="max-sm:p-3 sm:p-6 max-w-2xl mx-auto">
-			<h1 className="font-heading text-2xl font-bold text-green-800 mb-4">
-				My Profile
-			</h1>
+			<div className="flex items-center justify-between mb-4">
+				<h1 className="font-heading text-2xl font-bold text-green-800">
+					My Profile
+				</h1>
+				<button
+					type="button"
+					onClick={handleLogout}
+					className="flex items-center gap-1.5 cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-3 py-2 text-sm hover:bg-stone-50 transition-colors"
+				>
+					<LogOut size={16} />
+					Log Out
+				</button>
+			</div>
 
 			{errorMessage && (
 				<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-4">
