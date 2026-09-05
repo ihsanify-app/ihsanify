@@ -95,7 +95,12 @@ function CreateSessionModal({
 							type="number"
 							min={1}
 							placeholder="Duration (minutes)"
-							value={durationMinutes}
+							value={durationMinutes || ""}
+							onFocus={() => {
+								// Clear the default 60 on first focus so the user can
+								// type a fresh value instead of fighting "601" edits.
+								if (durationMinutes === 60) setDurationMinutes(0);
+							}}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
 						<div className="border border-stone-200 rounded-xl p-2">
@@ -209,7 +214,7 @@ function EditSessionModal({
 							type="number"
 							min={1}
 							placeholder="Duration (minutes)"
-							value={durationMinutes}
+							value={durationMinutes || ""}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
 						<div className="border border-stone-200 rounded-xl p-2">
