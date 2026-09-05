@@ -527,6 +527,36 @@ _Added 2026-09-01 — not started yet. This is a forward-looking plan, unlike Po
 - **Commodity — buy an SDK, don't build:** real-time media transport (WebRTC signaling, SFU/media server, TURN/STUN, adaptive bitrate), screen-share encoding, reconnection/network-quality handling. Candidates: LiveKit (open-source, self-hostable, good React/React Native SDKs), Agora, 100ms, Daily.co, Stream Video, Twilio Video.
 - **Core — build ourselves:** session ↔ group/cohort linking (who's allowed in which room, using this project's existing `Group`/enrollment model), attendance tracking tied to the existing audit-log model, in-session roles mapped to existing admin/teacher/student roles, recording tied back to lesson content, moderation wired to existing authorization rules.
 
+### Cost & quality comparison — "just use Zoom" vs. buying a video SDK and building our own
+
+_Added 2026-09-03, from a planning discussion. Numbers are approximate and vendor pricing pages change — re-verify before committing money, don't treat these as quotes._
+
+**Why nothing is free:** video cost tracks bandwidth + server compute directly (a 720p stream is ~1–2.5 Mbps vs. a few KB for a typical API call; group calls need a server-side SFU relaying every participant's stream to every other participant). Audio-only is ~20–100x cheaper than video (Opus runs ~24–64 kbps), which is why free tiers stretch much further for voice-only. Self-hosting an open-source option (LiveKit OSS, Jitsi) doesn't remove this cost — it moves it from a vendor's bill to a cloud bill, in exchange for engineering time.
+
+**Pricing model comparison:**
+
+| | Pricing model | Free tier | Beyond free tier |
+|---|---|---|---|
+| **Zoom Pro** | Flat, per host license/month | 40-min cap on group calls (Basic) | ~$13–16/month *per teacher who hosts* — flat, regardless of usage |
+| **Agora** | Pay-as-you-go, per participant-minute | ~10,000 min/month combined | ~$0.99/1,000 min voice, ~$3.99/1,000 min HD video |
+| **LiveKit Cloud** | Pay-as-you-go, per participant-minute | Generous starter allowance | Comparable to Agora; self-host later to cut further |
+| **Daily.co** | Pay-as-you-go, per participant-minute | ~10,000 participant-min/month | Tiered beyond that |
+| **ZEGOCLOUD** | Pay-as-you-go, per participant-minute | Free tier exists | Cheapest per-minute at scale, smaller community |
+
+Key structural difference: SDKs bill per **participant**-minute (a 45-min class with 4 people = 180 participant-minutes), Zoom bills per **host license**, flat, regardless of usage or participant count.
+
+**Worked example at our likely scale** — 20 sessions/week, ~45 min average, ~4 participants each, 4 weeks/month:
+- Total participant-minutes/month ≈ 20 × 45 × 4 × 4 = **14,400/month**.
+- Agora: ~4,400 min over free tier → roughly **$4–18/month** overage (less if audio-only).
+- Zoom: 5 teachers each needing a host license → **~$65–80/month**, flat.
+- At this scale the SDK route isn't just cheaper, it's roughly an order of magnitude cheaper, and scales down automatically if real usage is lower — Zoom's flat fee wouldn't.
+
+**Quality comparison — split into two different things:**
+1. **Raw call quality** (latency, resilience to bad network, echo cancellation, adaptive bitrate) — genuinely matchable. Agora/LiveKit are mature global infrastructure solving the same underlying problems Zoom solves; buying the SDK means renting the same *class* of solved infrastructure Zoom itself is built on, not hand-rolling raw WebRTC.
+2. **Surrounding product polish** (virtual backgrounds, gallery-view layout, breakout rooms, recording pipeline, waiting rooms) — this is a decade-plus of Zoom UI/UX refinement, not infrastructure. Our app won't match this on day one, and doesn't need to — a Tahsin correction session doesn't need virtual backgrounds. This gap closes gradually as we build, and is exactly the "spend engineering time on what's differentiated for us" side of the build-vs-buy split above.
+
+**Why not "just tell teachers to use Zoom directly" (no custom feature at all):** it's cheaper in effort but throws away the actual reason this feature exists — Ihsanify's stated differentiator (see Positioning in `PRODUCT.md`) is *not* being another ad hoc WhatsApp-and-Zoom-link school. An SDK integration ties video directly into the existing `Session`/`SessionAttendance` model (auto-recorded attendance, one branded in-app join flow) in a way a pasted Zoom link never will.
+
 ### Reference: the original mobile app roadmap (for the later, non-guaranteed mobile phase)
 
 > Pasted from Claude (web) 2026-09-01, lightly cleaned up (dash/encoding artifacts only, no content changes). Its own "Phase 0" is the web build described above — everything from "Phase 1" onward here is the native-mobile-specific follow-on, gated on Phase 0 actually proving out.
