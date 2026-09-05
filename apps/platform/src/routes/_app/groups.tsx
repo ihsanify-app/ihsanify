@@ -602,7 +602,7 @@ function RouteComponent() {
 				</h1>
 				<input
 					type="text"
-					placeholder="Search Group / Teacher / Subject ..."
+					placeholder="Search Group / Teacher / Subject / Student ..."
 					value={selectedQuery}
 					onChange={(e) => setSelectedQuery(e.target.value)}
 					className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors w-full sm:w-auto"
@@ -623,16 +623,16 @@ function RouteComponent() {
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
 				{groups
-					.filter(
-						(g) =>
-							g.groupName.toLowerCase().includes(selectedQuery.toLowerCase()) ||
-							(g.teacherName ?? "")
-								.toLowerCase()
-								.includes(selectedQuery.toLowerCase()) ||
-							(g.subjectName ?? "")
-								.toLowerCase()
-								.includes(selectedQuery.toLowerCase()),
-					)
+					.filter((g) => {
+						const q = selectedQuery.trim().toLowerCase();
+						if (!q) return true;
+						return (
+							g.groupName.toLowerCase().includes(q) ||
+							(g.teacherName ?? "").toLowerCase().includes(q) ||
+							(g.subjectName ?? "").toLowerCase().includes(q) ||
+							g.studentIds.some((s) => s.studentName.toLowerCase().includes(q))
+						);
+					})
 					.map((g, i) => (
 						<Link
 							key={g.groupId}
