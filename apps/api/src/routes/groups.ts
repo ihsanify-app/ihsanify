@@ -68,27 +68,53 @@ function toDbGroupType(groupType: ApiGroupType): DbGroupType {
 		: (groupType.toUpperCase() as "GROUP" | "PRIVATE");
 }
 
-async function serializeGroup(group: {
-	id: string;
-	name: string;
-	subjectId: string;
-	isActive: boolean;
-	startDate: Date;
-	endDate: Date | null;
-	cardColor: string | null;
-	groupType: DbGroupType;
-}) {
+// A period is "current" for a group when the group was live at any point
+// during that month: it started on or before the period's end, and (if it
+// has an endDate) ended on or after the period's start. A period selector
+// on the card grid uses this to hide groups that didn't exist yet — or had
+// already finished — in the chosen month.
+function isGroupLiveInPeriod(
+	group: { startDate: Date; endDate: Date | null },
+	period: { year: number; month: number },
+) {
+	const periodStart = new Date(period.year, period.month - 1, 1);
+	const periodEnd = new Date(period.year, period.month, 0, 23, 59, 59, 999);
+	if (group.startDate > periodEnd) return false;
+	if (group.endDate && group.endDate < periodStart) return false;
+	return true;
+}
+
+async function serializeGroup(
+	group: {
+		id: string;
+		name: string;
+		subjectId: string;
+		isActive: boolean;
+		startDate: Date;
+		endDate: Date | null;
+		cardColor: string | null;
+		groupType: DbGroupType;
+	},
+	// Which month the "sessions held so far" circles describe, and the
+	// `asOf` for roster replay. Defaults to the current month, so callers
+	// that don't care keep today's view.
+	period: { year: number; month: number } = (() => {
+		const now = new Date();
+		return { year: now.getFullYear(), month: now.getMonth() + 1 };
+	})(),
+) {
+	const asOf = new Date(period.year, period.month, 0, 23, 59, 59, 999);
 	const subject = await prisma.subject.findUnique({
 		where: { id: group.subjectId },
 	});
-	const teacherId = await getCurrentTeacherId(group.id);
+	const teacherId = await getCurrentTeacherId(group.id, asOf);
 	const teacher = teacherId
 		? await prisma.teacher.findUnique({
 				where: { id: teacherId },
 				include: { user: true },
 			})
 		: null;
-	const studentIds = await getCurrentStudentIds(group.id);
+	const studentIds = await getCurrentStudentIds(group.id, asOf);
 	const students = await prisma.student.findMany({
 		where: { id: { in: studentIds } },
 		include: { user: true },
@@ -98,13 +124,12 @@ async function serializeGroup(group: {
 		where: { groupId: group.id },
 	});
 
-	// Which days this month already have a logged session — surfaced on the
-	// group card as a quick "sessions held so far" indicator, distinct from
-	// plannedSessions (the recurring weekly template, not what's actually
-	// happened).
-	const now = new Date();
-	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+	// Which days of the selected period already have a logged session —
+	// surfaced on the group card as a quick "sessions held" indicator,
+	// distinct from plannedSessions (the recurring weekly template, not
+	// what's actually happened).
+	const monthStart = new Date(period.year, period.month - 1, 1);
+	const monthEnd = new Date(period.year, period.month, 1);
 	const sessionsThisMonth = await prisma.session.findMany({
 		where: { groupId: group.id, date: { gte: monthStart, lt: monthEnd } },
 		orderBy: { date: "asc" },
@@ -139,6 +164,31 @@ async function serializeGroup(group: {
 
 groupsRouter.get("/groups", requireAuth, async (c) => {
 	const authUser = c.get("authUser");
+
+	// Optional period filter — defaults to the current running month so the
+	// card grid's session-day circles describe "this month" out of the box.
+	const monthParam = Number(c.req.query("month"));
+	const yearParam = Number(c.req.query("year"));
+	const now = new Date();
+	const hasPeriod =
+		c.req.query("month") !== undefined || c.req.query("year") !== undefined;
+	const periodValid =
+		Number.isInteger(monthParam) &&
+		monthParam >= 1 &&
+		monthParam <= 12 &&
+		Number.isInteger(yearParam) &&
+		yearParam >= 2000;
+	if (hasPeriod && !periodValid) {
+		return c.json(
+			{ success: false, message: "month and year must be valid." },
+			400,
+		);
+	}
+	const period = hasPeriod
+		? { month: monthParam, year: yearParam }
+		: { month: now.getMonth() + 1, year: now.getFullYear() };
+	const asOf = new Date(period.year, period.month, 0, 23, 59, 59, 999);
+
 	let groups: {
 		id: string;
 		name: string;
@@ -157,7 +207,7 @@ groupsRouter.get("/groups", requireAuth, async (c) => {
 			where: { userId: authUser.id },
 		});
 		const groupIds = teacher
-			? await getCurrentGroupIdsForTeacher(teacher.id)
+			? await getCurrentGroupIdsForTeacher(teacher.id, asOf)
 			: [];
 		groups = await prisma.group.findMany({ where: { id: { in: groupIds } } });
 	} else {
@@ -165,12 +215,18 @@ groupsRouter.get("/groups", requireAuth, async (c) => {
 			where: { userId: authUser.id },
 		});
 		const groupIds = student
-			? await getCurrentGroupIdsForStudent(student.id)
+			? await getCurrentGroupIdsForStudent(student.id, asOf)
 			: [];
 		groups = await prisma.group.findMany({ where: { id: { in: groupIds } } });
 	}
 
-	const data = await Promise.all(groups.map(serializeGroup));
+	// Hide groups that weren't live at any point in the selected period —
+	// started after it ended, or ended before it started.
+	const liveGroups = groups.filter((g) => isGroupLiveInPeriod(g, period));
+
+	const data = await Promise.all(
+		liveGroups.map((group) => serializeGroup(group, period)),
+	);
 	return c.json({ success: true, data });
 });
 

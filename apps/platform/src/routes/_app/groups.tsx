@@ -37,6 +37,21 @@ const DAY_ABBREV: Record<string, string> = {
 	sunday: "Sun",
 };
 
+const MONTHS = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December",
+];
+
 function formatTime(time: string) {
 	const [h, m] = time.split(":").map(Number);
 	const period = h >= 12 ? "PM" : "AM";
@@ -446,6 +461,9 @@ function RouteComponent() {
 	>("loading");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedQuery, setSelectedQuery] = useState("");
+	const now = new Date();
+	const [month, setMonth] = useState(now.getMonth() + 1);
+	const [year, setYear] = useState(now.getFullYear());
 	const [groups, setGroups] = useState<Group[]>([]);
 	const [subjects, setSubjects] = useState<Option[]>([]);
 	const [teachers, setTeachers] = useState<Option[]>([]);
@@ -454,15 +472,19 @@ function RouteComponent() {
 	const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
 
 	useEffect(() => {
-		apiFetch("/groups").then(({ status, body }) => {
+		apiFetch(`/groups?month=${month}&year=${year}`).then(({ status, body }) => {
 			if (status === 401) {
 				setLoadState("unauthorized");
 				return;
 			}
+			// Replace the list wholesale: a historical period hides groups that
+			// weren't live then, so merging would keep stale cards around.
 			setGroups(body?.data ?? []);
 			setLoadState("ready");
 		});
+	}, [month, year]);
 
+	useEffect(() => {
 		if (authUser.role === "admin") {
 			apiFetch("/subjects").then(
 				({
@@ -600,13 +622,44 @@ function RouteComponent() {
 				<h1 className="font-heading text-2xl font-bold text-green-800">
 					Groups
 				</h1>
-				<input
-					type="text"
-					placeholder="Search Group / Teacher / Subject / Student ..."
-					value={selectedQuery}
-					onChange={(e) => setSelectedQuery(e.target.value)}
-					className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors w-full sm:w-auto"
-				/>
+				<div className="flex flex-col sm:flex-row sm:items-center gap-2">
+					<div className="flex items-center gap-2">
+						<select
+							aria-label="Filter month"
+							className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors"
+							value={month}
+							onChange={(e) => setMonth(Number(e.target.value))}
+						>
+							{MONTHS.map((m, i) => (
+								<option key={m} value={i + 1}>
+									{m}
+								</option>
+							))}
+						</select>
+						<select
+							aria-label="Filter year"
+							className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors"
+							value={year}
+							onChange={(e) => setYear(Number(e.target.value))}
+						>
+							{Array.from(
+								{ length: 6 },
+								(_, i) => now.getFullYear() - 4 + i,
+							).map((y) => (
+								<option key={y} value={y}>
+									{y}
+								</option>
+							))}
+						</select>
+					</div>
+					<input
+						type="text"
+						placeholder="Search Group / Teacher / Subject / Student ..."
+						value={selectedQuery}
+						onChange={(e) => setSelectedQuery(e.target.value)}
+						className="border border-stone-300 focus:border-green-500 rounded-xl px-3 py-2 outline-none transition-colors w-full sm:w-auto"
+					/>
+				</div>
 			</div>
 			{authUser.role === "admin" && (
 				<div className="flex justify-items-start mb-4">

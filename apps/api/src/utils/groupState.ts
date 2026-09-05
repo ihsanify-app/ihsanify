@@ -1,9 +1,12 @@
 import type { AuthedUser } from "./auth";
 import { prisma } from "./prisma";
 
-export async function getCurrentTeacherId(groupId: string) {
+export async function getCurrentTeacherId(
+	groupId: string,
+	asOf: Date = new Date(),
+) {
 	const latest = await prisma.groupTeacher.findFirst({
-		where: { groupId },
+		where: { groupId, date: { lte: asOf } },
 		orderBy: { date: "desc" },
 	});
 	return latest?.action === "ASSIGN" ? latest.teacherId : null;
@@ -30,9 +33,13 @@ export async function getCurrentStudentIds(
 		.map(([studentId]) => studentId);
 }
 
-export async function getCurrentGroupIdsForStudent(studentId: string) {
+// See getCurrentStudentIds' comment — `asOf` defaults to now.
+export async function getCurrentGroupIdsForStudent(
+	studentId: string,
+	asOf: Date = new Date(),
+) {
 	const events = await prisma.groupEnrollment.findMany({
-		where: { studentId },
+		where: { studentId, date: { lte: asOf } },
 		orderBy: { date: "asc" },
 	});
 	const lastActionByGroup = new Map<string, "JOIN" | "LEAVE">();
