@@ -42,6 +42,7 @@ const navItems = [
 		title: "Payroll",
 		path: "/payroll",
 		adminOnly: true,
+		teacherAllowed: true,
 	},
 	{
 		id: 10,
@@ -74,7 +75,10 @@ const navItems = [
 export function Sidebar() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const visibleNavItems = navItems.filter(
-		(n) => !n.adminOnly || authUser.role === "admin",
+		(n) =>
+			!n.adminOnly ||
+			authUser.role === "admin" ||
+			(n.teacherAllowed && authUser.role === "teacher"),
 	);
 
 	return (

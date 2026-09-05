@@ -163,7 +163,7 @@ payrollRouter.get("/payroll", requireAuth, requireRole("ADMIN"), async (c) => {
 payrollRouter.get(
 	"/payroll/payslips",
 	requireAuth,
-	requireRole("ADMIN"),
+	requireRole("ADMIN", "TEACHER"),
 	async (c) => {
 		const period = parseMonthYear(c);
 		if (!period) {
@@ -173,10 +173,22 @@ payrollRouter.get(
 			);
 		}
 
+		// Teachers only ever see their own payslips — resolve their teacher
+		// record up front and scope the relation query to it.
+		let teacherScope: string | undefined;
+		if (c.get("authUser").role === "TEACHER") {
+			const teacher = await prisma.teacher.findUnique({
+				where: { userId: c.get("authUser").id },
+			});
+			if (!teacher) return c.json({ success: true, data: [] });
+			teacherScope = teacher.id;
+		}
+
 		const payroll = await prisma.payroll.findUnique({
 			where: { month_year: { month: period.month, year: period.year } },
 			include: {
 				payslips: {
+					where: teacherScope ? { teacherId: teacherScope } : undefined,
 					include: { teacher: { include: { user: true } }, lines: true },
 					orderBy: { createdAt: "asc" },
 				},
@@ -197,11 +209,46 @@ payrollRouter.get(
 	},
 );
 
+// A teacher may read their own payslip (detail and PDF), so the ownership
+// check is shared between both handlers.
+async function getPayslipForUser(
+	payslipId: string,
+	user: {
+		id: string;
+		role: "ADMIN" | "TEACHER" | "STUDENT";
+	},
+) {
+	const payslip = await prisma.payslip.findUnique({
+		where: { id: payslipId },
+		include: {
+			teacher: true,
+		},
+	});
+	if (!payslip) return { error: "not_found" as const };
+	if (user.role === "TEACHER" && payslip.teacher.userId !== user.id) {
+		return { error: "forbidden" as const };
+	}
+	return { payslip };
+}
+
 payrollRouter.get(
 	"/payroll/payslips/:id",
 	requireAuth,
-	requireRole("ADMIN"),
+	requireRole("ADMIN", "TEACHER"),
 	async (c) => {
+		const result = await getPayslipForUser(
+			c.req.param("id"),
+			c.get("authUser"),
+		);
+		if (result.error === "not_found") {
+			return c.json({ success: false, message: "Payslip not found." }, 404);
+		}
+		if (result.error === "forbidden") {
+			return c.json(
+				{ success: false, message: "You can only view your own payslips." },
+				403,
+			);
+		}
 		const payslip = await prisma.payslip.findUnique({
 			where: { id: c.req.param("id") },
 			include: {
@@ -245,8 +292,21 @@ payrollRouter.get(
 payrollRouter.get(
 	"/payroll/payslips/:id/pdf",
 	requireAuth,
-	requireRole("ADMIN"),
+	requireRole("ADMIN", "TEACHER"),
 	async (c) => {
+		const result = await getPayslipForUser(
+			c.req.param("id"),
+			c.get("authUser"),
+		);
+		if (result.error === "not_found") {
+			return c.json({ success: false, message: "Payslip not found." }, 404);
+		}
+		if (result.error === "forbidden") {
+			return c.json(
+				{ success: false, message: "You can only view your own payslips." },
+				403,
+			);
+		}
 		const payslip = await prisma.payslip.findUnique({
 			where: { id: c.req.param("id") },
 			include: {

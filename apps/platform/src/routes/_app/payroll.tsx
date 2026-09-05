@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { apiFetch, downloadFile } from "../../lib/apiClient";
+import { authUser } from "../../lib/auth";
 
 export const Route = createFileRoute("/_app/payroll")({
 	component: RouteComponent,
@@ -334,15 +335,20 @@ function RouteComponent() {
 	const [errorMessage, setErrorMessage] = useState("");
 
 	async function loadPeriod() {
+		// Admin-only aggregate; teachers would just get a 403, so skip it.
+		const statsPromise =
+			authUser.role === "admin"
+				? apiFetch(`/payroll?month=${month}&year=${year}`)
+				: null;
 		const [statsRes, payslipsRes] = await Promise.all([
-			apiFetch(`/payroll?month=${month}&year=${year}`),
+			statsPromise,
 			apiFetch(`/payroll/payslips?month=${month}&year=${year}`),
 		]);
-		if (statsRes.status === 401 || statsRes.status === 403) {
+		if (payslipsRes.status === 401 || payslipsRes.status === 403) {
 			setLoadState("unauthorized");
 			return;
 		}
-		setStats(statsRes.body?.data ?? null);
+		setStats(statsRes?.body?.data ?? null);
 		setPayslips(payslipsRes.body?.data ?? []);
 		setLoadState("ready");
 	}
@@ -377,9 +383,7 @@ function RouteComponent() {
 	if (loadState === "unauthorized") {
 		return (
 			<section className="max-sm:p-3 sm:p-6 text-center text-stone-500">
-				<p className="mb-3">
-					You need to be logged in as an admin to view this page.
-				</p>
+				<p className="mb-3">You need to log in to view this page.</p>
 				<Link to="/login" className="text-green-700 font-semibold underline">
 					Go to login
 				</Link>
@@ -449,57 +453,61 @@ function RouteComponent() {
 				<p className="text-stone-400">Loading…</p>
 			) : (
 				<>
-					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-						<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
-							<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
-								<TrendingUp size={14} />
-								Total Revenue
+					{authUser.role === "admin" && (
+						<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+							<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+								<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
+									<TrendingUp size={14} />
+									Total Revenue
+								</div>
+								<p className="mt-1 font-heading text-xl font-bold text-green-800">
+									{formatIDR(stats?.totalRevenue ?? 0)}
+								</p>
 							</div>
-							<p className="mt-1 font-heading text-xl font-bold text-green-800">
-								{formatIDR(stats?.totalRevenue ?? 0)}
-							</p>
-						</div>
-						<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
-							<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
-								<Wallet size={14} />
-								Total Cost
+							<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+								<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
+									<Wallet size={14} />
+									Total Cost
+								</div>
+								<p className="mt-1 font-heading text-xl font-bold text-stone-800">
+									{formatIDR(stats?.totalCost ?? 0)}
+								</p>
 							</div>
-							<p className="mt-1 font-heading text-xl font-bold text-stone-800">
-								{formatIDR(stats?.totalCost ?? 0)}
-							</p>
-						</div>
-						<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
-							<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
-								<TrendingUp size={14} />
-								Total Profit
+							<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+								<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
+									<TrendingUp size={14} />
+									Total Profit
+								</div>
+								<p className="mt-1 font-heading text-xl font-bold text-stone-800">
+									{formatIDR(stats?.totalProfit ?? 0)}
+								</p>
 							</div>
-							<p className="mt-1 font-heading text-xl font-bold text-stone-800">
-								{formatIDR(stats?.totalProfit ?? 0)}
-							</p>
-						</div>
-						<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
-							<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
-								<Users size={14} />
-								Total Group
+							<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+								<div className="flex items-center gap-2 text-stone-500 text-xs uppercase tracking-wide">
+									<Users size={14} />
+									Total Group
+								</div>
+								<p className="mt-1 font-heading text-xl font-bold text-stone-800">
+									{stats?.totalGroup ?? 0}
+								</p>
 							</div>
-							<p className="mt-1 font-heading text-xl font-bold text-stone-800">
-								{stats?.totalGroup ?? 0}
-							</p>
 						</div>
-					</div>
+					)}
 
 					<div className="flex items-center justify-between mb-3">
 						<h2 className="font-heading text-lg font-bold text-green-800">
 							Payslips
 						</h2>
-						<button
-							type="button"
-							className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
-							onClick={() => setIsModalOpen(true)}
-						>
-							<PlusCircle size={18} />
-							Create Payslip
-						</button>
+						{authUser.role === "admin" && (
+							<button
+								type="button"
+								className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
+								onClick={() => setIsModalOpen(true)}
+							>
+								<PlusCircle size={18} />
+								Create Payslip
+							</button>
+						)}
 					</div>
 
 					<div className="overflow-x-auto">
@@ -509,8 +517,12 @@ function RouteComponent() {
 									<tr>
 										<th className="px-4 py-3 text-left">Teacher</th>
 										<th className="px-4 py-3 text-left">Groups/Students</th>
-										<th className="px-4 py-3 text-left">Profit</th>
-										<th className="px-4 py-3 text-left">Cost</th>
+										{authUser.role === "admin" && (
+											<th className="px-4 py-3 text-left">Profit</th>
+										)}
+										<th className="px-4 py-3 text-left">
+											{authUser.role === "admin" ? "Cost" : "Total Pay"}
+										</th>
 										<th className="px-4 py-3 text-left">Action</th>
 									</tr>
 								</thead>
@@ -518,7 +530,7 @@ function RouteComponent() {
 									{payslips.length === 0 && (
 										<tr>
 											<td
-												colSpan={5}
+												colSpan={authUser.role === "admin" ? 5 : 4}
 												className="px-4 py-6 text-center text-stone-400 italic"
 											>
 												No payslips created for this period yet.
@@ -529,7 +541,11 @@ function RouteComponent() {
 										<tr key={p.payslipId} className="hover:bg-green-50">
 											<td className="px-4 py-3">{p.teacherName}</td>
 											<td className="px-4 py-3">{p.lineCount}</td>
-											<td className="px-4 py-3">{formatIDR(p.totalProfit)}</td>
+											{authUser.role === "admin" && (
+												<td className="px-4 py-3">
+													{formatIDR(p.totalProfit)}
+												</td>
+											)}
 											<td className="px-4 py-3">{formatIDR(p.totalCost)}</td>
 											<td className="px-4 py-3">
 												<div className="flex flex-row gap-3">
@@ -547,13 +563,15 @@ function RouteComponent() {
 													>
 														<Download size={16} />
 													</button>
-													<button
-														type="button"
-														className="text-rose-500 hover:text-rose-600 cursor-pointer"
-														onClick={() => setDeletingId(p.payslipId)}
-													>
-														<Ban size={16} />
-													</button>
+													{authUser.role === "admin" && (
+														<button
+															type="button"
+															className="text-rose-500 hover:text-rose-600 cursor-pointer"
+															onClick={() => setDeletingId(p.payslipId)}
+														>
+															<Ban size={16} />
+														</button>
+													)}
 												</div>
 											</td>
 										</tr>
