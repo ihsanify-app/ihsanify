@@ -79,3 +79,29 @@ code {
 .animate-shake {
 	animation: shake 2.5s ease-in-out infinite;
 }
+
+/* Continuous soft blink for the session-day checkmark badge — keeps the
+   "attendance recorded" indicator noticeable on the group card without
+   shaking the whole layout. Pulses opacity/scale only (GPU-friendly),
+   and honors the reduced-motion preference by standing still. */
+@keyframes badge-blink {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1.2);
+	}
+	50% {
+		opacity: 0.55;
+		transform: scale(0.85);
+	}
+}
+
+.animate-badge-blink {
+	animation: badge-blink 0.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-badge-blink {
+		animation: none;
+	}
+}

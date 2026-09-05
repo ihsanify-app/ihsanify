@@ -758,7 +758,7 @@ function RouteComponent() {
 												className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-sm font-bold"
 											>
 												{day}
-												<div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400 text-emerald-950">
+												<div className="animate-badge-blink absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400 text-emerald-950">
 													<Check size={10} strokeWidth={3} />
 												</div>
 											</div>
