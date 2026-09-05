@@ -1,5 +1,23 @@
-import { Eye, Target } from "lucide-react";
+import {
+	BookOpen,
+	Eye,
+	Handshake,
+	Heart,
+	MessageCircle,
+	Star,
+	Target,
+	Users,
+} from "lucide-react";
 import { Reveal } from "./Reveal";
+
+const GROWTH_TRAITS = [
+	{ icon: Heart, label: "Cinta kepada Al-Qur'an" },
+	{ icon: BookOpen, label: "Semangat menuntut ilmu" },
+	{ icon: Handshake, label: "Adab dan akhlak" },
+	{ icon: MessageCircle, label: "Kemampuan berkomunikasi" },
+	{ icon: Star, label: "Kepercayaan diri" },
+	{ icon: Users, label: "Kepedulian kepada sesama" },
+];
 
 const ITEMS = [
 	{
@@ -56,6 +74,26 @@ export function NiatTujuan() {
 									{item.description}
 								</p>
 							)}
+						</div>
+					</Reveal>
+				))}
+			</div>
+
+			<Reveal delayMs={200}>
+				<h3 className="mt-14 font-heading text-lg font-bold text-green-800">
+					Apa yang Akan Bertumbuh dalam Diri Anak?
+				</h3>
+			</Reveal>
+			<div className="mx-auto mt-5 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+				{GROWTH_TRAITS.map((trait, i) => (
+					<Reveal key={trait.label} delayMs={220 + i * 60}>
+						<div className="flex h-full flex-col items-center gap-2 rounded-2xl border border-green-100 bg-green-50 p-4 text-center">
+							<div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
+								<trait.icon size={18} />
+							</div>
+							<p className="text-sm font-medium text-stone-700">
+								{trait.label}
+							</p>
 						</div>
 					</Reveal>
 				))}

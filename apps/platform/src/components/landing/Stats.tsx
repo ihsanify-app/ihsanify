@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
+import { AnimatedNumber } from "./AnimatedNumber";
 import { Reveal } from "./Reveal";
 
 type PublicStats = {
@@ -43,7 +44,13 @@ export function Stats() {
 
 	return (
 		<section id="stats" className="scroll-mt-20 bg-green-50 px-4 py-16 sm:px-6">
-			<Reveal className="flex justify-center">
+			<Reveal className="mx-auto mb-6 max-w-2xl text-center">
+				<p className="text-lg text-stone-600">
+					Dipercaya oleh keluarga yang ingin menghadirkan pendidikan Islami yang
+					hangat dan bermakna.
+				</p>
+			</Reveal>
+			<Reveal className="flex justify-center" delayMs={100}>
 				<div className="w-full max-w-4xl px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6 bg-green-700 rounded-3xl shadow-lg shadow-green-700/20">
 					{items.map((s) => (
 						<div
@@ -54,7 +61,7 @@ export function Stats() {
 								<div className="mx-auto h-9 w-12 animate-pulse rounded-lg bg-white/20" />
 							) : (
 								<h2 className="font-heading text-3xl text-white font-extrabold">
-									{s.count}+
+									<AnimatedNumber value={s.count} startDelayMs={s.id * 150} />+
 								</h2>
 							)}
 							<p className="text-green-100 text-base mt-1">{s.title}</p>

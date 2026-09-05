@@ -7,6 +7,7 @@ const NAV_ITEMS = [
 	{ id: "tentang-kami", label: "Tentang Kami" },
 	{ id: "niat-tujuan", label: "Visi & Misi" },
 	{ id: "program-fasilitas", label: "Program & Fasilitas" },
+	{ id: "mengapa-kami", label: "Mengapa Kami" },
 	{ id: "testimoni", label: "Testimoni" },
 	{ id: "registrasi", label: "Registrasi" },
 	{ id: "faq", label: "FAQ" },
@@ -39,7 +40,7 @@ export function Navbar() {
 	return (
 		<nav className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-green-100">
 			<div className="flex items-center justify-between px-4 py-4 sm:px-6">
-				<span className="flex max-w-42.5 items-center gap-2 text-green-700 font-heading font-bold text-base sm:max-w-none sm:text-xl">
+				<span className="flex items-center gap-2 text-green-700 font-heading font-bold text-sm sm:text-xl">
 					{logoUrl ? (
 						<img
 							src={logoUrl}

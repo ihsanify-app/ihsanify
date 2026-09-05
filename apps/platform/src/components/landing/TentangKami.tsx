@@ -22,6 +22,11 @@ const TIMELINE = [
 			"Untuk memberikan gambaran perkembangan belajar yang lebih transparan kepada orang tua, Madrasatul 'Ilmin Naafi' mulai menerapkan sistem laporan belajar bulanan bagi setiap murid.",
 	},
 	{
+		year: 2025,
+		event:
+			"Animo murid terus bertambah dari berbagai kota di Indonesia. Di tahun ini juga hadir program Calistung untuk membekali anak-anak usia dini dengan kemampuan membaca, menulis, dan berhitung.",
+	},
+	{
 		year: 2026,
 		event:
 			"Madrasatul 'Ilmin Naafi' mengembangkan teknologi Learning Management System bernama Ihsanify, sebuah platform terpadu yang memudahkan kegiatan belajar-mengajar mulai dari jadwal, laporan, ujian, hingga administrasi pembayaran.",
