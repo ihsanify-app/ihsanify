@@ -8,7 +8,7 @@ import {
 	PlusCircle,
 	X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { authUser } from "../../lib/auth";
 import { formatNameList } from "../../lib/plannedSessions";
@@ -537,6 +537,16 @@ function RouteComponent() {
 		}
 	}, []);
 
+	// Assignment events saved from this page are stamped with this date:
+	// the 1st of the viewed month, capped at today, so roster edits made
+	// while viewing a past month become visible in that month (and
+	// payroll-accurate for it) instead of being stamped "now".
+	const effectiveDate = useMemo(() => {
+		const firstOfMonth = new Date(year, month - 1, 1);
+		const today = new Date();
+		return firstOfMonth > today ? today : firstOfMonth;
+	}, [month, year]);
+
 	async function handleCreate(payload: {
 		groupName: string;
 		subjectId: string;
@@ -548,7 +558,7 @@ function RouteComponent() {
 	}) {
 		const { body } = await apiFetch("/groups", {
 			method: "POST",
-			body: JSON.stringify(payload),
+			body: JSON.stringify({ ...payload, effectiveDate }),
 		});
 		if (body?.success) {
 			fetchGroups(month, year);
@@ -570,7 +580,7 @@ function RouteComponent() {
 	) {
 		const { body } = await apiFetch(`/groups/${groupId}`, {
 			method: "PATCH",
-			body: JSON.stringify(payload),
+			body: JSON.stringify({ ...payload, effectiveDate }),
 		});
 		if (body?.success) {
 			fetchGroups(month, year);

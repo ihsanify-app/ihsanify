@@ -85,6 +85,19 @@ function isGroupLiveInPeriod(
 	return true;
 }
 
+// Custom `date` the client may send when saving roster changes while
+// viewing a past month — the assignment events are stamped with it so the
+// change is visible in (and payroll-accurate for) that month. Future
+// dates are rejected: the event log records what already happened, not
+// what's planned.
+function parseEffectiveDate(raw: string | undefined | null) {
+	if (!raw) return new Date();
+	const parsed = new Date(raw);
+	if (Number.isNaN(parsed.getTime())) return null;
+	if (parsed.getTime() > Date.now() + 60_000) return null;
+	return parsed;
+}
+
 async function serializeGroup(
 	group: {
 		id: string;
@@ -241,6 +254,7 @@ groupsRouter.post("/groups", requireAuth, requireRole("ADMIN"), async (c) => {
 		startDate?: string;
 		endDate?: string | null;
 		plannedSessions?: { dayOfWeek: string; time: string }[];
+		effectiveDate?: string;
 	};
 
 	if (!body.groupName || !body.subjectId || !body.startDate) {
@@ -249,6 +263,14 @@ groupsRouter.post("/groups", requireAuth, requireRole("ADMIN"), async (c) => {
 				success: false,
 				message: "groupName, subjectId, and startDate are required.",
 			},
+			400,
+		);
+	}
+
+	const effectiveDate = parseEffectiveDate(body.effectiveDate);
+	if (effectiveDate === null) {
+		return c.json(
+			{ success: false, message: "effectiveDate cannot be in the future." },
 			400,
 		);
 	}
@@ -264,13 +286,23 @@ groupsRouter.post("/groups", requireAuth, requireRole("ADMIN"), async (c) => {
 
 	if (body.teacherId) {
 		await prisma.groupTeacher.create({
-			data: { groupId: group.id, teacherId: body.teacherId, action: "ASSIGN" },
+			data: {
+				groupId: group.id,
+				teacherId: body.teacherId,
+				action: "ASSIGN",
+				date: effectiveDate,
+			},
 		});
 		await notifyGroupAssignment("teacher", body.teacherId, group.name);
 	}
 	for (const studentId of body.studentIds ?? []) {
 		await prisma.groupEnrollment.create({
-			data: { groupId: group.id, studentId, action: "JOIN" },
+			data: {
+				groupId: group.id,
+				studentId,
+				action: "JOIN",
+				date: effectiveDate,
+			},
 		});
 		await notifyGroupAssignment("student", studentId, group.name);
 	}
@@ -305,7 +337,16 @@ groupsRouter.patch(
 			plannedSessions?: { dayOfWeek: string; time: string }[];
 			cardColor?: string | null;
 			groupType?: ApiGroupType;
+			effectiveDate?: string;
 		};
+
+		const effectiveDate = parseEffectiveDate(body.effectiveDate);
+		if (effectiveDate === null) {
+			return c.json(
+				{ success: false, message: "effectiveDate cannot be in the future." },
+				400,
+			);
+		}
 
 		const existing = await prisma.group.findUnique({ where: { id: groupId } });
 		if (!existing) {
@@ -331,17 +372,33 @@ groupsRouter.patch(
 			},
 		});
 
+		// Diff rosters as of `effectiveDate` (defaults to now), so saving
+		// while viewing a past month compares against that month's roster
+		// and stamps the new events into that month.
 		if (body.teacherId !== undefined) {
-			const currentTeacherId = await getCurrentTeacherId(groupId);
+			const currentTeacherId = await getCurrentTeacherId(
+				groupId,
+				effectiveDate,
+			);
 			if (currentTeacherId !== body.teacherId) {
 				if (currentTeacherId) {
 					await prisma.groupTeacher.create({
-						data: { groupId, teacherId: currentTeacherId, action: "REMOVED" },
+						data: {
+							groupId,
+							teacherId: currentTeacherId,
+							action: "REMOVED",
+							date: effectiveDate,
+						},
 					});
 				}
 				if (body.teacherId) {
 					await prisma.groupTeacher.create({
-						data: { groupId, teacherId: body.teacherId, action: "ASSIGN" },
+						data: {
+							groupId,
+							teacherId: body.teacherId,
+							action: "ASSIGN",
+							date: effectiveDate,
+						},
 					});
 					await notifyGroupAssignment("teacher", body.teacherId, group.name);
 				}
@@ -349,7 +406,10 @@ groupsRouter.patch(
 		}
 
 		if (body.studentIds !== undefined) {
-			const currentStudentIds = await getCurrentStudentIds(groupId);
+			const currentStudentIds = await getCurrentStudentIds(
+				groupId,
+				effectiveDate,
+			);
 			const nextStudentIds = body.studentIds;
 			const toRemove = currentStudentIds.filter(
 				(id) => !nextStudentIds.includes(id),
@@ -359,12 +419,12 @@ groupsRouter.patch(
 			);
 			for (const studentId of toRemove) {
 				await prisma.groupEnrollment.create({
-					data: { groupId, studentId, action: "LEAVE" },
+					data: { groupId, studentId, action: "LEAVE", date: effectiveDate },
 				});
 			}
 			for (const studentId of toAdd) {
 				await prisma.groupEnrollment.create({
-					data: { groupId, studentId, action: "JOIN" },
+					data: { groupId, studentId, action: "JOIN", date: effectiveDate },
 				});
 				await notifyGroupAssignment("student", studentId, group.name);
 			}
