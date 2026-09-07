@@ -8,7 +8,7 @@ import {
 	PlusCircle,
 	X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { authUser } from "../../lib/auth";
 import { formatNameList } from "../../lib/plannedSessions";
@@ -471,18 +471,27 @@ function RouteComponent() {
 	const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 	const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
 
+	const fetchGroups = useCallback(
+		(selectedMonth: number, selectedYear: number) => {
+			apiFetch(`/groups?month=${selectedMonth}&year=${selectedYear}`).then(
+				({ status, body }) => {
+					if (status === 401) {
+						setLoadState("unauthorized");
+						return;
+					}
+					// Replace the list wholesale: a historical period hides groups that
+					// weren't live then, so merging would keep stale cards around.
+					setGroups(body?.data ?? []);
+					setLoadState("ready");
+				},
+			);
+		},
+		[],
+	);
+
 	useEffect(() => {
-		apiFetch(`/groups?month=${month}&year=${year}`).then(({ status, body }) => {
-			if (status === 401) {
-				setLoadState("unauthorized");
-				return;
-			}
-			// Replace the list wholesale: a historical period hides groups that
-			// weren't live then, so merging would keep stale cards around.
-			setGroups(body?.data ?? []);
-			setLoadState("ready");
-		});
-	}, [month, year]);
+		fetchGroups(month, year);
+	}, [month, year, fetchGroups]);
 
 	useEffect(() => {
 		if (authUser.role === "admin") {
@@ -542,7 +551,7 @@ function RouteComponent() {
 			body: JSON.stringify(payload),
 		});
 		if (body?.success) {
-			setGroups((prev) => [...prev, body.data]);
+			fetchGroups(month, year);
 			setIsModalOpen(false);
 		}
 	}
@@ -564,9 +573,7 @@ function RouteComponent() {
 			body: JSON.stringify(payload),
 		});
 		if (body?.success) {
-			setGroups((prev) =>
-				prev.map((g) => (g.groupId === groupId ? body.data : g)),
-			);
+			fetchGroups(month, year);
 			setEditingGroup(null);
 		}
 	}

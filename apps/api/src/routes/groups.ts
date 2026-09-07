@@ -8,6 +8,7 @@ import {
 } from "../utils/groupState";
 import { notifyUser } from "../utils/notify";
 import { prisma } from "../utils/prisma";
+import { isPrismaErrorCode } from "../utils/prismaErrors";
 
 export const groupsRouter = new Hono();
 
@@ -95,26 +96,27 @@ async function serializeGroup(
 		cardColor: string | null;
 		groupType: DbGroupType;
 	},
-	// Which month the "sessions held so far" circles describe, and the
-	// `asOf` for roster replay. Defaults to the current month, so callers
-	// that don't care keep today's view.
+	// Which month the "sessions held so far" circles describe. Defaults to
+	// the current month, so callers that don't care keep today's view. The
+	// teacher/student roster is deliberately NOT period-scoped: cards show
+	// who is currently assigned, so an edit made while viewing a past month
+	// still shows up (and persists) there instead of being replayed away.
 	period: { year: number; month: number } = (() => {
 		const now = new Date();
 		return { year: now.getFullYear(), month: now.getMonth() + 1 };
 	})(),
 ) {
-	const asOf = new Date(period.year, period.month, 0, 23, 59, 59, 999);
 	const subject = await prisma.subject.findUnique({
 		where: { id: group.subjectId },
 	});
-	const teacherId = await getCurrentTeacherId(group.id, asOf);
+	const teacherId = await getCurrentTeacherId(group.id);
 	const teacher = teacherId
 		? await prisma.teacher.findUnique({
 				where: { id: teacherId },
 				include: { user: true },
 			})
 		: null;
-	const studentIds = await getCurrentStudentIds(group.id, asOf);
+	const studentIds = await getCurrentStudentIds(group.id);
 	const students = await prisma.student.findMany({
 		where: { id: { in: studentIds } },
 		include: { user: true },
@@ -395,8 +397,8 @@ groupsRouter.delete(
 		try {
 			await prisma.group.delete({ where: { id: groupId } });
 			return c.json({ success: true });
-		} catch (error: any) {
-			if (error.code === "P2025") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2025")) {
 				return c.json({ success: false, message: "Group not found." }, 404);
 			}
 			return c.json({ success: false, message: "Internal server error." }, 500);

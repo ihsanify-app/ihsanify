@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import jwt from "jsonwebtoken";
 import type { TokenPayload } from "../src/types";
 import { prisma } from "../src/utils/prisma";
+import { isPrismaErrorCode } from "../src/utils/prismaErrors";
 
 export const authRouter = new Hono();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -11,7 +12,11 @@ if (!JWT_SECRET) throw new Error("JWT_SECRET is not set in .env");
 authRouter
 	.post("/auth/register", async (c) => {
 		try {
-			const body = (await c.req.json()) as any;
+			const body = (await c.req.json()) as {
+				email?: string;
+				password?: string;
+				name?: string;
+			};
 			if (!body.email || !body.password || !body.name) {
 				return c.json(
 					{
@@ -55,8 +60,8 @@ authRouter
 				},
 				201,
 			);
-		} catch (error: any) {
-			if (error.code === "P2002") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2002")) {
 				return c.json(
 					{
 						success: false,
@@ -70,7 +75,10 @@ authRouter
 	})
 	.post("/auth/login", async (c) => {
 		try {
-			const body = (await c.req.json()) as any;
+			const body = (await c.req.json()) as {
+				email?: string;
+				password?: string;
+			};
 
 			if (!body.email || !body.password) {
 				return c.json(
@@ -132,7 +140,7 @@ authRouter
 					token: token,
 				},
 			});
-		} catch (_error: any) {
+		} catch {
 			return c.json(
 				{
 					success: false,

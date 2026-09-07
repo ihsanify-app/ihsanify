@@ -7,6 +7,7 @@ import {
 	getCurrentGroupIdsForTeacher,
 } from "../utils/groupState";
 import { prisma } from "../utils/prisma";
+import { isPrismaErrorCode } from "../utils/prismaErrors";
 
 export const usersRouter = new Hono();
 
@@ -186,8 +187,8 @@ usersRouter.post("/users", requireAuth, requireRole("ADMIN"), async (c) => {
 		}
 
 		return c.json({ success: true, data: await serializeUser(user) }, 201);
-	} catch (error: any) {
-		if (error.code === "P2002") {
+	} catch (error) {
+		if (isPrismaErrorCode(error, "P2002")) {
 			return c.json(
 				{ success: false, message: "This email already exists." },
 				400,
@@ -324,11 +325,11 @@ usersRouter.patch(
 				data: await serializeUser(user),
 				swappedUser,
 			});
-		} catch (error: any) {
-			if (error.code === "P2025") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2025")) {
 				return c.json({ success: false, message: "User not found." }, 404);
 			}
-			if (error.code === "P2002") {
+			if (isPrismaErrorCode(error, "P2002")) {
 				return c.json(
 					{
 						success: false,

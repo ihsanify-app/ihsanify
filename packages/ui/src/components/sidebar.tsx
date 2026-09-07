@@ -36,7 +36,7 @@ export function Sidebar({ children }) {
 	);
 }
 
-export function SidebarItem({ icon, text, active, alert }) {
+export function SidebarItem({ icon, text }: { icon: unknown; text: unknown }) {
 	return (
 		<li>
 			{icon}

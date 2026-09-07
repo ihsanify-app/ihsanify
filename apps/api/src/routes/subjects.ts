@@ -1,15 +1,14 @@
 import { Hono } from "hono";
+import type { Prisma } from "../generated/prisma/client";
 import { requireAuth, requireRole } from "../utils/auth";
 import { prisma } from "../utils/prisma";
+import { isPrismaErrorCode } from "../utils/prismaErrors";
 
 export const subjectsRouter = new Hono();
 
-function duplicateFieldMessage(error: {
-	code?: string;
-	meta?: { target?: string[] };
-}) {
-	const target = error.meta?.target ?? [];
-	if (target.includes("subjectCode")) {
+function duplicateFieldMessage(error: Prisma.PrismaClientKnownRequestError) {
+	const target = error.meta?.target;
+	if (Array.isArray(target) && target.includes("subjectCode")) {
 		return "A subject with this code already exists.";
 	}
 	return "A subject with this name already exists.";
@@ -63,8 +62,8 @@ subjectsRouter.post(
 				},
 				201,
 			);
-		} catch (error: any) {
-			if (error.code === "P2002") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2002")) {
 				return c.json(
 					{ success: false, message: duplicateFieldMessage(error) },
 					400,
@@ -131,11 +130,11 @@ subjectsRouter.patch(
 					reportThemeName: subject.reportTheme?.name ?? null,
 				},
 			});
-		} catch (error: any) {
-			if (error.code === "P2025") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2025")) {
 				return c.json({ success: false, message: "Subject not found." }, 404);
 			}
-			if (error.code === "P2002") {
+			if (isPrismaErrorCode(error, "P2002")) {
 				return c.json(
 					{ success: false, message: duplicateFieldMessage(error) },
 					400,
@@ -156,11 +155,11 @@ subjectsRouter.delete(
 		try {
 			await prisma.subject.delete({ where: { id: subjectId } });
 			return c.json({ success: true });
-		} catch (error: any) {
-			if (error.code === "P2025") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2025")) {
 				return c.json({ success: false, message: "Subject not found." }, 404);
 			}
-			if (error.code === "P2003") {
+			if (isPrismaErrorCode(error, "P2003")) {
 				return c.json(
 					{
 						success: false,

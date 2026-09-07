@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { requireAuth, requireRole } from "../utils/auth";
 import { prisma } from "../utils/prisma";
+import { isPrismaErrorCode } from "../utils/prismaErrors";
 
 export const testimonialsRouter = new Hono();
 
@@ -81,8 +82,8 @@ testimonialsRouter.patch(
 				},
 			});
 			return c.json({ success: true, data: serializeTestimonial(testimonial) });
-		} catch (error: any) {
-			if (error.code === "P2025") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2025")) {
 				return c.json(
 					{ success: false, message: "Testimonial not found." },
 					404,
@@ -101,8 +102,8 @@ testimonialsRouter.delete(
 		try {
 			await prisma.testimonial.delete({ where: { id: c.req.param("id") } });
 			return c.json({ success: true });
-		} catch (error: any) {
-			if (error.code === "P2025") {
+		} catch (error) {
+			if (isPrismaErrorCode(error, "P2025")) {
 				return c.json(
 					{ success: false, message: "Testimonial not found." },
 					404,
