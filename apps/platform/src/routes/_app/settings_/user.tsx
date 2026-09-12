@@ -7,6 +7,7 @@ import {
 	KeyRound,
 	Pencil,
 	PlusCircle,
+	Search,
 	Upload,
 	User,
 	UserCheck,
@@ -560,6 +561,11 @@ function RouteComponent() {
 	const [editingUser, setEditingUser] = useState<AppUser | null>(null);
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 	const [resettingUser, setResettingUser] = useState<AppUser | null>(null);
+	const [nameFilter, setNameFilter] = useState("");
+
+	const filteredUsers = users.filter((u) =>
+		u.name.toLowerCase().includes(nameFilter.trim().toLowerCase()),
+	);
 
 	useEffect(() => {
 		apiFetch("/users").then(({ status, body }) => {
@@ -713,10 +719,23 @@ function RouteComponent() {
 				</p>
 			)}
 
-			<div className="flex justify-end mb-4">
+			<div className="flex justify-between items-center gap-3 mb-4">
+				<div className="relative w-full max-w-xs">
+					<Search
+						size={16}
+						className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+					/>
+					<input
+						type="text"
+						placeholder="Filter by name…"
+						value={nameFilter}
+						onChange={(e) => setNameFilter(e.target.value)}
+						className="w-full border border-stone-300 focus:border-green-500 rounded-xl py-2 pl-9 pr-3 text-sm font-normal outline-none transition-colors"
+					/>
+				</div>
 				<button
 					type="button"
-					className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
+					className="flex shrink-0 font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2"
 					onClick={() => setIsCreateModalOpen(true)}
 				>
 					<PlusCircle size={18} />
@@ -753,7 +772,17 @@ function RouteComponent() {
 										</td>
 									</tr>
 								)}
-								{users.map((u) => (
+								{users.length > 0 && filteredUsers.length === 0 && (
+									<tr>
+										<td
+											colSpan={8}
+											className="px-4 py-6 text-center text-stone-400 italic"
+										>
+											No users match "{nameFilter}".
+										</td>
+									</tr>
+								)}
+								{filteredUsers.map((u) => (
 									<tr
 										key={u.userId}
 										className={u.isActive ? "hover:bg-green-50" : "bg-rose-50"}
