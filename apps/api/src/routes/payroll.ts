@@ -2,10 +2,6 @@ import { Hono } from "hono";
 import { renderPayslipPdf } from "../pdf/PayslipDocument";
 import { DEFAULT_THEME_COLOR } from "../pdf/shared";
 import { requireAuth, requireRole } from "../utils/auth";
-import {
-	getCurrentGroupIdsForTeacher,
-	getCurrentStudentIds,
-} from "../utils/groupState";
 import { prisma } from "../utils/prisma";
 
 export const payrollRouter = new Hono();
@@ -23,12 +19,6 @@ function monthRange(year: number, month: number) {
 		start: new Date(year, month - 1, 1),
 		end: new Date(year, month, 1), // exclusive
 	};
-}
-
-// The instant a payroll period "closes" — used to replay the enrollment/
-// assignment audit logs as they stood back then, not as they stand today.
-function endOfMonth(year: number, month: number) {
-	return new Date(year, month, 0, 23, 59, 59, 999);
 }
 
 function parseMonthYear(c: {
@@ -394,37 +384,56 @@ async function buildPayslipPreview(
 	month: number,
 	year: number,
 ) {
-	const asOf = endOfMonth(year, month);
 	const { start, end } = monthRange(year, month);
 
-	const groupIds = await getCurrentGroupIdsForTeacher(teacherId, asOf);
-	const groups = await prisma.group.findMany({
-		where: { id: { in: groupIds } },
+	// Sourced directly from Session.teacherId — who actually taught it,
+	// captured when the session was logged — rather than replaying the
+	// GroupTeacher assignment log at one end-of-month cutoff. That older
+	// approach couldn't tell a mid-month teacher swap apart from a
+	// full-month assignment, and broke whenever a backdated assignment
+	// landed after some of the month's sessions had already happened.
+	//
+	// Only sessions with attendance actually recorded count toward the
+	// denominator — an unrecorded session isn't evidence of absence, so
+	// including it would unfairly deflate every student's fraction for a
+	// gap that's the teacher's bookkeeping, not the student's attendance.
+	const sessions = await prisma.session.findMany({
+		where: {
+			teacherId,
+			date: { gte: start, lt: end },
+			attendanceRecorded: true,
+		},
+		include: { attendance: true, group: true },
 	});
+
 	const rates = await prisma.teacherRate.findMany({ where: { teacherId } });
 	const rateByType = new Map(rates.map((r) => [r.groupType, r.monthlyRate]));
 
+	const sessionsByGroup = new Map<string, typeof sessions>();
+	for (const session of sessions) {
+		const bucket = sessionsByGroup.get(session.groupId);
+		if (bucket) bucket.push(session);
+		else sessionsByGroup.set(session.groupId, [session]);
+	}
+
 	const preview = [];
-	for (const group of groups) {
-		const studentIds = await getCurrentStudentIds(group.id, asOf);
+	for (const groupSessions of sessionsByGroup.values()) {
+		const group = groupSessions[0].group;
+		const sessionsTotal = groupSessions.length;
+
+		// Billed students are whoever actually has attendance recorded in
+		// these specific sessions — not "currently enrolled" — so a
+		// student added mid-month is included for the sessions they
+		// attended without needing their enrollment date backdated.
+		const studentIds = [
+			...new Set(
+				groupSessions.flatMap((s) => s.attendance.map((a) => a.studentId)),
+			),
+		];
 		const students = await prisma.student.findMany({
 			where: { id: { in: studentIds } },
 			include: { user: true },
 		});
-
-		// Only sessions with attendance actually recorded count toward the
-		// denominator — an unrecorded session isn't evidence of absence, so
-		// including it would unfairly deflate every student's fraction for a
-		// gap that's the teacher's bookkeeping, not the student's attendance.
-		const sessions = await prisma.session.findMany({
-			where: {
-				groupId: group.id,
-				date: { gte: start, lt: end },
-				attendanceRecorded: true,
-			},
-			include: { attendance: true },
-		});
-		const sessionsTotal = sessions.length;
 
 		preview.push({
 			groupId: group.id,
@@ -434,7 +443,7 @@ async function buildPayslipPreview(
 			students: students.map((student) => ({
 				studentId: student.id,
 				studentName: student.user.name,
-				sessionsAttended: sessions.filter((s) =>
+				sessionsAttended: groupSessions.filter((s) =>
 					s.attendance.some((a) => a.studentId === student.id),
 				).length,
 				sessionsTotal,

@@ -142,11 +142,13 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 		);
 	}
 
+	const teacherId = await getCurrentTeacherId(groupId, new Date(body.date));
 	const session = await prisma.session.create({
 		data: {
 			groupId,
 			date: new Date(body.date),
 			durationMinutes: body.durationMinutes,
+			teacherId,
 			...(body.studentIds !== undefined && { attendanceRecorded: true }),
 		},
 	});
@@ -163,7 +165,6 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 		}
 	}
 
-	const teacherId = await getCurrentTeacherId(groupId);
 	const teacher = teacherId
 		? await prisma.teacher.findUnique({
 				where: { id: teacherId },

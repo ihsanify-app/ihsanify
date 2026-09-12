@@ -110,6 +110,7 @@ model Teacher {
   rates           TeacherRate[]
   payslips        Payslip[]
   teachingHistory TeachingHistory[]
+  sessions        Session[]
 }
 
 // A teacher's prior work history before joining — freeform organization name
@@ -282,6 +283,15 @@ model Session {
   attendanceRecorded Boolean  @default(false)
   createdAt          DateTime @default(now())
   group              Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  // Who actually taught this session, captured when it's logged — not
+  // derived from GroupTeacher at read time. A session is a historical
+  // fact; recording the teacher here means payroll doesn't depend on
+  // replaying a mutable, backdatable assignment log, and a mid-month
+  // teacher swap is attributed correctly instead of all-or-nothing.
+  // Nullable only because existing rows need a one-time backfill
+  // (scripts/backfillSessionTeacher.ts); every new session sets it.
+  teacherId          String?
+  teacher            Teacher? @relation(fields: [teacherId], references: [id])
 
   attendance   SessionAttendance[]
   invoiceLines InvoiceLine[]       @relation("InvoiceLineSessions")
