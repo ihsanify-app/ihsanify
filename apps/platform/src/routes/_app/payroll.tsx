@@ -54,6 +54,11 @@ type PayslipSummary = {
 	totalProfit: number;
 	totalCost: number;
 	lineCount: number;
+	students: {
+		studentName: string;
+		groupType: string;
+		subjectName: string;
+	}[];
 };
 
 type PreviewStudent = {
@@ -540,7 +545,25 @@ function RouteComponent() {
 									{payslips.map((p) => (
 										<tr key={p.payslipId} className="hover:bg-green-50">
 											<td className="px-4 py-3">{p.teacherName}</td>
-											<td className="px-4 py-3">{p.lineCount}</td>
+											<td className="px-4 py-3">
+												<div className="flex flex-col gap-0.5">
+													{p.students.map((s, i) => (
+														<span
+															// biome-ignore lint/suspicious/noArrayIndexKey: same student/group/subject can repeat across lines; there's no other stable key
+															key={i}
+															className="text-xs"
+														>
+															<span className="font-medium text-stone-700">
+																{s.studentName}
+															</span>{" "}
+															<span className="text-stone-400 capitalize">
+																({s.groupType.replace("_", "-")} ·{" "}
+																{s.subjectName})
+															</span>
+														</span>
+													))}
+												</div>
+											</td>
 											{authUser.role === "admin" && (
 												<td className="px-4 py-3">
 													{formatIDR(p.totalProfit)}
@@ -549,13 +572,15 @@ function RouteComponent() {
 											<td className="px-4 py-3">{formatIDR(p.totalCost)}</td>
 											<td className="px-4 py-3">
 												<div className="flex flex-row gap-3">
-													<Link
-														to="/payroll/$payslipId"
-														params={{ payslipId: p.payslipId }}
-														className="flex items-center gap-1 text-sky-600 hover:text-sky-700 cursor-pointer"
-													>
-														<Eye size={16} />
-													</Link>
+													{authUser.role === "admin" && (
+														<Link
+															to="/payroll/$payslipId"
+															params={{ payslipId: p.payslipId }}
+															className="flex items-center gap-1 text-sky-600 hover:text-sky-700 cursor-pointer"
+														>
+															<Eye size={16} />
+														</Link>
+													)}
 													<button
 														type="button"
 														className="text-green-700 hover:text-green-800 cursor-pointer"

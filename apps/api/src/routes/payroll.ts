@@ -179,7 +179,15 @@ payrollRouter.get(
 			include: {
 				payslips: {
 					where: teacherScope ? { teacherId: teacherScope } : undefined,
-					include: { teacher: { include: { user: true } }, lines: true },
+					include: {
+						teacher: { include: { user: true } },
+						lines: {
+							include: {
+								student: { include: { user: true } },
+								group: { include: { subject: true } },
+							},
+						},
+					},
 					orderBy: { createdAt: "asc" },
 				},
 			},
@@ -194,6 +202,15 @@ payrollRouter.get(
 				totalProfit: p.lines.reduce((sum, l) => sum + l.price, 0),
 				totalCost: p.lines.reduce((sum, l) => sum + l.teacherRateSnapshot, 0),
 				lineCount: p.lines.length,
+				// Deliberately no `price` here — a teacher can see which
+				// students/groups their pay covers, not what those
+				// students are charged (see getPayslipForUser/the payslip
+				// detail route for the same rule).
+				students: p.lines.map((l) => ({
+					studentName: l.student.user.name,
+					groupType: l.groupTypeSnapshot.toLowerCase(),
+					subjectName: l.group.subject.name,
+				})),
 			})),
 		});
 	},
@@ -255,6 +272,10 @@ payrollRouter.get(
 		if (!payslip) {
 			return c.json({ success: false, message: "Payslip not found." }, 404);
 		}
+		// A teacher's payslip shows what the school pays *them* — what a
+		// student is charged for that group is a separate, admin-only
+		// figure, and must never be derivable from a teacher's own view.
+		const isAdmin = c.get("authUser").role === "ADMIN";
 		return c.json({
 			success: true,
 			data: {
@@ -270,7 +291,7 @@ payrollRouter.get(
 					studentName: l.student.user.name,
 					sessionsAttended: l.sessionsAttended,
 					sessionsTotal: l.sessionsTotal,
-					price: l.price,
+					...(isAdmin && { price: l.price }),
 					groupType: l.groupTypeSnapshot.toLowerCase(),
 					teacherRate: l.teacherRateSnapshot,
 				})),

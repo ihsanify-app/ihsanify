@@ -3,6 +3,7 @@ import { ArrowLeft, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "../../../components/Toast";
 import { apiFetch, downloadFile } from "../../../lib/apiClient";
+import { authUser } from "../../../lib/auth";
 
 export const Route = createFileRoute("/_app/payroll_/$payslipId")({
 	component: RouteComponent,
@@ -38,7 +39,7 @@ type PayslipLine = {
 	studentName: string;
 	sessionsAttended: number;
 	sessionsTotal: number;
-	price: number;
+	price?: number;
 	groupType: string;
 	teacherRate: number;
 };
@@ -92,7 +93,8 @@ function RouteComponent() {
 		);
 	}
 
-	const totalProfit = payslip.lines.reduce((sum, l) => sum + l.price, 0);
+	const isAdmin = authUser.role === "admin";
+	const totalProfit = payslip.lines.reduce((sum, l) => sum + (l.price ?? 0), 0);
 	const totalCost = payslip.lines.reduce((sum, l) => sum + l.teacherRate, 0);
 
 	async function handleDownload() {
@@ -141,18 +143,22 @@ function RouteComponent() {
 				{MONTHS[payslip.month - 1]} {payslip.year}
 			</p>
 
-			<div className="grid grid-cols-2 gap-4 mb-6 max-w-md">
+			<div
+				className={`grid gap-4 mb-6 max-w-md ${isAdmin ? "grid-cols-2" : "grid-cols-1"}`}
+			>
+				{isAdmin && (
+					<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+						<p className="text-xs uppercase tracking-wide text-stone-500">
+							Total Profit
+						</p>
+						<p className="mt-1 font-heading text-xl font-bold text-green-800">
+							{formatIDR(totalProfit)}
+						</p>
+					</div>
+				)}
 				<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
 					<p className="text-xs uppercase tracking-wide text-stone-500">
-						Total Profit
-					</p>
-					<p className="mt-1 font-heading text-xl font-bold text-green-800">
-						{formatIDR(totalProfit)}
-					</p>
-				</div>
-				<div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
-					<p className="text-xs uppercase tracking-wide text-stone-500">
-						Total Cost
+						{isAdmin ? "Total Cost" : "Total Pay"}
 					</p>
 					<p className="mt-1 font-heading text-xl font-bold text-stone-800">
 						{formatIDR(totalCost)}
@@ -168,7 +174,7 @@ function RouteComponent() {
 								<th className="px-4 py-3 text-left">Group</th>
 								<th className="px-4 py-3 text-left">Student</th>
 								<th className="px-4 py-3 text-left">Sessions</th>
-								<th className="px-4 py-3 text-left">Price</th>
+								{isAdmin && <th className="px-4 py-3 text-left">Price</th>}
 								<th className="px-4 py-3 text-left">Type</th>
 								<th className="px-4 py-3 text-left">Rate</th>
 							</tr>
@@ -184,7 +190,9 @@ function RouteComponent() {
 									<td className="px-4 py-3">
 										{line.sessionsAttended}/{line.sessionsTotal}
 									</td>
-									<td className="px-4 py-3">{formatIDR(line.price)}</td>
+									{isAdmin && (
+										<td className="px-4 py-3">{formatIDR(line.price ?? 0)}</td>
+									)}
 									<td className="px-4 py-3 capitalize">
 										{line.groupType.replace("_", "-")}
 									</td>
