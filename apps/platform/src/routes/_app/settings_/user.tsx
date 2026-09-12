@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Ban,
-	Check,
 	CheckCircle,
-	Copy,
+	Eye,
+	EyeOff,
 	KeyRound,
 	Pencil,
 	PlusCircle,
@@ -332,38 +332,29 @@ function CreateUserModal({
 function ResetPasswordModal({
 	userName,
 	onClose,
-	onGenerate,
+	onSubmit,
 }: {
 	userName: string;
 	onClose: () => void;
-	onGenerate: () => Promise<{
-		ok: boolean;
-		temporaryPassword?: string;
-		message?: string;
-	}>;
+	onSubmit: (password: string) => Promise<{ ok: boolean; message?: string }>;
 }) {
-	const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
-		null,
-	);
+	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState("");
-	const [copied, setCopied] = useState(false);
 
-	async function handleGenerate() {
+	const canSubmit = password.length >= 6;
+
+	async function handleSubmit() {
+		if (!canSubmit) return;
 		setIsSubmitting(true);
-		const result = await onGenerate();
+		const result = await onSubmit(password);
 		setIsSubmitting(false);
-		if (result.ok && result.temporaryPassword) {
-			setTemporaryPassword(result.temporaryPassword);
+		if (result.ok) {
+			onClose();
 		} else {
 			setError(result.message ?? "Could not reset password.");
 		}
-	}
-
-	async function handleCopy() {
-		if (!temporaryPassword) return;
-		await navigator.clipboard.writeText(temporaryPassword);
-		setCopied(true);
 	}
 
 	return (
@@ -379,72 +370,52 @@ function ResetPasswordModal({
 				className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				{temporaryPassword ? (
-					<>
-						<h2 className="font-heading text-lg text-green-800 mb-2">
-							New password for {userName}
-						</h2>
-						<p className="text-sm font-normal text-stone-500 mb-3">
-							Share this with them now — it won't be shown again.
-						</p>
-						<div className="flex items-center gap-2 mb-4">
-							<code className="flex-1 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 text-base font-mono font-bold text-green-800 tracking-wide">
-								{temporaryPassword}
-							</code>
-							<button
-								type="button"
-								onClick={handleCopy}
-								className="shrink-0 cursor-pointer rounded-xl border border-stone-300 p-2.5 text-stone-600 hover:bg-stone-50 transition-colors"
-								aria-label="Copy password"
-							>
-								{copied ? (
-									<Check size={16} className="text-green-600" />
-								) : (
-									<Copy size={16} />
-								)}
-							</button>
-						</div>
-						<button
-							type="button"
-							onClick={onClose}
-							className="w-full cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
-						>
-							Done
-						</button>
-					</>
-				) : (
-					<>
-						<h2 className="font-heading text-lg text-green-800 mb-2">
-							Reset password?
-						</h2>
-						<p className="text-sm font-normal text-stone-500 mb-4">
-							This immediately invalidates {userName}'s current password. A new
-							one will be generated for you to share with them.
-						</p>
-						{error && (
-							<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3 font-normal">
-								{error}
-							</p>
-						)}
-						<div className="flex justify-end gap-2">
-							<button
-								type="button"
-								onClick={onClose}
-								className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								disabled={isSubmitting}
-								onClick={handleGenerate}
-								className="cursor-pointer rounded-xl bg-rose-600 text-white px-4 py-2 hover:bg-rose-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-							>
-								{isSubmitting ? "Generating…" : "Reset Password"}
-							</button>
-						</div>
-					</>
+				<h2 className="font-heading text-lg text-green-800 mb-2">
+					Reset password for {userName}
+				</h2>
+				<p className="text-sm font-normal text-stone-500 mb-4">
+					This immediately invalidates their current password — share the new
+					one with them yourself.
+				</p>
+				{error && (
+					<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3 font-normal">
+						{error}
+					</p>
 				)}
+				<div className="relative mb-4">
+					<input
+						type={showPassword ? "text" : "password"}
+						placeholder="New password (min. 6 characters)"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 pr-10 text-sm font-normal outline-none transition-colors"
+					/>
+					<button
+						type="button"
+						onClick={() => setShowPassword((prev) => !prev)}
+						className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-stone-400 hover:text-stone-600 transition-colors"
+						aria-label={showPassword ? "Hide password" : "Show password"}
+					>
+						{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+					</button>
+				</div>
+				<div className="flex justify-end gap-2">
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						disabled={!canSubmit || isSubmitting}
+						onClick={handleSubmit}
+						className="cursor-pointer rounded-xl bg-rose-600 text-white px-4 py-2 hover:bg-rose-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{isSubmitting ? "Saving…" : "Set Password"}
+					</button>
+				</div>
 			</div>
 		</div>
 	);
@@ -600,12 +571,14 @@ function RouteComponent() {
 		return false;
 	}
 
-	async function handleResetPassword(userId: string) {
+	async function handleResetPassword(userId: string, password: string) {
 		const { body } = await apiFetch(`/users/${userId}/reset-password`, {
 			method: "POST",
+			body: JSON.stringify({ password }),
 		});
 		if (body?.success) {
-			return { ok: true, temporaryPassword: body.data.temporaryPassword };
+			toast.success("Password updated.");
+			return { ok: true };
 		}
 		return { ok: false, message: body?.message ?? "Could not reset password." };
 	}
@@ -704,7 +677,9 @@ function RouteComponent() {
 				<ResetPasswordModal
 					userName={resettingUser.name}
 					onClose={() => setResettingUser(null)}
-					onGenerate={() => handleResetPassword(resettingUser.userId)}
+					onSubmit={(password) =>
+						handleResetPassword(resettingUser.userId, password)
+					}
 				/>
 			)}
 
