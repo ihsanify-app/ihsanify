@@ -50,8 +50,33 @@ via the root `package.json` `version` field.
   on any authenticated request (throttled to once per 60s). `/users` now
   shows it — a green dot on the avatar plus an "Online" / "Active Xm ago" /
   "Never active" status, computed with a 2-minute online threshold.
+- Teacher public profiles — nickname, title, and a persuasive bio, set by
+  admin in Settings → User, shown in a new "Pengajar Kami" landing-page
+  section once both the nickname and bio are filled in. Also added the
+  missing avatar-upload control to the Edit User modal (previously only
+  available when creating a user).
+- Subjects can now have a description, an uploaded icon, and a YouTube
+  video URL, all set in Settings → Subject. The landing page's "Program
+  Belajar" cards are now driven by this instead of a hardcoded list, and
+  show a "Watch" button opening a video preview when a subject has one.
+- Alma Mater — institutional logos (Settings → Landing) shown as a "Pengajar
+  Kami adalah Alumni Dari" strip on the landing page, telling visitors
+  which institutions the teachers are alumni of.
+- Login page now has a "Remember me" checkbox — checked (default) keeps you
+  signed in across browser restarts, same as before; unchecked signs you
+  out once the browser tab closes.
+- Settings → User gained a name filter above the user table.
+- Payroll's payslip list now shows each student/group/subject a payslip
+  covers (no pricing) instead of a bare count, for both admin and teacher.
 
 ### Changed
+
+- Reset Password (Settings → User) now lets the admin type the new
+  password directly, instead of the system generating a random one to
+  relay to the user.
+- A teacher's own payslip (list, detail, and PDF) no longer includes what a
+  student is billed — only what the teacher themselves is paid. That figure
+  was already excluded from the PDF; the JSON API and detail page now match.
 
 - Responsive styling pass across the app (sidebar, dashboard, and other
   views) for phone and tablet screen sizes.
@@ -74,6 +99,15 @@ via the root `package.json` `version` field.
   "Ihsanify".
 - Admin WhatsApp number moved to an environment variable
   (`VITE_ADMIN_WHATSAPP_NUMBER`) instead of being hardcoded.
+
+### Fixed
+
+- Payroll could miss a teacher's group, or a student added to a group
+  mid-month, depending on exactly when roster/assignment changes were
+  recorded. Sessions now record who actually taught them at the time
+  they're logged (`Session.teacherId`), and payroll is built directly from
+  that plus real attendance — not replayed from the assignment/enrollment
+  history at read time. See `SOLUTION.md` for the full root cause.
 
 ## [1.0.0] - 2026-08-21
 
