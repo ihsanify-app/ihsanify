@@ -12,6 +12,7 @@ function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
+	const [rememberMe, setRememberMe] = useState(true);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 
@@ -42,6 +43,7 @@ function LoginPage() {
 					name: body.data.user.name,
 				},
 				body.data.token,
+				rememberMe,
 			);
 			// Full page navigation so authUser (read once at module load) picks up
 			// the freshly stored auth instead of the stale pre-login value.
@@ -92,6 +94,15 @@ function LoginPage() {
 							{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
 						</button>
 					</div>
+					<label className="flex items-center gap-2 text-sm text-stone-600 cursor-pointer select-none">
+						<input
+							type="checkbox"
+							checked={rememberMe}
+							onChange={(e) => setRememberMe(e.target.checked)}
+							className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500 cursor-pointer"
+						/>
+						Remember me
+					</label>
 					{error && (
 						<p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
 							{error}

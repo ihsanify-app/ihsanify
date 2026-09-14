@@ -8,9 +8,15 @@ type AuthUser = {
 
 const STORAGE_KEY = "ihsanify_auth";
 
+// "Remember me" is a choice of *where* the session lives, not a separate
+// flag to track — localStorage survives closing the browser, sessionStorage
+// doesn't. Reading checks both (whichever the login actually used); writing
+// clears the other one so a later login with the opposite choice can't
+// leave a stale copy sitting in the unused storage.
 export function getStoredAuth(): { user: AuthUser; token: string } | null {
 	if (typeof window === "undefined") return null;
-	const raw = localStorage.getItem(STORAGE_KEY);
+	const raw =
+		localStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(STORAGE_KEY);
 	if (!raw) return null;
 	try {
 		return JSON.parse(raw);
@@ -19,12 +25,24 @@ export function getStoredAuth(): { user: AuthUser; token: string } | null {
 	}
 }
 
-export function setStoredAuth(user: AuthUser, token: string) {
-	localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }));
+export function setStoredAuth(
+	user: AuthUser,
+	token: string,
+	rememberMe: boolean,
+) {
+	const value = JSON.stringify({ user, token });
+	if (rememberMe) {
+		localStorage.setItem(STORAGE_KEY, value);
+		sessionStorage.removeItem(STORAGE_KEY);
+	} else {
+		sessionStorage.setItem(STORAGE_KEY, value);
+		localStorage.removeItem(STORAGE_KEY);
+	}
 }
 
 export function clearStoredAuth() {
 	localStorage.removeItem(STORAGE_KEY);
+	sessionStorage.removeItem(STORAGE_KEY);
 }
 
 export function getAuthToken(): string | null {
