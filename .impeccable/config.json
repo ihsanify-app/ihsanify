@@ -28,6 +28,12 @@
 				"rule": "gray-on-color",
 				"value": "text-stone-600 on bg-green-50",
 				"createdAt": "2026-09-05T09:52:46.399Z"
+			},
+			{
+				"rule": "gray-on-color",
+				"value": "*",
+				"files": ["src/components/landing/RegistrationFormModal.tsx"],
+				"createdAt": "2026-09-14T09:21:38.926Z"
 			}
 		]
 	}
