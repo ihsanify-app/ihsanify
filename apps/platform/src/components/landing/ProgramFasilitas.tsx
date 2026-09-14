@@ -171,7 +171,7 @@ export function ProgramFasilitas() {
 										className="absolute right-3 top-3 flex items-center gap-1 cursor-pointer rounded-full bg-white px-2 py-1 text-xs font-semibold text-green-700 shadow-sm hover:bg-green-100 transition-colors"
 									>
 										<PlayCircle size={14} />
-										Watch
+										Preview Class
 									</button>
 								)}
 								<div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-green-700 shadow-sm">
