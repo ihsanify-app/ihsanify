@@ -19,7 +19,7 @@ const GENDERS = [
 	{ id: "female", label: "Perempuan", messageText: "perempuan" },
 ];
 
-export function RegistrasiFormModal({ onClose }: { onClose: () => void }) {
+export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 	const [subjects, setSubjects] = useState<Subject[]>([]);
 	const [name, setName] = useState("");
 	const [domicile, setDomicile] = useState("");

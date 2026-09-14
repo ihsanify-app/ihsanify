@@ -39,10 +39,10 @@ const ITEMS = [
 	},
 ];
 
-export function NiatTujuan() {
+export function VisionMission() {
 	return (
 		<section
-			id="niat-tujuan"
+			id="vision-mission"
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>

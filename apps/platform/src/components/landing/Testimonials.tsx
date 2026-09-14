@@ -72,7 +72,7 @@ export function Testimonials() {
 
 	return (
 		<section
-			id="testimoni"
+			id="testimonials"
 			className="scroll-mt-20 bg-[#e7ddd0] py-16 px-4 text-center sm:px-6"
 			style={{
 				backgroundImage:

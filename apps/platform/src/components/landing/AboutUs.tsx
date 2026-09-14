@@ -33,10 +33,10 @@ const TIMELINE = [
 	},
 ];
 
-export function TentangKami() {
+export function AboutUs() {
 	return (
 		<section
-			id="tentang-kami"
+			id="about-us"
 			className="scroll-mt-20 bg-green-50 px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>

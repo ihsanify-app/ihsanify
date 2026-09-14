@@ -59,7 +59,7 @@ function TeacherCard({ teacher }: { teacher: PublicTeacher }) {
 	);
 }
 
-export function Pengajar() {
+export function Teachers() {
 	const [teachers, setTeachers] = useState<PublicTeacher[]>([]);
 
 	useEffect(() => {
@@ -75,7 +75,7 @@ export function Pengajar() {
 
 	return (
 		<section
-			id="pengajar"
+			id="teachers"
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>

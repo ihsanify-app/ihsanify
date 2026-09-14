@@ -117,7 +117,7 @@ function VideoModal({
 	);
 }
 
-export function ProgramFasilitas() {
+export function ProgramsFacilities() {
 	const [subjects, setSubjects] = useState<PublicSubject[]>([]);
 	const [watchingSubject, setWatchingSubject] = useState<PublicSubject | null>(
 		null,
@@ -135,7 +135,7 @@ export function ProgramFasilitas() {
 
 	return (
 		<section
-			id="program-fasilitas"
+			id="programs-facilities"
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			{watchingSubject && watchingEmbedUrl && (

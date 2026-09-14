@@ -40,10 +40,10 @@ const REASONS = [
 	},
 ];
 
-export function MengapaKami() {
+export function WhyUs() {
 	return (
 		<section
-			id="mengapa-kami"
+			id="why-us"
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>

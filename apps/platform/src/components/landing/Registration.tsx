@@ -1,13 +1,13 @@
 import { MessageCircle } from "lucide-react";
 import { useState } from "react";
-import { RegistrasiFormModal } from "./RegistrasiFormModal";
+import { RegistrationFormModal } from "./RegistrationFormModal";
 import { Reveal } from "./Reveal";
 
-export function Registrasi() {
+export function Registration() {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	return (
 		<section
-			id="registrasi"
+			id="registration"
 			className="scroll-mt-20 bg-green-700 px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>
@@ -28,7 +28,7 @@ export function Registrasi() {
 				</button>
 			</Reveal>
 			{isFormOpen && (
-				<RegistrasiFormModal onClose={() => setIsFormOpen(false)} />
+				<RegistrationFormModal onClose={() => setIsFormOpen(false)} />
 			)}
 		</section>
 	);

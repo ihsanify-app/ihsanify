@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { useBrandLogo } from "../../lib/useBrandLogo";
 
 const NAV_ITEMS = [
-	{ id: "tentang-kami", label: "Tentang Kami" },
-	{ id: "niat-tujuan", label: "Visi & Misi" },
-	{ id: "program-fasilitas", label: "Program & Fasilitas" },
-	{ id: "mengapa-kami", label: "Mengapa Kami" },
-	{ id: "testimoni", label: "Testimoni" },
-	{ id: "registrasi", label: "Registrasi" },
+	{ id: "about-us", label: "Tentang Kami" },
+	{ id: "vision-mission", label: "Visi & Misi" },
+	{ id: "programs-facilities", label: "Program & Fasilitas" },
+	{ id: "why-us", label: "Mengapa Kami" },
+	{ id: "testimonials", label: "Testimoni" },
+	{ id: "registration", label: "Registrasi" },
 	{ id: "faq", label: "FAQ" },
 ];
 

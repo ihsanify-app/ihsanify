@@ -1,7 +1,7 @@
 import { ArrowRight, Sprout } from "lucide-react";
 import { useState } from "react";
 import { useBrandLogo } from "../../lib/useBrandLogo";
-import { RegistrasiFormModal } from "./RegistrasiFormModal";
+import { RegistrationFormModal } from "./RegistrationFormModal";
 import { Reveal } from "./Reveal";
 
 export function Hero({ schoolName }: { schoolName: string }) {
@@ -44,7 +44,7 @@ export function Hero({ schoolName }: { schoolName: string }) {
 						<ArrowRight size={20} />
 					</button>
 					<a
-						href="#program-fasilitas"
+						href="#programs-facilities"
 						className="inline-flex items-center gap-2 border border-green-300 text-green-700 hover:bg-green-50 transition-colors text-lg font-semibold px-8 py-3.5 rounded-full"
 					>
 						Lihat Program
@@ -55,7 +55,7 @@ export function Hero({ schoolName }: { schoolName: string }) {
 				</p>
 			</Reveal>
 			{isFormOpen && (
-				<RegistrasiFormModal onClose={() => setIsFormOpen(false)} />
+				<RegistrationFormModal onClose={() => setIsFormOpen(false)} />
 			)}
 		</section>
 	);

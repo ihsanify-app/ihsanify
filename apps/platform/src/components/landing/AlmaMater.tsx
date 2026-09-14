@@ -18,7 +18,7 @@ export function AlmaMater() {
 	}, []);
 
 	// Same "hide rather than show broken/empty" precedent as
-	// Testimonials/Pengajar — nothing fabricated in place of real logos.
+	// Testimonials/Teachers — nothing fabricated in place of real logos.
 	if (almaMaters.length === 0) return null;
 
 	return (
