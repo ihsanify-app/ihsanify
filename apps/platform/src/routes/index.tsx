@@ -7,6 +7,7 @@ import { InstagramMarquee } from "../components/landing/InstagramMarquee";
 import { MengapaKami } from "../components/landing/MengapaKami";
 import { Navbar } from "../components/landing/Navbar";
 import { NiatTujuan } from "../components/landing/NiatTujuan";
+import { Pengajar } from "../components/landing/Pengajar";
 import { ProgramFasilitas } from "../components/landing/ProgramFasilitas";
 import { QuranVerse } from "../components/landing/QuranVerse";
 import { Registrasi } from "../components/landing/Registrasi";
@@ -28,6 +29,7 @@ function App() {
 			<NiatTujuan />
 			<ProgramFasilitas />
 			<MengapaKami />
+			<Pengajar />
 			<AppScreenshots />
 			<Testimonials />
 			<Faq />

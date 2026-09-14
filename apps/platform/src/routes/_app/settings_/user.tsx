@@ -18,6 +18,11 @@ import { useEffect, useState } from "react";
 import { SettingsTabs } from "../../../components/dashboard/SettingsTabs";
 import { useToast } from "../../../components/Toast";
 import { apiFetch } from "../../../lib/apiClient";
+import {
+	ACCEPTED_IMAGE_TYPES,
+	fileToDataUrl,
+	MAX_IMAGE_BYTES,
+} from "../../../lib/imageUpload";
 
 export const Route = createFileRoute("/_app/settings_/user")({
 	component: RouteComponent,
@@ -124,6 +129,101 @@ function TeacherRatesEditor({ teacherId }: { teacherId: string }) {
 	);
 }
 
+function TeacherPublicProfileEditor({ teacherId }: { teacherId: string }) {
+	const [profile, setProfile] = useState({
+		nickname: "",
+		publicTitle: "",
+		publicBio: "",
+	});
+	const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">(
+		"idle",
+	);
+
+	useEffect(() => {
+		apiFetch(`/teachers/${teacherId}/public-profile`).then(
+			({ status, body }) => {
+				if (status !== 200) return;
+				setProfile({
+					nickname: body?.data?.nickname ?? "",
+					publicTitle: body?.data?.publicTitle ?? "",
+					publicBio: body?.data?.publicBio ?? "",
+				});
+			},
+		);
+	}, [teacherId]);
+
+	async function saveProfile(next: typeof profile) {
+		setSaveState("saving");
+		await apiFetch(`/teachers/${teacherId}/public-profile`, {
+			method: "PATCH",
+			body: JSON.stringify(next),
+		});
+		setSaveState("saved");
+	}
+
+	return (
+		<div className="mt-2 rounded-xl border border-stone-200 p-3">
+			<p className="mb-2 text-xs font-semibold text-stone-500">
+				Landing page profile — shown publicly once nama panggilan and pengalaman
+				are both filled in
+			</p>
+			<div className="flex flex-col gap-2">
+				<label className="flex items-center gap-2 text-sm">
+					<span className="w-28 shrink-0 text-stone-600">Nama panggilan</span>
+					<input
+						type="text"
+						placeholder="e.g. Siska"
+						className="flex-1 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+						value={profile.nickname}
+						onChange={(e) => {
+							const next = { ...profile, nickname: e.target.value };
+							setProfile(next);
+							setSaveState("idle");
+						}}
+						onBlur={() => saveProfile(profile)}
+					/>
+				</label>
+				<label className="flex items-center gap-2 text-sm">
+					<span className="w-28 shrink-0 text-stone-600">Gelar</span>
+					<input
+						type="text"
+						placeholder="e.g. S.Ag."
+						className="flex-1 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+						value={profile.publicTitle}
+						onChange={(e) => {
+							const next = { ...profile, publicTitle: e.target.value };
+							setProfile(next);
+							setSaveState("idle");
+						}}
+						onBlur={() => saveProfile(profile)}
+					/>
+				</label>
+				<label className="flex items-start gap-2 text-sm">
+					<span className="w-28 shrink-0 pt-2 text-stone-600">Pengalaman</span>
+					<textarea
+						rows={3}
+						placeholder="e.g. 5 tahun pengajar tahsin dan tahfizh di MIN"
+						className="flex-1 border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors resize-none"
+						value={profile.publicBio}
+						onChange={(e) => {
+							const next = { ...profile, publicBio: e.target.value };
+							setProfile(next);
+							setSaveState("idle");
+						}}
+						onBlur={() => saveProfile(profile)}
+					/>
+				</label>
+			</div>
+			{saveState === "saving" && (
+				<p className="mt-1 text-xs text-stone-400">Saving…</p>
+			)}
+			{saveState === "saved" && (
+				<p className="mt-1 text-xs text-green-600">Saved</p>
+			)}
+		</div>
+	);
+}
+
 function initials(name: string) {
 	const parts = name.trim().split(/\s+/);
 	if (parts.length === 0 || !parts[0]) return "?";
@@ -131,22 +231,8 @@ function initials(name: string) {
 	return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-const MAX_AVATAR_BYTES = 300 * 1024;
-const ACCEPTED_AVATAR_TYPES = [
-	"image/png",
-	"image/jpeg",
-	"image/webp",
-	"image/gif",
-];
-
-function fileToDataUrl(file: File): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(reader.result as string);
-		reader.onerror = () => reject(reader.error);
-		reader.readAsDataURL(file);
-	});
-}
+const MAX_AVATAR_BYTES = MAX_IMAGE_BYTES;
+const ACCEPTED_AVATAR_TYPES = ACCEPTED_IMAGE_TYPES;
 
 function CreateUserModal({
 	onClose,
@@ -439,6 +525,24 @@ function EditUserModal({
 	const [email, setEmail] = useState(user.email);
 	const [gender, setGender] = useState(user.gender ?? "male");
 	const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
+	const [avatarError, setAvatarError] = useState("");
+
+	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file) return;
+
+		if (!ACCEPTED_AVATAR_TYPES.includes(file.type)) {
+			setAvatarError("Only PNG, JPEG, WEBP, or GIF images are allowed.");
+			return;
+		}
+		if (file.size > MAX_AVATAR_BYTES) {
+			setAvatarError("Image must be smaller than 300KB.");
+			return;
+		}
+		setAvatarError("");
+		setAvatarUrl(await fileToDataUrl(file));
+	}
 
 	return (
 		<div
@@ -455,16 +559,27 @@ function EditUserModal({
 			>
 				<h2 className="font-heading text-lg text-green-800 mb-3">Edit User</h2>
 				<div className="flex flex-col items-center gap-2 mb-3">
-					<div className="h-20 w-20 overflow-hidden rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center text-green-700 font-heading font-bold text-xl">
-						{avatarUrl ? (
-							<img
-								src={avatarUrl}
-								alt="Avatar preview"
-								className="h-full w-full object-cover"
+					<div className="relative">
+						<div className="h-20 w-20 overflow-hidden rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center text-green-700 font-heading font-bold text-xl">
+							{avatarUrl ? (
+								<img
+									src={avatarUrl}
+									alt="Avatar preview"
+									className="h-full w-full object-cover"
+								/>
+							) : (
+								initials(name || "?")
+							)}
+						</div>
+						<label className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-green-600 text-white shadow-sm hover:bg-green-700 transition-colors">
+							<Upload size={14} />
+							<input
+								type="file"
+								accept={ACCEPTED_AVATAR_TYPES.join(",")}
+								className="hidden"
+								onChange={handleAvatarChange}
 							/>
-						) : (
-							initials(name || "?")
-						)}
+						</label>
 					</div>
 					{avatarUrl && (
 						<button
@@ -475,6 +590,14 @@ function EditUserModal({
 							Remove photo
 						</button>
 					)}
+					{avatarError && (
+						<span className="text-xs text-rose-500 font-normal">
+							{avatarError}
+						</span>
+					)}
+					<span className="text-xs text-stone-400 font-normal">
+						PNG, JPEG, WEBP, or GIF. Max 300KB.
+					</span>
 				</div>
 				<form>
 					<div className="flex flex-col gap-2">
@@ -499,7 +622,10 @@ function EditUserModal({
 					</div>
 				</form>
 				{user.role === "teacher" && user.teacherId && (
-					<TeacherRatesEditor teacherId={user.teacherId} />
+					<>
+						<TeacherRatesEditor teacherId={user.teacherId} />
+						<TeacherPublicProfileEditor teacherId={user.teacherId} />
+					</>
 				)}
 				<div className="flex justify-end gap-2 mt-4">
 					<button

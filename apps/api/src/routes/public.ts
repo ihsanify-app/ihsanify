@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { getCurrentGroupIdsForTeacher } from "../utils/groupState";
 import { prisma } from "../utils/prisma";
 
 // Aggregate counts only, no PII — safe to expose without auth for the
@@ -84,8 +85,46 @@ publicRouter.get("/public/subjects", async (c) => {
 		data: subjects.map((s) => ({
 			subjectId: s.id,
 			subjectName: s.name,
+			description: s.description,
+			iconUrl: s.iconUrl,
+			videoUrl: s.videoUrl,
 		})),
 	});
+});
+
+// Admin-authored bio meant to be shown publicly (Settings → User), same
+// pattern as /public/testimonials — no auth on the read side, only the write
+// side (users.ts) is admin-gated. A teacher only appears here once nickname
+// and publicBio are both set; that's the opt-in, not a separate flag (see
+// the Teacher model's doc comment). Subjects are derived from groups the
+// teacher is *currently* assigned to — TeacherSubject exists in the schema
+// but isn't wired up anywhere in the app, so it'd be stale/unmaintained data.
+publicRouter.get("/public/teachers", async (c) => {
+	const teachers = await prisma.teacher.findMany({
+		where: { nickname: { not: null }, publicBio: { not: null } },
+		include: { user: true },
+	});
+
+	const data = await Promise.all(
+		teachers.map(async (t) => {
+			const groupIds = await getCurrentGroupIdsForTeacher(t.id);
+			const groups = await prisma.group.findMany({
+				where: { id: { in: groupIds } },
+				include: { subject: true },
+			});
+			const subjectNames = [...new Set(groups.map((g) => g.subject.name))];
+			return {
+				teacherId: t.id,
+				nickname: t.nickname,
+				publicTitle: t.publicTitle,
+				publicBio: t.publicBio,
+				avatarUrl: t.user.avatarUrl,
+				subjects: subjectNames,
+			};
+		}),
+	);
+
+	return c.json({ success: true, data });
 });
 
 // Public feed for the landing page's Instagram marquee. The source of truth

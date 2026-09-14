@@ -5,27 +5,16 @@ import {
 	getCurrentGroupIdsForStudent,
 	getCurrentGroupIdsForTeacher,
 } from "../utils/groupState";
+import { isValidImageDataUrl } from "../utils/imageValidation";
 import { prisma } from "../utils/prisma";
 import { isPrismaErrorCode } from "../utils/prismaErrors";
 
 export const usersRouter = new Hono();
 
-const MAX_AVATAR_BYTES = 300 * 1024;
-const AVATAR_DATA_URL_PATTERN =
-	/^data:image\/(png|jpe?g|webp|gif);base64,([a-zA-Z0-9+/]+=*)$/;
-
 // How recent lastActiveAt has to be to count as "online" — deliberately
 // wider than requireAuth's 60s write-throttle, so someone who's been
 // continuously active doesn't flicker offline between throttled writes.
 const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
-
-function isValidAvatarDataUrl(value: string): boolean {
-	const match = AVATAR_DATA_URL_PATTERN.exec(value);
-	if (!match) return false;
-	const base64 = match[2];
-	const approxBytes = (base64.length * 3) / 4;
-	return approxBytes <= MAX_AVATAR_BYTES;
-}
 
 async function serializeUser(user: {
 	id: string;
@@ -144,7 +133,7 @@ usersRouter.post("/users", requireAuth, requireRole("ADMIN"), async (c) => {
 		);
 	}
 
-	if (body.avatarUrl && !isValidAvatarDataUrl(body.avatarUrl)) {
+	if (body.avatarUrl && !isValidImageDataUrl(body.avatarUrl)) {
 		return c.json(
 			{
 				success: false,
@@ -200,7 +189,7 @@ usersRouter.patch(
 			studentNumber?: number | null;
 		};
 
-		if (body.avatarUrl && !isValidAvatarDataUrl(body.avatarUrl)) {
+		if (body.avatarUrl && !isValidImageDataUrl(body.avatarUrl)) {
 			return c.json(
 				{
 					success: false,
@@ -362,5 +351,71 @@ usersRouter.post(
 		});
 
 		return c.json({ success: true });
+	},
+);
+
+// ---------------------------------------------------------------------------
+// Teacher public profile (Settings → User) — landing-page bio, admin-authored.
+// See GET /public/teachers for the public read side.
+// ---------------------------------------------------------------------------
+
+usersRouter.get(
+	"/teachers/:teacherId/public-profile",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const teacher = await prisma.teacher.findUnique({
+			where: { id: c.req.param("teacherId") },
+		});
+		if (!teacher) {
+			return c.json({ success: false, message: "Teacher not found." }, 404);
+		}
+		return c.json({
+			success: true,
+			data: {
+				nickname: teacher.nickname,
+				publicTitle: teacher.publicTitle,
+				publicBio: teacher.publicBio,
+			},
+		});
+	},
+);
+
+usersRouter.patch(
+	"/teachers/:teacherId/public-profile",
+	requireAuth,
+	requireRole("ADMIN"),
+	async (c) => {
+		const teacherId = c.req.param("teacherId");
+		const teacher = await prisma.teacher.findUnique({
+			where: { id: teacherId },
+		});
+		if (!teacher) {
+			return c.json({ success: false, message: "Teacher not found." }, 404);
+		}
+
+		const body = (await c.req.json()) as {
+			nickname?: string | null;
+			publicTitle?: string | null;
+			publicBio?: string | null;
+		};
+
+		const updated = await prisma.teacher.update({
+			where: { id: teacherId },
+			data: {
+				nickname: body.nickname?.trim() || null,
+				publicTitle: body.publicTitle?.trim() || null,
+				publicBio: body.publicBio?.trim() || null,
+			},
+		});
+
+		return c.json({
+			success: true,
+			data: {
+				nickname: updated.nickname,
+				publicTitle: updated.publicTitle,
+				publicBio: updated.publicBio,
+			},
+		});
 	},
 );

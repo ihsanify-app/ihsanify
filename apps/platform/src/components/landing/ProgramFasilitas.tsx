@@ -5,9 +5,15 @@ import {
 	CalendarCheck2,
 	FileText,
 	Globe,
+	GraduationCap,
 	PencilLine,
+	PlayCircle,
 	Video,
+	X,
 } from "lucide-react";
+import { type ComponentType, useEffect, useState } from "react";
+import { apiFetch } from "../../lib/apiClient";
+import { getYoutubeEmbedUrl } from "../../lib/youtube";
 import { Reveal } from "./Reveal";
 
 // lucide-react's "Languages" icon depicts a CJK character (文) next to a
@@ -26,37 +32,17 @@ function ArabicLetterIcon({ size = 24 }: { size?: number }) {
 	);
 }
 
-const PROGRAMS = [
-	{
-		icon: BookOpen,
-		title: "Tahsin",
-		description:
-			"Belajar membaca Al-Qur'an dengan tajwid yang benar dan tartil.",
-	},
-	{
-		icon: BookMarked,
-		title: "Tahfizh",
-		description:
-			"Menghafal Al-Qur'an dengan bimbingan sabar dan muroja'ah terjadwal.",
-	},
-	{
-		icon: ArabicLetterIcon,
-		title: "Bahasa Arab",
-		description:
-			"Memahami kaidah dan percakapan Bahasa Arab dari dasar hingga mahir.",
-	},
-	{
-		icon: Globe,
-		title: "Bahasa Inggris",
-		description: "Percakapan dan tata bahasa Inggris untuk segala usia.",
-	},
-	{
-		icon: PencilLine,
-		title: "Calistung",
-		description:
-			"Membaca, menulis, dan berhitung — pondasi dasar bagi si kecil sebelum memasuki jenjang berikutnya.",
-	},
-];
+// Subject content (title, description) comes from Settings → Subject —
+// icons stay hardcoded here since there's no icon field in the data model,
+// keyed by name with a generic fallback for anything not in this list
+// (e.g. a newly-added subject, or a combined one like "Tahsin & Tahfizh").
+const SUBJECT_ICONS: Record<string, ComponentType<{ size?: number }>> = {
+	Tahsin: BookOpen,
+	Tahfizh: BookMarked,
+	"Bahasa Arab": ArabicLetterIcon,
+	"Bahasa Inggris": Globe,
+	Calistung: PencilLine,
+};
 
 const FACILITIES = [
 	{
@@ -72,12 +58,93 @@ const FACILITIES = [
 	},
 ];
 
+type PublicSubject = {
+	subjectId: string;
+	subjectName: string;
+	description: string | null;
+	iconUrl: string | null;
+	videoUrl: string | null;
+};
+
+// Class-documentation video, opened from a subject card's "Watch" button.
+// A modal keeps the visitor on this page (and their scroll position) rather
+// than navigating away into YouTube's own UI — see PLAN.md/conversation for
+// why this beat replacing the icon or a separate gallery section.
+function VideoModal({
+	embedUrl,
+	subjectName,
+	onClose,
+}: {
+	embedUrl: string;
+	subjectName: string;
+	onClose: () => void;
+}) {
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/70 p-4"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="w-full max-w-2xl rounded-2xl bg-white p-3 shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<div className="mb-2 flex items-center justify-between px-1">
+					<p className="font-heading font-bold text-green-800">{subjectName}</p>
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer text-stone-400 hover:text-stone-600"
+						aria-label="Close"
+					>
+						<X size={20} />
+					</button>
+				</div>
+				<div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+					<iframe
+						src={embedUrl}
+						title={`${subjectName} — video`}
+						className="h-full w-full"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowFullScreen
+					/>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function ProgramFasilitas() {
+	const [subjects, setSubjects] = useState<PublicSubject[]>([]);
+	const [watchingSubject, setWatchingSubject] = useState<PublicSubject | null>(
+		null,
+	);
+
+	useEffect(() => {
+		apiFetch("/public/subjects").then(({ status, body }) => {
+			if (status === 200) setSubjects(body?.data ?? []);
+		});
+	}, []);
+
+	const watchingEmbedUrl = watchingSubject?.videoUrl
+		? getYoutubeEmbedUrl(watchingSubject.videoUrl)
+		: null;
+
 	return (
 		<section
 			id="program-fasilitas"
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
+			{watchingSubject && watchingEmbedUrl && (
+				<VideoModal
+					embedUrl={watchingEmbedUrl}
+					subjectName={watchingSubject.subjectName}
+					onClose={() => setWatchingSubject(null)}
+				/>
+			)}
 			<Reveal>
 				<h2 className="font-heading text-3xl font-bold text-green-800">
 					Program & Fasilitas
@@ -91,21 +158,45 @@ export function ProgramFasilitas() {
 				</h3>
 			</Reveal>
 			<div className="mx-auto mt-5 grid max-w-5xl grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-				{PROGRAMS.map((p, i) => (
-					<Reveal key={p.title} delayMs={i * 80}>
-						<div className="h-full rounded-2xl border border-green-100 bg-green-50 p-6 shadow-sm">
-							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
-								<p.icon size={22} />
+				{subjects.map((s, i) => {
+					const Icon = SUBJECT_ICONS[s.subjectName] ?? GraduationCap;
+					const canWatch = s.videoUrl && getYoutubeEmbedUrl(s.videoUrl);
+					return (
+						<Reveal key={s.subjectId} delayMs={i * 80}>
+							<div className="relative h-full rounded-2xl border border-green-100 bg-green-50 p-6 shadow-sm">
+								{canWatch && (
+									<button
+										type="button"
+										onClick={() => setWatchingSubject(s)}
+										className="absolute right-3 top-3 flex items-center gap-1 cursor-pointer rounded-full bg-white px-2 py-1 text-xs font-semibold text-green-700 shadow-sm hover:bg-green-100 transition-colors"
+									>
+										<PlayCircle size={14} />
+										Watch
+									</button>
+								)}
+								<div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-green-700 shadow-sm">
+									{s.iconUrl ? (
+										<img
+											src={s.iconUrl}
+											alt=""
+											className="h-full w-full object-cover"
+										/>
+									) : (
+										<Icon size={22} />
+									)}
+								</div>
+								<h4 className="mt-3 font-heading font-bold text-green-800">
+									{s.subjectName}
+								</h4>
+								{s.description && (
+									<p className="mt-2 text-base leading-relaxed text-stone-600">
+										{s.description}
+									</p>
+								)}
 							</div>
-							<h4 className="mt-3 font-heading font-bold text-green-800">
-								{p.title}
-							</h4>
-							<p className="mt-2 text-base leading-relaxed text-stone-600">
-								{p.description}
-							</p>
-						</div>
-					</Reveal>
-				))}
+						</Reveal>
+					);
+				})}
 			</div>
 
 			<Reveal delayMs={100}>

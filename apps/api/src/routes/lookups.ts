@@ -17,6 +17,9 @@ lookupsRouter.get("/subjects", requireAuth, requireRole("ADMIN"), async (c) => {
 			subjectCode: s.subjectCode,
 			reportThemeId: s.reportThemeId,
 			reportThemeName: s.reportTheme?.name ?? null,
+			description: s.description,
+			iconUrl: s.iconUrl,
+			videoUrl: s.videoUrl,
 		})),
 	});
 });

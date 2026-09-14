@@ -103,6 +103,15 @@ model Teacher {
   // Academic title, optional — set by the teacher on their own Profile page.
   title  TeacherTitle?
 
+  // Public landing-page profile — admin-authored (Settings → User), distinct
+  // from `title`'s closed enum since a marketing bio needs free text (e.g.
+  // "S.Ag.", not in TeacherTitle). A teacher is shown on the landing page
+  // only once nickname and publicBio are both set (see GET /public/teachers)
+  // — no separate visibility flag, filling these in *is* the opt-in.
+  nickname    String?
+  publicTitle String?
+  publicBio   String?
+
   subjects        TeacherSubject[]
   groupHistory    GroupTeacher[]
   reports         Report[]
@@ -189,6 +198,25 @@ model Subject {
   subjectCode   String?      @unique
   reportThemeId String?
   reportTheme   ReportTheme? @relation(fields: [reportThemeId], references: [id])
+  // Public landing-page blurb (Settings → Subject), shown on the "Program
+  // Belajar" section instead of the hardcoded copy that used to live in
+  // ProgramFasilitas.tsx. Optional — a subject without one just renders
+  // without a description rather than being hidden, unlike the teacher
+  // public-profile opt-in (a subject existing at all already means it's a
+  // real offering, not something needing separate publish consent).
+  description   String?
+  // Icon shown on the landing page's "Program Belajar" card, uploaded via
+  // Settings → Subject. Falls back to a hardcoded lucide icon keyed by name
+  // (ProgramFasilitas.tsx) when unset, so existing subjects keep working
+  // without every one of them needing an upload.
+  iconUrl       String?
+  // Raw YouTube URL (any format — watch/youtu.be/embed) for a "Watch" button
+  // on the subject's landing-page card, opening a modal embed. Stored as
+  // pasted; the video ID is parsed out at render time (ProgramFasilitas.tsx)
+  // rather than here, so improving that parsing never needs a migration.
+  // A URL that doesn't parse is treated the same as unset — no button shown,
+  // never a broken embed.
+  videoUrl      String?
 
   groups   Group[]
   teachers TeacherSubject[]

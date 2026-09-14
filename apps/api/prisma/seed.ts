@@ -1,8 +1,38 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { hash } from "bcryptjs";
 import { prisma } from "../src/utils/prisma";
 import testimonialSeeds from "./seed-data/testimonials.json";
 
 const SEED_PASSWORD = "password123";
+
+// ESM has no bare __dirname — derive it explicitly (same pattern as
+// src/pdf/shared.tsx) rather than relying on the generated Prisma client's
+// globalThis.__dirname polyfill, which points at its own directory, not
+// this file's.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Resized to 256x256 and compressed to stay well under the 300KB upload cap
+// (utils/imageValidation.ts) that this same field enforces when set via
+// Settings → Subject — a fresh install gets real icons out of the box
+// instead of the lucide fallback on the landing page.
+const SUBJECT_ICON_FILES: Record<string, string> = {
+	Tahsin: "Tahsin.png",
+	Tahfizh: "Tahfizh.png",
+	"Bahasa Inggris": "Inggris.png",
+	"Bahasa Arab": "Arabic.png",
+	Calistung: "Calistung.png",
+};
+
+function subjectIconDataUrl(subjectName: string): string | null {
+	const fileName = SUBJECT_ICON_FILES[subjectName];
+	if (!fileName) return null;
+	const filePath = path.join(__dirname, "seed-data/subject-icons", fileName);
+	if (!fs.existsSync(filePath)) return null;
+	const base64 = fs.readFileSync(filePath).toString("base64");
+	return `data:image/png;base64,${base64}`;
+}
 
 async function main() {
 	const password = await hash(SEED_PASSWORD, 10);
@@ -30,14 +60,17 @@ async function main() {
 	];
 	const subjects: Record<string, { id: string }> = {};
 	for (const s of subjectNames) {
+		const iconUrl = subjectIconDataUrl(s.name);
 		subjects[s.name] = await prisma.subject.upsert({
 			where: { name: s.name },
 			update: {
 				reportThemeId: s.reportTheme ? reportThemes[s.reportTheme].id : null,
+				...(iconUrl && { iconUrl }),
 			},
 			create: {
 				name: s.name,
 				reportThemeId: s.reportTheme ? reportThemes[s.reportTheme].id : null,
+				iconUrl,
 			},
 		});
 	}
