@@ -1,8 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ban, Pencil, PlusCircle } from "lucide-react";
+import { Ban, Pencil, PlusCircle, Upload } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { SettingsTabs } from "../../../components/dashboard/SettingsTabs";
 import { apiFetch } from "../../../lib/apiClient";
+import {
+	ACCEPTED_IMAGE_TYPES,
+	fileToDataUrl,
+	MAX_IMAGE_BYTES,
+} from "../../../lib/imageUpload";
 
 export const Route = createFileRoute("/_app/settings_/landing")({
 	component: RouteComponent,
@@ -14,6 +20,12 @@ type Testimonial = {
 	message: string;
 	givenAt: string;
 	createdAt: string;
+};
+
+type AlmaMater = {
+	almaMaterId: string;
+	name: string;
+	logoUrl: string;
 };
 
 // <input type="datetime-local"> wants "YYYY-MM-DDTHH:mm" in local time, not
@@ -112,9 +124,11 @@ function TestimonialModal({
 }
 
 function ConfirmDeleteModal({
+	message,
 	onConfirm,
 	onClose,
 }: {
+	message: string;
 	onConfirm: () => void;
 	onClose: () => void;
 }) {
@@ -131,7 +145,7 @@ function ConfirmDeleteModal({
 				className="bg-white rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4 shadow-xl"
 				onClick={(e) => e.stopPropagation()}
 			>
-				<h2 className="text-stone-800">Delete this testimonial?</h2>
+				<h2 className="text-stone-800">{message}</h2>
 				<div className="flex flex-col gap-2">
 					<button
 						type="button"
@@ -146,6 +160,114 @@ function ConfirmDeleteModal({
 						onClick={onClose}
 					>
 						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function AlmaMaterModal({
+	initialData,
+	onClose,
+	onSubmit,
+}: {
+	initialData: AlmaMater | null;
+	onClose: () => void;
+	onSubmit: (payload: { name: string; logoUrl: string }) => void;
+}) {
+	const [name, setName] = useState(initialData?.name ?? "");
+	const [logoUrl, setLogoUrl] = useState<string | null>(
+		initialData?.logoUrl ?? null,
+	);
+	const [logoError, setLogoError] = useState("");
+
+	async function handleLogoChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file) return;
+
+		if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+			setLogoError("Only PNG, JPEG, WEBP, or GIF images are allowed.");
+			return;
+		}
+		if (file.size > MAX_IMAGE_BYTES) {
+			setLogoError("Image must be smaller than 300KB.");
+			return;
+		}
+		setLogoError("");
+		setLogoUrl(await fileToDataUrl(file));
+	}
+
+	return (
+		<div
+			role="dialog"
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			className="fixed inset-0 bg-stone-900/50 flex items-center justify-center font-bold z-50 p-4"
+			onClick={onClose}
+		>
+			<div
+				role="dialog"
+				onKeyDown={(e) => e.key === "Escape" && onClose()}
+				className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="font-heading text-lg text-green-800 mb-3">
+					{initialData ? "Edit Alma Mater" : "Add Alma Mater"}
+				</h2>
+				<div className="flex flex-col items-center gap-2 mb-3">
+					<div className="relative">
+						<div className="h-20 w-20 overflow-hidden rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center text-green-700">
+							{logoUrl ? (
+								<img
+									src={logoUrl}
+									alt="Logo preview"
+									className="h-full w-full object-contain p-2"
+								/>
+							) : (
+								<PlusCircle size={22} className="opacity-30" />
+							)}
+						</div>
+						<label className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-green-600 text-white shadow-sm hover:bg-green-700 transition-colors">
+							<Upload size={14} />
+							<input
+								type="file"
+								accept={ACCEPTED_IMAGE_TYPES.join(",")}
+								className="hidden"
+								onChange={handleLogoChange}
+							/>
+						</label>
+					</div>
+					{logoError && (
+						<span className="text-xs text-rose-500 font-normal">
+							{logoError}
+						</span>
+					)}
+					<span className="text-xs text-stone-400 font-normal">
+						PNG, JPEG, WEBP, or GIF. Max 300KB.
+					</span>
+				</div>
+				<input
+					className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+					placeholder="Institution name (e.g. Universitas Al-Azhar)"
+					value={name}
+					onChange={(e) => setName(e.target.value)}
+				/>
+				<div className="flex justify-end gap-2 mt-4">
+					<button
+						type="button"
+						onClick={onClose}
+						className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						disabled={!name.trim() || !logoUrl}
+						onClick={() => logoUrl && onSubmit({ name: name.trim(), logoUrl })}
+						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						Save
 					</button>
 				</div>
 			</div>
@@ -215,6 +337,13 @@ function RouteComponent() {
 		Testimonial | "new" | null
 	>(null);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [almaMaters, setAlmaMaters] = useState<AlmaMater[]>([]);
+	const [editingAlmaMater, setEditingAlmaMater] = useState<
+		AlmaMater | "new" | null
+	>(null);
+	const [deletingAlmaMaterId, setDeletingAlmaMaterId] = useState<string | null>(
+		null,
+	);
 
 	useEffect(() => {
 		apiFetch("/public/testimonials").then(({ status, body }) => {
@@ -224,6 +353,9 @@ function RouteComponent() {
 			}
 			setTestimonials(body?.data ?? []);
 			setLoadState("ready");
+		});
+		apiFetch("/public/alma-maters").then(({ status, body }) => {
+			if (status === 200) setAlmaMaters(body?.data ?? []);
 		});
 	}, []);
 
@@ -272,6 +404,50 @@ function RouteComponent() {
 		}
 	}
 
+	async function handleAlmaMaterSubmit(payload: {
+		name: string;
+		logoUrl: string;
+	}) {
+		const isEditing = editingAlmaMater && editingAlmaMater !== "new";
+		const { body } = await apiFetch(
+			isEditing
+				? `/alma-maters/${editingAlmaMater.almaMaterId}`
+				: "/alma-maters",
+			{
+				method: isEditing ? "PATCH" : "POST",
+				body: JSON.stringify(payload),
+			},
+		);
+		if (body?.success) {
+			setAlmaMaters((prev) =>
+				isEditing
+					? prev.map((a) =>
+							a.almaMaterId === body.data.almaMaterId ? body.data : a,
+						)
+					: [...prev, body.data],
+			);
+			setEditingAlmaMater(null);
+			setErrorMessage("");
+		} else {
+			setErrorMessage(body?.message ?? "Could not save alma mater.");
+		}
+	}
+
+	async function handleAlmaMaterDelete(almaMaterId: string) {
+		const { body } = await apiFetch(`/alma-maters/${almaMaterId}`, {
+			method: "DELETE",
+		});
+		if (body?.success) {
+			setAlmaMaters((prev) =>
+				prev.filter((a) => a.almaMaterId !== almaMaterId),
+			);
+			setDeletingAlmaMaterId(null);
+		} else {
+			setErrorMessage(body?.message ?? "Could not delete alma mater.");
+			setDeletingAlmaMaterId(null);
+		}
+	}
+
 	if (loadState === "unauthorized") {
 		return (
 			<section className="m-3 sm:m-10 text-center text-stone-500">
@@ -296,8 +472,23 @@ function RouteComponent() {
 			)}
 			{deletingId && (
 				<ConfirmDeleteModal
+					message="Delete this testimonial?"
 					onConfirm={() => handleDelete(deletingId)}
 					onClose={() => setDeletingId(null)}
+				/>
+			)}
+			{editingAlmaMater && (
+				<AlmaMaterModal
+					initialData={editingAlmaMater === "new" ? null : editingAlmaMater}
+					onClose={() => setEditingAlmaMater(null)}
+					onSubmit={handleAlmaMaterSubmit}
+				/>
+			)}
+			{deletingAlmaMaterId && (
+				<ConfirmDeleteModal
+					message="Delete this alma mater?"
+					onConfirm={() => handleAlmaMaterDelete(deletingAlmaMaterId)}
+					onClose={() => setDeletingAlmaMaterId(null)}
 				/>
 			)}
 
@@ -369,6 +560,62 @@ function RouteComponent() {
 									type="button"
 									className="text-rose-500 hover:text-rose-600 cursor-pointer"
 									onClick={() => setDeletingId(t.testimonialId)}
+								>
+									<Ban size={16} />
+								</button>
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+
+			<div className="flex max-sm:flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4 mt-10">
+				<p className="text-stone-500 text-sm">
+					Institutional logos shown on the public landing page, telling visitors
+					which institutions our teachers are alumni of.
+				</p>
+				<button
+					type="button"
+					className="flex font-semibold items-center gap-2 cursor-pointer text-white bg-green-600 hover:bg-green-700 transition-colors rounded-xl px-4 py-2 w-fit"
+					onClick={() => setEditingAlmaMater("new")}
+				>
+					<PlusCircle size={18} />
+					Add Alma Mater
+				</button>
+			</div>
+
+			{loadState !== "loading" && (
+				<div className="flex flex-wrap gap-4 max-w-4xl">
+					{almaMaters.length === 0 && (
+						<p className="text-stone-400 italic text-sm">No alma maters yet.</p>
+					)}
+					{almaMaters.map((a) => (
+						<div
+							key={a.almaMaterId}
+							className="w-36 rounded-2xl border border-green-100 bg-white p-4 shadow-sm flex flex-col items-center gap-2"
+						>
+							<div className="h-16 w-16 overflow-hidden rounded-full border border-green-100 bg-green-50 flex items-center justify-center">
+								<img
+									src={a.logoUrl}
+									alt={a.name}
+									className="h-full w-full object-contain p-2"
+								/>
+							</div>
+							<p className="text-center text-sm font-semibold text-stone-800">
+								{a.name}
+							</p>
+							<div className="flex justify-center gap-3">
+								<button
+									type="button"
+									className="text-green-700 hover:text-green-800 cursor-pointer"
+									onClick={() => setEditingAlmaMater(a)}
+								>
+									<Pencil size={16} />
+								</button>
+								<button
+									type="button"
+									className="text-rose-500 hover:text-rose-600 cursor-pointer"
+									onClick={() => setDeletingAlmaMaterId(a.almaMaterId)}
 								>
 									<Ban size={16} />
 								</button>

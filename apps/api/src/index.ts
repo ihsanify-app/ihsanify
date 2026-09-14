@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { meRouter } from "../auth/me";
 import { authRouter } from "../auth/register";
+import { almaMatersRouter } from "./routes/almaMaters";
 import { assignmentsRouter } from "./routes/assignments";
 import { groupsRouter } from "./routes/groups";
 import { invoiceSettingsRouter } from "./routes/invoiceSettings";
@@ -54,6 +55,7 @@ app
 	.route("/", reportThemesRouter)
 	.route("/", reportSettingsRouter)
 	.route("/", testimonialsRouter)
+	.route("/", almaMatersRouter)
 	.route("/", landingStatsRouter);
 
 serve(

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AlmaMater } from "../components/landing/AlmaMater";
 import { AppScreenshots } from "../components/landing/AppScreenshots";
 import { Faq } from "../components/landing/Faq";
 import { Footer } from "../components/landing/Footer";
@@ -30,6 +31,7 @@ function App() {
 			<ProgramFasilitas />
 			<MengapaKami />
 			<Pengajar />
+			<AlmaMater />
 			<AppScreenshots />
 			<Testimonials />
 			<Faq />

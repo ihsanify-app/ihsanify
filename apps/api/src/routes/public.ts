@@ -73,6 +73,22 @@ publicRouter.get("/public/testimonials", async (c) => {
 	});
 });
 
+// Same admin-authored/public-read split as testimonials — logo strip for
+// the landing page's alumni-credibility section (almaMaters.ts is admin-only).
+publicRouter.get("/public/alma-maters", async (c) => {
+	const almaMaters = await prisma.almaMater.findMany({
+		orderBy: { createdAt: "asc" },
+	});
+	return c.json({
+		success: true,
+		data: almaMaters.map((a) => ({
+			almaMaterId: a.id,
+			name: a.name,
+			logoUrl: a.logoUrl,
+		})),
+	});
+});
+
 // Subject names only, no PII — safe to expose without auth so the landing
 // page's registration form can offer real subject choices instead of a
 // hardcoded list.

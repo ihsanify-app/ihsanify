@@ -517,6 +517,17 @@ model Testimonial {
   createdAt DateTime @default(now())
 }
 
+// Institutions our teachers graduated from — admin-authored (Settings →
+// Landing), shown as a logo strip on the public landing page as a
+// credibility signal ("our teachers are alumni of these institutions").
+// Same public-read/admin-write split as Testimonial.
+model AlmaMater {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String
+  createdAt DateTime @default(now())
+}
+
 // One row, global — a manually-set number added to the live-computed
 // session-hour stat on the landing page (GET /public/stats), representing
 // real teaching hours that happened before this LMS existed (since 2021)
