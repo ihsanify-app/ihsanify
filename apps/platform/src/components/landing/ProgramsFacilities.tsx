@@ -7,9 +7,7 @@ import {
 	Globe,
 	GraduationCap,
 	PencilLine,
-	PlayCircle,
 	Video,
-	X,
 } from "lucide-react";
 import { type ComponentType, useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
@@ -66,62 +64,46 @@ type PublicSubject = {
 	videoUrl: string | null;
 };
 
-// Class-documentation video, opened from a subject card's "Watch" button.
-// A modal keeps the visitor on this page (and their scroll position) rather
-// than navigating away into YouTube's own UI — see PLAN.md/conversation for
-// why this beat replacing the icon or a separate gallery section.
-function VideoModal({
-	embedUrl,
-	subjectName,
-	onClose,
+// One card's icon + name + description — shared between the video and
+// plain-card layouts below. `sideBySide` flips text alignment to left
+// (video sits to its right); the plain grid stays centered as before.
+function SubjectInfo({
+	subject,
+	sideBySide,
 }: {
-	embedUrl: string;
-	subjectName: string;
-	onClose: () => void;
+	subject: PublicSubject;
+	sideBySide: boolean;
 }) {
+	const Icon = SUBJECT_ICONS[subject.subjectName] ?? GraduationCap;
 	return (
 		<div
-			role="dialog"
-			onKeyDown={(e) => e.key === "Escape" && onClose()}
-			className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/70 p-4"
-			onClick={onClose}
+			className={`flex flex-col items-center text-center ${sideBySide ? "sm:items-start sm:text-left" : ""}`}
 		>
-			<div
-				role="dialog"
-				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				className="w-full max-w-2xl rounded-2xl bg-white p-3 shadow-xl"
-				onClick={(e) => e.stopPropagation()}
-			>
-				<div className="mb-2 flex items-center justify-between px-1">
-					<p className="font-heading font-bold text-green-800">{subjectName}</p>
-					<button
-						type="button"
-						onClick={onClose}
-						className="cursor-pointer text-stone-400 hover:text-stone-600"
-						aria-label="Close"
-					>
-						<X size={20} />
-					</button>
-				</div>
-				<div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
-					<iframe
-						src={embedUrl}
-						title={`${subjectName} — video`}
-						className="h-full w-full"
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-						allowFullScreen
+			<div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-green-700 shadow-sm">
+				{subject.iconUrl ? (
+					<img
+						src={subject.iconUrl}
+						alt=""
+						className="h-full w-full object-cover"
 					/>
-				</div>
+				) : (
+					<Icon size={22} />
+				)}
 			</div>
+			<h4 className="mt-3 font-heading font-bold text-green-800">
+				{subject.subjectName}
+			</h4>
+			{subject.description && (
+				<p className="mt-2 text-base leading-relaxed text-stone-600">
+					{subject.description}
+				</p>
+			)}
 		</div>
 	);
 }
 
 export function ProgramsFacilities() {
 	const [subjects, setSubjects] = useState<PublicSubject[]>([]);
-	const [watchingSubject, setWatchingSubject] = useState<PublicSubject | null>(
-		null,
-	);
 
 	useEffect(() => {
 		apiFetch("/public/subjects").then(({ status, body }) => {
@@ -129,22 +111,26 @@ export function ProgramsFacilities() {
 		});
 	}, []);
 
-	const watchingEmbedUrl = watchingSubject?.videoUrl
-		? getYoutubeEmbedUrl(watchingSubject.videoUrl)
-		: null;
+	// Video-bearing subjects get their own row (2 per row, roomy enough for
+	// icon+text beside the embed) instead of squeezing into the compact
+	// 3-col grid below, which stays for subjects with no video to preview.
+	const videoSubjects = subjects
+		.map((s) => ({
+			subject: s,
+			embedUrl: s.videoUrl ? getYoutubeEmbedUrl(s.videoUrl) : null,
+		}))
+		.filter(
+			(s): s is { subject: PublicSubject; embedUrl: string } => !!s.embedUrl,
+		);
+	const plainSubjects = subjects.filter(
+		(s) => !s.videoUrl || !getYoutubeEmbedUrl(s.videoUrl),
+	);
 
 	return (
 		<section
 			id="programs-facilities"
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
-			{watchingSubject && watchingEmbedUrl && (
-				<VideoModal
-					embedUrl={watchingEmbedUrl}
-					subjectName={watchingSubject.subjectName}
-					onClose={() => setWatchingSubject(null)}
-				/>
-			)}
 			<Reveal>
 				<h2 className="font-heading text-3xl font-bold text-green-800">
 					Program & Fasilitas
@@ -157,46 +143,36 @@ export function ProgramsFacilities() {
 					Program Belajar
 				</h3>
 			</Reveal>
-			<div className="mx-auto mt-5 grid max-w-5xl grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-				{subjects.map((s, i) => {
-					const Icon = SUBJECT_ICONS[s.subjectName] ?? GraduationCap;
-					const canWatch = s.videoUrl && getYoutubeEmbedUrl(s.videoUrl);
-					return (
+			{videoSubjects.length > 0 && (
+				<div className="mx-auto mt-5 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2">
+					{videoSubjects.map(({ subject: s, embedUrl }, i) => (
 						<Reveal key={s.subjectId} delayMs={i * 80}>
-							<div className="relative h-full rounded-2xl border border-green-100 bg-green-50 p-6 shadow-sm">
-								{canWatch && (
-									<button
-										type="button"
-										onClick={() => setWatchingSubject(s)}
-										className="absolute right-3 top-3 flex items-center gap-1 cursor-pointer rounded-full bg-white px-2 py-1 text-xs font-semibold text-green-700 shadow-sm hover:bg-green-100 transition-colors"
-									>
-										<PlayCircle size={14} />
-										Preview
-									</button>
-								)}
-								<div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-green-700 shadow-sm">
-									{s.iconUrl ? (
-										<img
-											src={s.iconUrl}
-											alt=""
-											className="h-full w-full object-cover"
-										/>
-									) : (
-										<Icon size={22} />
-									)}
+							<div className="flex h-full flex-col items-center gap-5 rounded-2xl border border-green-100 bg-green-50 p-6 text-left shadow-sm sm:flex-row">
+								<SubjectInfo subject={s} sideBySide />
+								<div className="aspect-video w-full shrink-0 overflow-hidden rounded-xl bg-black sm:w-56">
+									<iframe
+										src={embedUrl}
+										title={`${s.subjectName} — video`}
+										className="h-full w-full"
+										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+										allowFullScreen
+									/>
 								</div>
-								<h4 className="mt-3 font-heading font-bold text-green-800">
-									{s.subjectName}
-								</h4>
-								{s.description && (
-									<p className="mt-2 text-base leading-relaxed text-stone-600">
-										{s.description}
-									</p>
-								)}
 							</div>
 						</Reveal>
-					);
-				})}
+					))}
+				</div>
+			)}
+			<div
+				className={`mx-auto grid max-w-5xl grid-cols-2 gap-6 sm:grid-cols-3 ${videoSubjects.length > 0 ? "mt-6" : "mt-5"}`}
+			>
+				{plainSubjects.map((s, i) => (
+					<Reveal key={s.subjectId} delayMs={i * 80}>
+						<div className="h-full rounded-2xl border border-green-100 bg-green-50 p-6 shadow-sm">
+							<SubjectInfo subject={s} sideBySide={false} />
+						</div>
+					</Reveal>
+				))}
 			</div>
 
 			<Reveal delayMs={100}>
