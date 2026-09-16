@@ -525,7 +525,7 @@ _Added 2026-08-05 — work that grew organically per-feature (schema → API →
 ## Future Work — Live Classroom Feature (Zoom-like)
 _Added 2026-09-01 — not started yet. This is a forward-looking plan, unlike Post-Plan Additions above (a log of completed work) — kept in its own section so the two don't get confused._
 
-**Status:** Not started. **Target start: October 2026.**
+**Status:** Started 2026-09-16 (ahead of the original October target) — confirmed web-first, for the user's own learning/experience per the mentor-mode approach below. Next concrete step: pick a video SDK vendor from the build-vs-buy candidates further down, then embed a first "Live Session" page in `apps/platform`.
 
 **How we'll work on this — different from everything else in this plan:** the user asked explicitly to go slow here and be treated as a mentee, not a client — the goal is for the user to actually learn real-time video/media architecture and earn the "scar tissue" of building it, not just receive a finished feature. When this phase starts:
 - Don't write the implementation wholesale. Explain the concept, point at the relevant SDK docs/section, let the user attempt it first.
