@@ -35,6 +35,7 @@ const navItems = [
 		title: "Invoices",
 		path: "/invoices",
 		adminOnly: true,
+		studentAllowed: true,
 	},
 	{
 		id: 9,
@@ -78,7 +79,8 @@ export function Sidebar() {
 		(n) =>
 			!n.adminOnly ||
 			authUser.role === "admin" ||
-			(n.teacherAllowed && authUser.role === "teacher"),
+			(n.teacherAllowed && authUser.role === "teacher") ||
+			(n.studentAllowed && authUser.role === "student"),
 	);
 
 	return (
