@@ -34,7 +34,7 @@ function RouteComponent() {
 			setLoadState("unauthorized");
 			return;
 		}
-		apiFetch("/groups").then(({ status, body }) => {
+		apiFetch("/groups?period=all").then(({ status, body }) => {
 			if (status === 401 || status === 403) {
 				setLoadState("unauthorized");
 				return;

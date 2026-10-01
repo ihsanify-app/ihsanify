@@ -15,14 +15,28 @@ import { Teachers } from "../components/landing/Teachers";
 import { Testimonials } from "../components/landing/Testimonials";
 import { VisionMission } from "../components/landing/VisionMission";
 import { WhyUs } from "../components/landing/WhyUs";
+import { apiFetch } from "../lib/apiClient";
 
-export const Route = createFileRoute("/")({ component: App });
+export const Route = createFileRoute("/")({
+	component: App,
+	// Resolved server-side during SSR (and cached for client navigations),
+	// so the brand logo ships in the first HTML instead of swapping in
+	// after a client-only fetch — see useBrandLogo.ts for the pattern this
+	// replaces on this page specifically.
+	loader: async () => {
+		const { status, body } = await apiFetch("/public/branding");
+		const logoUrl: string | null =
+			status === 200 ? (body?.data?.logoUrl ?? null) : null;
+		return { logoUrl };
+	},
+});
 
 function App() {
+	const { logoUrl } = Route.useLoaderData();
 	return (
 		<div className="font-sans">
-			<Navbar />
-			<Hero schoolName="Madrasatul 'Ilmin Naafi'" />
+			<Navbar logoUrl={logoUrl} />
+			<Hero schoolName="Madrasatul 'Ilmin Naafi'" logoUrl={logoUrl} />
 			<QuranVerse />
 			<Stats />
 			<InstagramMarquee />

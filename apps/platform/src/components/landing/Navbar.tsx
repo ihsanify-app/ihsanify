@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, Sprout, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useBrandLogo } from "../../lib/useBrandLogo";
 
 const NAV_ITEMS = [
 	{ id: "about-us", label: "Tentang Kami" },
@@ -13,8 +12,7 @@ const NAV_ITEMS = [
 	{ id: "faq", label: "FAQ" },
 ];
 
-export function Navbar() {
-	const logoUrl = useBrandLogo();
+export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 	const [activeId, setActiveId] = useState(NAV_ITEMS[0].id);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 

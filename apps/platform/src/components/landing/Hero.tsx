@@ -1,11 +1,15 @@
 import { ArrowRight, Sprout } from "lucide-react";
 import { useState } from "react";
-import { useBrandLogo } from "../../lib/useBrandLogo";
 import { RegistrationFormModal } from "./RegistrationFormModal";
 import { Reveal } from "./Reveal";
 
-export function Hero({ schoolName }: { schoolName: string }) {
-	const logoUrl = useBrandLogo();
+export function Hero({
+	schoolName,
+	logoUrl,
+}: {
+	schoolName: string;
+	logoUrl: string | null;
+}) {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	return (
 		<section className="relative overflow-hidden gap-4 min-h-[85vh] bg-linear-to-b from-green-50 via-white to-white flex flex-col items-center justify-center text-center px-4 sm:px-6">

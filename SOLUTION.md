@@ -2,6 +2,14 @@
 
 A running record of concrete issues (things that were actually broken or misbehaving) and how each was fixed. Feature additions with no underlying defect aren't logged here — see `CHANGELOG.md` for those. Newest first.
 
+## 2026-09-30 — A group created with a future start date was invisible on Settings → Group
+
+**Issue:** Reported on staging: created a group with `startDate` = tomorrow (Oct 1, viewed on Sep 30) and it never appeared in Settings → Group's config table.
+
+**Root cause:** `GET /groups` (`groups.ts`) applies `isGroupLiveInPeriod`, which hides any group that isn't live during a `month`/`year` period — defaulting silently to the current calendar month whenever the caller sends none. That filter was written for the main `/groups` dashboard's month/year picker, but Settings → Group is a flat admin config table with no period concept at all; it calls the bare endpoint and unknowingly inherited "this month" as an implicit filter. A group starting in any future month is invisible there until that month arrives.
+
+**Solution:** Added an explicit `period=all` opt-out to `GET /groups` that skips the liveness filter entirely, and pointed Settings → Group at `/groups?period=all`. Left the default (current-month) behavior untouched for every other caller — the dashboard's schedule widget and the group/report pickers all genuinely want "this month," so the fix is scoped to the one page that doesn't.
+
 ## 2026-09-14 — Payroll could miss a teacher's group, or a student added mid-month
 
 **Issue:** Reported as "why doesn't Aysar's Class show up on Sabrina's August payslip?" Investigation found the original exclusion was actually correct — her `GroupTeacher` assignment really was dated after August — but trying to correct that backdated data through the app's own "edit while viewing a past month" feature silently did nothing, with no error. Separately, a student added to "Thalibaat Bhs Arab" mid-month also didn't show up on that teacher's payslip.

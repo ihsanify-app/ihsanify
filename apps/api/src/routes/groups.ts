@@ -236,8 +236,14 @@ groupsRouter.get("/groups", requireAuth, async (c) => {
 	}
 
 	// Hide groups that weren't live at any point in the selected period —
-	// started after it ended, or ended before it started.
-	const liveGroups = groups.filter((g) => isGroupLiveInPeriod(g, period));
+	// started after it ended, or ended before it started. Callers with no
+	// period concept of their own (e.g. the flat admin config table at
+	// Settings → Group) pass period=all to see every group regardless of
+	// its start/end date, instead of silently inheriting "this month".
+	const showAllPeriods = c.req.query("period") === "all";
+	const liveGroups = showAllPeriods
+		? groups
+		: groups.filter((g) => isGroupLiveInPeriod(g, period));
 
 	const data = await Promise.all(
 		liveGroups.map((group) => serializeGroup(group, period)),
