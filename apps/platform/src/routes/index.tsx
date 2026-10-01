@@ -3,6 +3,7 @@ import { AboutUs } from "../components/landing/AboutUs";
 import { AlmaMater } from "../components/landing/AlmaMater";
 import { AppScreenshots } from "../components/landing/AppScreenshots";
 import { Faq } from "../components/landing/Faq";
+import { Filosofi } from "../components/landing/Filosofi";
 import { Footer } from "../components/landing/Footer";
 import { Hero } from "../components/landing/Hero";
 import { InstagramMarquee } from "../components/landing/InstagramMarquee";
@@ -37,10 +38,11 @@ function App() {
 		<div className="font-sans">
 			<Navbar logoUrl={logoUrl} />
 			<Hero schoolName="Madrasatul 'Ilmin Naafi'" logoUrl={logoUrl} />
-			<QuranVerse />
 			<Stats />
+			<QuranVerse />
 			<InstagramMarquee />
 			<AboutUs />
+			<Filosofi logoUrl={logoUrl} />
 			<VisionMission />
 			<ProgramsFacilities />
 			<WhyUs />

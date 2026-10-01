@@ -5,6 +5,7 @@ import {
 	MessageCircleHeart,
 	Users,
 } from "lucide-react";
+import { Eyebrow } from "./Eyebrow";
 import { Reveal } from "./Reveal";
 
 const REASONS = [
@@ -44,15 +45,18 @@ export function WhyUs() {
 	return (
 		<section
 			id="why-us"
-			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
+			className="scroll-mt-20 bg-forest px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>
-				<h2 className="font-heading text-3xl font-bold text-green-800">
+				<Eyebrow className="mb-3" tone="amber">
+					Kelebihan
+				</Eyebrow>
+				<h2 className="font-heading text-3xl font-bold text-white">
 					Mengapa Madrasatul 'Ilmin Naafi'?
 				</h2>
 			</Reveal>
 			<Reveal delayMs={80}>
-				<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-stone-600">
+				<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-green-200">
 					Bukan sekadar tempat les — kami hadir untuk menemani anak bertumbuh
 					dalam ilmu, adab, dan Al-Qur'an.
 				</p>
@@ -60,14 +64,14 @@ export function WhyUs() {
 			<div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				{REASONS.map((r, i) => (
 					<Reveal key={r.title} delayMs={140 + i * 80}>
-						<div className="flex h-full flex-col items-center gap-3 rounded-2xl border border-green-100 bg-green-50 p-6 text-center shadow-sm">
-							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
-								<r.icon size={22} />
+						<div className="flex h-full flex-col items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 text-left">
+							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold/15 text-gold">
+								<r.icon size={20} />
 							</div>
-							<h3 className="font-heading font-bold text-green-800">
+							<h3 className="font-heading font-bold text-gold-soft">
 								{r.title}
 							</h3>
-							<p className="text-base leading-relaxed text-stone-600">
+							<p className="text-base leading-relaxed text-green-200">
 								{r.description}
 							</p>
 						</div>

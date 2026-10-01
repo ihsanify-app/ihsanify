@@ -1,8 +1,9 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { Eyebrow } from "./Eyebrow";
 import { Reveal } from "./Reveal";
 
-type Shot = {
+export type Shot = {
 	src: string;
 	alt: string;
 };
@@ -22,7 +23,7 @@ const DESKTOP_SHOTS: Shot[] = [
 	},
 ];
 
-const MOBILE_SHOTS: Shot[] = [
+export const MOBILE_SHOTS: Shot[] = [
 	{
 		src: "/landing/screenshots/mobile-calendar.png",
 		alt: "Dashboard dan jadwal kelas di ponsel",
@@ -41,10 +42,10 @@ const MOBILE_SHOTS: Shot[] = [
 	},
 ];
 
-function BrowserFrame({ shot }: { shot: Shot }) {
+export function BrowserFrame({ shot }: { shot: Shot }) {
 	return (
-		<div className="w-full overflow-hidden rounded-2xl border border-green-100 bg-white shadow-sm">
-			<div className="flex items-center gap-1.5 border-b border-green-100 bg-stone-50 px-3 py-2.5">
+		<div className="w-full overflow-hidden rounded-2xl border-2 border-stone-200 bg-white shadow-2xl shadow-stone-900/15">
+			<div className="flex items-center gap-1.5 border-b border-stone-200 bg-stone-50 px-3 py-2.5">
 				<span className="h-2.5 w-2.5 rounded-full bg-stone-300" />
 				<span className="h-2.5 w-2.5 rounded-full bg-stone-300" />
 				<span className="h-2.5 w-2.5 rounded-full bg-stone-300" />
@@ -62,7 +63,7 @@ function BrowserFrame({ shot }: { shot: Shot }) {
 	);
 }
 
-function PhoneFrame({ shot }: { shot: Shot }) {
+export function PhoneFrame({ shot }: { shot: Shot }) {
 	return (
 		<div className="mx-auto w-full max-w-xs rounded-4xl border-4 border-stone-800 bg-stone-800 p-1.5 shadow-sm">
 			<div className="relative aspect-[9/17] overflow-hidden rounded-3xl bg-stone-50">
@@ -155,7 +156,7 @@ function ScreenshotCarousel({
 							aria-label="Sebelumnya"
 							onClick={() => scrollToIndex(activeIndex - 1)}
 							disabled={activeIndex === 0}
-							className="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-green-700 shadow-sm transition-opacity hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+							className="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-emerald shadow-sm transition-opacity hover:bg-white disabled:pointer-events-none disabled:opacity-0"
 						>
 							<ChevronLeft size={20} />
 						</button>
@@ -164,7 +165,7 @@ function ScreenshotCarousel({
 							aria-label="Berikutnya"
 							onClick={() => scrollToIndex(activeIndex + 1)}
 							disabled={activeIndex === shots.length - 1}
-							className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-green-700 shadow-sm transition-opacity hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+							className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-emerald shadow-sm transition-opacity hover:bg-white disabled:pointer-events-none disabled:opacity-0"
 						>
 							<ChevronRight size={20} />
 						</button>
@@ -176,7 +177,7 @@ function ScreenshotCarousel({
 									aria-label={`Ke gambar ${i + 1}`}
 									onClick={() => scrollToIndex(i)}
 									className={`h-2 rounded-full transition-all ${
-										i === activeIndex ? "w-6 bg-green-600" : "w-2 bg-green-200"
+										i === activeIndex ? "w-6 bg-emerald" : "w-2 bg-cream-2"
 									}`}
 								/>
 							))}
@@ -236,15 +237,16 @@ export function AppScreenshots() {
 	return (
 		<section
 			id="app-screenshots"
-			className="scroll-mt-20 bg-green-50 px-4 py-16 text-center sm:px-6"
+			className="scroll-mt-20 bg-cream px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>
-				<h2 className="font-heading text-3xl font-bold text-green-800">
+				<Eyebrow className="mb-3">Dalam Aplikasi</Eyebrow>
+				<h2 className="font-heading text-3xl font-bold text-emerald">
 					Dikelola dengan Sistem yang Transparan
 				</h2>
 			</Reveal>
 			<Reveal delayMs={80}>
-				<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-stone-600">
+				<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-stone-700">
 					Ihsanify menghubungkan pengajar, pelajar, dan orang tua dalam satu
 					aplikasi — mulai dari jadwal, presensi, hingga laporan belajar
 					bulanan.
@@ -252,10 +254,10 @@ export function AppScreenshots() {
 			</Reveal>
 
 			<Reveal delayMs={140}>
-				<h3 className="mt-12 font-heading text-lg font-bold text-green-800">
+				<h3 className="mt-12 font-heading text-lg font-bold text-emerald">
 					Untuk Admin & Pengajar
 				</h3>
-				<p className="mt-1 text-base text-stone-600">
+				<p className="mt-1 text-base text-stone-700">
 					Kelola jadwal, presensi, dan laporan dari satu dashboard.
 				</p>
 			</Reveal>
@@ -268,10 +270,10 @@ export function AppScreenshots() {
 			</Reveal>
 
 			<Reveal delayMs={140}>
-				<h3 className="mt-14 font-heading text-lg font-bold text-green-800">
+				<h3 className="mt-14 font-heading text-lg font-bold text-emerald">
 					Untuk Pelajar & Orang Tua
 				</h3>
-				<p className="mt-1 text-base text-stone-600">
+				<p className="mt-1 text-base text-stone-700">
 					Pantau jadwal dan perkembangan belajar kapan saja, langsung dari
 					ponsel.
 				</p>

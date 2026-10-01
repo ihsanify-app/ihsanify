@@ -8,6 +8,7 @@ import {
 	Target,
 	Users,
 } from "lucide-react";
+import { Eyebrow } from "./Eyebrow";
 import { Reveal } from "./Reveal";
 
 const GROWTH_TRAITS = [
@@ -46,31 +47,32 @@ export function VisionMission() {
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>
-				<h2 className="font-heading text-3xl font-bold text-green-800">
+				<Eyebrow className="mb-3">Pedoman</Eyebrow>
+				<h2 className="font-heading text-3xl font-bold text-emerald">
 					Visi & Misi
 				</h2>
-				<p className="mx-auto mt-2 max-w-xl text-stone-500">
+				<p className="mx-auto mt-2 max-w-xl text-base text-stone-700">
 					Landasan kami dalam membersamai perjalanan belajar Anda.
 				</p>
 			</Reveal>
 			<div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
 				{ITEMS.map((item, i) => (
 					<Reveal key={item.title} delayMs={i * 100}>
-						<div className="h-full rounded-2xl border border-green-100 bg-green-50 p-6 text-left shadow-sm">
-							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
+						<div className="h-full rounded-2xl bg-forest p-6 text-left shadow-sm">
+							<div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-emerald shadow-sm">
 								<item.icon size={22} />
 							</div>
-							<h3 className="mt-3 font-heading text-xl font-bold text-green-800">
+							<h3 className="mt-3 font-heading text-xl font-bold text-white">
 								{item.title}
 							</h3>
 							{Array.isArray(item.description) ? (
-								<ol className="mt-2 flex list-decimal flex-col gap-2 pl-4 text-base leading-relaxed text-stone-600">
+								<ol className="mt-2 flex list-decimal flex-col gap-2 pl-4 text-base leading-relaxed text-green-100">
 									{item.description.map((point) => (
 										<li key={point}>{point}</li>
 									))}
 								</ol>
 							) : (
-								<p className="mt-2 text-base leading-relaxed text-stone-600">
+								<p className="mt-2 text-base leading-relaxed text-green-100">
 									{item.description}
 								</p>
 							)}
@@ -80,18 +82,18 @@ export function VisionMission() {
 			</div>
 
 			<Reveal delayMs={200}>
-				<h3 className="mt-14 font-heading text-lg font-bold text-green-800">
+				<h3 className="mt-14 font-heading text-lg font-bold text-emerald">
 					Apa yang Akan Bertumbuh dalam Diri Anak?
 				</h3>
 			</Reveal>
 			<div className="mx-auto mt-5 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
 				{GROWTH_TRAITS.map((trait, i) => (
 					<Reveal key={trait.label} delayMs={220 + i * 60}>
-						<div className="flex h-full flex-col items-center gap-2 rounded-2xl border border-green-100 bg-green-50 p-4 text-center">
-							<div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
+						<div className="flex h-full flex-col items-center gap-2 rounded-2xl bg-forest p-4 text-center">
+							<div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-emerald shadow-sm">
 								<trait.icon size={18} />
 							</div>
-							<p className="text-sm font-medium text-stone-700">
+							<p className="text-base font-medium text-green-100">
 								{trait.label}
 							</p>
 						</div>

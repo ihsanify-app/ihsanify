@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
+import { Eyebrow } from "./Eyebrow";
 import { Reveal } from "./Reveal";
 
 type PublicTeacher = {
@@ -20,8 +21,8 @@ function initials(name: string) {
 
 function TeacherCard({ teacher }: { teacher: PublicTeacher }) {
 	return (
-		<div className="flex h-full flex-col items-center gap-3 rounded-2xl border border-green-100 bg-green-50 p-6 text-center shadow-sm">
-			<div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white bg-white text-green-700 shadow-sm flex items-center justify-center font-heading font-bold text-lg">
+		<div className="flex h-full flex-col items-center gap-3 rounded-2xl bg-forest p-6 text-center shadow-sm">
+			<div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white bg-white text-emerald shadow-sm flex items-center justify-center font-heading font-bold text-lg">
 				{teacher.avatarUrl ? (
 					<img
 						src={teacher.avatarUrl}
@@ -33,7 +34,7 @@ function TeacherCard({ teacher }: { teacher: PublicTeacher }) {
 				)}
 			</div>
 			<div>
-				<h3 className="font-heading font-bold text-green-800">
+				<h3 className="font-heading font-bold text-white">
 					{teacher.nickname}
 					{teacher.publicTitle && (
 						<span className="font-normal">, {teacher.publicTitle}</span>
@@ -45,14 +46,14 @@ function TeacherCard({ teacher }: { teacher: PublicTeacher }) {
 					{teacher.subjects.map((s) => (
 						<span
 							key={s}
-							className="rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-green-700 border border-green-200"
+							className="rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-emerald border border-cream-2"
 						>
 							{s}
 						</span>
 					))}
 				</div>
 			)}
-			<p className="text-base leading-relaxed text-stone-600">
+			<p className="text-base leading-relaxed text-green-100">
 				{teacher.publicBio}
 			</p>
 		</div>
@@ -79,12 +80,13 @@ export function Teachers() {
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>
-				<h2 className="font-heading text-3xl font-bold text-green-800">
+				<Eyebrow className="mb-3">Tim Kami</Eyebrow>
+				<h2 className="font-heading text-3xl font-bold text-emerald">
 					Pengajar Kami
 				</h2>
 			</Reveal>
 			<Reveal delayMs={80}>
-				<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-stone-600">
+				<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-stone-700">
 					Dibimbing langsung oleh pengajar yang berpengalaman dan amanah.
 				</p>
 			</Reveal>

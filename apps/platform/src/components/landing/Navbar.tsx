@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
 	{ id: "about-us", label: "Tentang Kami" },
+	{ id: "filosofi", label: "Filosofi" },
 	{ id: "vision-mission", label: "Visi & Misi" },
 	{ id: "programs-facilities", label: "Program & Fasilitas" },
 	{ id: "why-us", label: "Mengapa Kami" },
@@ -36,9 +37,9 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 	}, []);
 
 	return (
-		<nav className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-green-100">
+		<nav className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-cream-2">
 			<div className="flex items-center justify-between px-4 py-4 sm:px-6">
-				<span className="flex items-center gap-2 text-green-700 font-heading font-bold text-sm sm:text-xl">
+				<span className="flex items-center gap-2 text-emerald font-heading font-bold text-sm sm:text-xl">
 					{logoUrl ? (
 						<img
 							src={logoUrl}
@@ -46,7 +47,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 							className="h-8 w-8 shrink-0 rounded-full object-cover"
 						/>
 					) : (
-						<Sprout className="shrink-0 text-green-600" size={24} />
+						<Sprout className="shrink-0 text-emerald" size={24} />
 					)}
 					<span className="truncate">Madrasatul 'Ilmin Naafi'</span>
 				</span>
@@ -58,8 +59,8 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 							href={`#${item.id}`}
 							className={`rounded-full px-3.5 py-2 text-base font-medium transition-colors ${
 								activeId === item.id
-									? "bg-green-100 text-green-800"
-									: "text-stone-600 hover:bg-green-50 hover:text-green-700"
+									? "bg-cream-2 text-emerald"
+									: "text-stone-600 hover:bg-cream hover:text-emerald"
 							}`}
 						>
 							{item.label}
@@ -70,7 +71,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 				<div className="flex items-center gap-2">
 					<Link
 						to="/login"
-						className="hidden bg-green-600 hover:bg-green-700 transition-colors text-white font-semibold px-6 py-2.5 rounded-full sm:inline-block"
+						className="hidden bg-emerald hover:bg-emerald-dark transition-colors text-white font-semibold px-6 py-2.5 rounded-full sm:inline-block"
 					>
 						Login
 					</Link>
@@ -78,7 +79,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 						type="button"
 						aria-label="Buka menu navigasi"
 						onClick={() => setIsMenuOpen((v) => !v)}
-						className="rounded-full p-2 text-green-700 hover:bg-green-50 lg:hidden"
+						className="rounded-full p-2 text-emerald hover:bg-cream lg:hidden"
 					>
 						{isMenuOpen ? <X size={22} /> : <Menu size={22} />}
 					</button>
@@ -86,7 +87,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 			</div>
 
 			{isMenuOpen && (
-				<div className="max-h-[70vh] overflow-y-auto border-t border-green-100 px-4 py-3 lg:hidden">
+				<div className="max-h-[70vh] overflow-y-auto border-t border-cream-2 px-4 py-3 lg:hidden">
 					<div className="flex flex-col gap-1">
 						{NAV_ITEMS.map((item) => (
 							<a
@@ -95,8 +96,8 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 								onClick={() => setIsMenuOpen(false)}
 								className={`rounded-xl px-4 py-2.5 text-base font-medium transition-colors ${
 									activeId === item.id
-										? "bg-green-100 text-green-800"
-										: "text-stone-600 hover:bg-green-50 hover:text-green-700"
+										? "bg-cream-2 text-emerald"
+										: "text-stone-600 hover:bg-cream hover:text-emerald"
 								}`}
 							>
 								{item.label}
@@ -105,7 +106,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 						<Link
 							to="/login"
 							onClick={() => setIsMenuOpen(false)}
-							className="mt-2 rounded-xl bg-green-600 px-4 py-2.5 text-center font-semibold text-white transition-colors hover:bg-green-700 sm:hidden"
+							className="mt-2 rounded-xl bg-emerald px-4 py-2.5 text-center font-semibold text-white transition-colors hover:bg-emerald-dark sm:hidden"
 						>
 							Login
 						</Link>

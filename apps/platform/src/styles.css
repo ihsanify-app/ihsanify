@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+/* Landing-page-only palette, scoped to apps/platform/src/components/landing
+   so the rest of the app (dashboard, admin, etc.) keeps Tailwind's stock
+   green/amber tokens untouched.
+   - forest: dark-card green (Visi & Misi, Program & Fasilitas, Why Us, FAQ,
+     Teachers, Registration, Stats) — a specific shade the user picked.
+   - cream / cream-2: warm page-background tones, borrowed from a reference
+     landing page's palette, replacing bg-green-50 on this page only.
+   - emerald / emerald-dark: the landing page's single dark-green accent —
+     buttons, links, icons, AND headings all draw from this one token (no
+     more mixing in Tailwind's own green-800), so there's one "hijau tua"
+     across the page, not two slightly different greens next to each other.
+   - gold / gold-soft: the landing page's highlight accent (icon chips,
+     eyebrows, the Jadwal Fleksibel pill, the CTA glow), replacing
+     bg/text-amber-* on this page only. */
+@theme {
+	--color-forest: #0d542b;
+	--color-cream: #f3efe6;
+	--color-cream-2: #ebe5d8;
+	--color-emerald: #166534;
+	--color-emerald-dark: #14532d;
+	--color-gold: #d6a23a;
+	--color-gold-soft: #f6e3b9;
+}
+
 html {
 	scroll-behavior: smooth;
 }

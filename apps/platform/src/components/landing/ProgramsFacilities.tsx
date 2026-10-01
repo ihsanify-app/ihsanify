@@ -12,6 +12,7 @@ import {
 import { type ComponentType, useEffect, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
 import { getYoutubeEmbedUrl } from "../../lib/youtube";
+import { Eyebrow } from "./Eyebrow";
 import { Reveal } from "./Reveal";
 
 // lucide-react's "Languages" icon depicts a CJK character (文) next to a
@@ -79,7 +80,7 @@ function SubjectInfo({
 		<div
 			className={`flex flex-col items-center text-center ${sideBySide ? "sm:items-start sm:text-left" : ""}`}
 		>
-			<div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-green-700 shadow-sm">
+			<div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white text-emerald shadow-sm">
 				{subject.iconUrl ? (
 					<img
 						src={subject.iconUrl}
@@ -90,11 +91,11 @@ function SubjectInfo({
 					<Icon size={22} />
 				)}
 			</div>
-			<h4 className="mt-3 font-heading font-bold text-green-800">
+			<h4 className="mt-3 font-heading font-bold text-white">
 				{subject.subjectName}
 			</h4>
 			{subject.description && (
-				<p className="mt-2 text-base leading-relaxed text-stone-600">
+				<p className="mt-2 text-base leading-relaxed text-green-100">
 					{subject.description}
 				</p>
 			)}
@@ -132,14 +133,15 @@ export function ProgramsFacilities() {
 			className="scroll-mt-20 bg-white px-4 py-16 text-center sm:px-6"
 		>
 			<Reveal>
-				<h2 className="font-heading text-3xl font-bold text-green-800">
+				<Eyebrow className="mb-3">Fitur</Eyebrow>
+				<h2 className="font-heading text-3xl font-bold text-emerald">
 					Program & Fasilitas
 				</h2>
 			</Reveal>
 
 			<Reveal delayMs={100}>
-				<h3 className="mt-10 flex items-center justify-center gap-2 font-heading text-lg font-bold text-green-800">
-					<BookOpenCheck size={20} className="text-green-600" />
+				<h3 className="mt-10 flex items-center justify-center gap-2 font-heading text-lg font-bold text-emerald">
+					<BookOpenCheck size={20} className="text-emerald" />
 					Program Belajar
 				</h3>
 			</Reveal>
@@ -147,7 +149,7 @@ export function ProgramsFacilities() {
 				<div className="mx-auto mt-5 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2">
 					{videoSubjects.map(({ subject: s, embedUrl }, i) => (
 						<Reveal key={s.subjectId} delayMs={i * 80}>
-							<div className="flex h-full flex-col items-center gap-5 rounded-2xl border border-green-100 bg-green-50 p-6 text-left shadow-sm sm:flex-row">
+							<div className="flex h-full flex-col items-center gap-5 rounded-2xl bg-forest p-6 text-left shadow-sm sm:flex-row">
 								<SubjectInfo subject={s} sideBySide />
 								<div className="aspect-video w-full shrink-0 overflow-hidden rounded-xl bg-black sm:w-56">
 									<iframe
@@ -168,7 +170,7 @@ export function ProgramsFacilities() {
 			>
 				{plainSubjects.map((s, i) => (
 					<Reveal key={s.subjectId} delayMs={i * 80}>
-						<div className="h-full rounded-2xl border border-green-100 bg-green-50 p-6 shadow-sm">
+						<div className="h-full rounded-2xl bg-forest p-6 shadow-sm">
 							<SubjectInfo subject={s} sideBySide={false} />
 						</div>
 					</Reveal>
@@ -176,22 +178,20 @@ export function ProgramsFacilities() {
 			</div>
 
 			<Reveal delayMs={100}>
-				<h3 className="mt-14 font-heading text-lg font-bold text-green-800">
+				<h3 className="mt-14 font-heading text-lg font-bold text-emerald">
 					Fasilitas
 				</h3>
 			</Reveal>
 			<div className="mx-auto mt-5 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
 				{FACILITIES.map((f, i) => (
 					<Reveal key={f.title} delayMs={i * 100}>
-						<div className="flex h-full items-start gap-4 rounded-2xl border border-green-100 bg-green-50 p-6 text-left shadow-sm">
-							<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
+						<div className="flex h-full items-start gap-4 rounded-2xl bg-forest p-6 text-left shadow-sm">
+							<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-emerald shadow-sm">
 								<f.icon size={22} />
 							</div>
 							<div>
-								<h4 className="font-heading font-bold text-green-800">
-									{f.title}
-								</h4>
-								<p className="mt-1 text-base leading-relaxed text-stone-600">
+								<h4 className="font-heading font-bold text-white">{f.title}</h4>
+								<p className="mt-1 text-base leading-relaxed text-green-100">
 									{f.description}
 								</p>
 							</div>
@@ -201,7 +201,7 @@ export function ProgramsFacilities() {
 			</div>
 
 			<Reveal delayMs={200}>
-				<div className="mx-auto mt-10 inline-flex items-center gap-2 rounded-full bg-amber-100 px-5 py-2.5 text-base font-medium text-amber-800">
+				<div className="mx-auto mt-10 inline-flex items-center gap-2 rounded-full bg-gold-soft px-5 py-2.5 text-base font-medium text-forest">
 					<CalendarCheck2 size={18} />
 					Jadwal Fleksibel — 4x atau 8x pertemuan sebulan, sesuai kesepakatan
 				</div>

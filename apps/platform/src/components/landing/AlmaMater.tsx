@@ -22,9 +22,9 @@ export function AlmaMater() {
 	if (almaMaters.length === 0) return null;
 
 	return (
-		<section className="scroll-mt-20 bg-green-50 px-4 py-12 text-center sm:px-6">
+		<section className="scroll-mt-20 bg-cream px-4 py-12 text-center sm:px-6">
 			<Reveal>
-				<p className="font-heading text-sm font-bold uppercase tracking-wide text-green-700">
+				<p className="font-heading text-base font-bold uppercase tracking-wide text-emerald">
 					Background Lulusan Pengajar
 				</p>
 			</Reveal>

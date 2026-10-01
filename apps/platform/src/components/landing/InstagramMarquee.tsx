@@ -9,7 +9,7 @@ const PLACEHOLDER_POSTS = [
 	{
 		id: 1,
 		label: "Kajian Akbar: Adab Menuntut Ilmu",
-		gradient: "from-green-600 via-green-700 to-green-800",
+		gradient: "from-emerald via-emerald-dark to-forest",
 	},
 	{
 		id: 2,
@@ -20,22 +20,22 @@ const PLACEHOLDER_POSTS = [
 	{
 		id: 3,
 		label: "Pendaftaran Gelombang Baru Dibuka",
-		gradient: "from-green-500 via-green-600 to-stone-600",
+		gradient: "from-cream0 via-emerald to-stone-600",
 	},
 	{
 		id: 4,
 		label: "Testimoni Wali Murid Bulan Ini",
-		gradient: "from-stone-600 via-green-700 to-green-800",
+		gradient: "from-stone-600 via-emerald-dark to-forest",
 	},
 	{
 		id: 5,
 		label: "Jadwal Libur Semester",
-		gradient: "from-green-700 via-stone-600 to-stone-700",
+		gradient: "from-emerald-dark via-stone-600 to-stone-700",
 	},
 	{
 		id: 6,
 		label: "Tips Mendidik Anak Cinta Al-Qur'an",
-		gradient: "from-stone-500 via-green-600 to-green-700",
+		gradient: "from-stone-500 via-emerald to-emerald-dark",
 	},
 ];
 
@@ -102,12 +102,12 @@ export function InstagramMarquee() {
 	return (
 		<section className="overflow-hidden bg-white py-10">
 			<div className="mb-5 flex items-center justify-center gap-2 px-4">
-				<Instagram size={18} className="text-green-700" />
-				<p className="text-base font-medium text-stone-500">
+				<Instagram size={18} className="text-emerald" />
+				<p className="text-base font-medium text-stone-700">
 					Live Instagram Feeds
 				</p>
 			</div>
-			<div className="relative mx-4 border-x-2 border-green-100 sm:mx-6">
+			<div className="relative mx-4 border-x-2 border-cream-2 sm:mx-6">
 				<div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-linear-to-r from-white to-transparent sm:w-20" />
 				<div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-linear-to-l from-white to-transparent sm:w-20" />
 				<div className="overflow-hidden">

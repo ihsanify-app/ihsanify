@@ -41,10 +41,10 @@ function ChatBubble({ testimonial }: { testimonial: Testimonial }) {
 		<div className="relative">
 			<div className="absolute -left-1.5 top-3 h-3 w-3 rotate-45 bg-white" />
 			<div className="relative rounded-2xl bg-white p-4 shadow-sm text-left">
-				<p className="font-heading text-base font-bold text-green-700">
+				<p className="font-heading text-base font-bold text-emerald">
 					{testimonial.name}
 				</p>
-				<p className="font-handwritten mt-1 whitespace-pre-line text-lg leading-snug text-stone-700">
+				<p className="font-handwritten mt-1 whitespace-pre-line text-base leading-snug text-stone-700">
 					{testimonial.message}
 				</p>
 				<div className="mt-2 flex items-center justify-end gap-1">
@@ -81,7 +81,7 @@ export function Testimonials() {
 			}}
 		>
 			<Reveal>
-				<h2 className="font-heading text-3xl font-bold text-green-800 mb-10">
+				<h2 className="font-heading text-3xl font-bold text-emerald mb-10">
 					Kata Mereka
 				</h2>
 			</Reveal>

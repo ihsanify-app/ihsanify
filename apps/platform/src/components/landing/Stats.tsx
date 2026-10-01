@@ -43,15 +43,15 @@ export function Stats() {
 	];
 
 	return (
-		<section id="stats" className="scroll-mt-20 bg-green-50 px-4 py-16 sm:px-6">
+		<section id="stats" className="scroll-mt-20 bg-cream px-4 py-16 sm:px-6">
 			<Reveal className="mx-auto mb-6 max-w-2xl text-center">
-				<p className="text-lg text-stone-600">
+				<p className="text-base text-stone-700">
 					Dipercaya oleh keluarga yang ingin menghadirkan pendidikan Islami yang
 					hangat dan bermakna.
 				</p>
 			</Reveal>
 			<Reveal className="flex justify-center" delayMs={100}>
-				<div className="w-full max-w-4xl px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6 bg-green-700 rounded-3xl shadow-lg shadow-green-700/20">
+				<div className="w-full max-w-4xl px-6 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6 bg-emerald rounded-3xl shadow-lg shadow-emerald/20">
 					{items.map((s) => (
 						<div
 							key={s.id}

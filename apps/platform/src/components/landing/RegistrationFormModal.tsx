@@ -76,7 +76,7 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex items-center justify-between border-b border-stone-100 p-6 pb-4">
-					<h2 className="font-heading text-xl font-bold text-green-800">
+					<h2 className="font-heading text-xl font-bold text-emerald">
 						Form Registrasi
 					</h2>
 					<button
@@ -97,7 +97,7 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="Nama calon murid"
-							className="rounded-xl border border-stone-300 p-2.5 text-base font-normal text-stone-800 outline-none transition-colors focus:border-green-500"
+							className="rounded-xl border border-stone-300 p-2.5 text-base font-normal text-stone-800 outline-none transition-colors focus:border-emerald"
 						/>
 					</label>
 
@@ -113,8 +113,8 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 										onClick={() => setGenderId(g.id)}
 										className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
 											isSelected
-												? "border-green-600 bg-green-600 text-white"
-												: "border-stone-300 text-stone-600 hover:bg-green-50"
+												? "border-emerald bg-emerald text-white"
+												: "border-stone-300 text-stone-600 hover:bg-cream"
 										}`}
 									>
 										{isSelected && <Check size={14} />}
@@ -132,7 +132,7 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 							value={domicile}
 							onChange={(e) => setDomicile(e.target.value)}
 							placeholder="Kota domisili"
-							className="rounded-xl border border-stone-300 p-2.5 text-base font-normal text-stone-800 outline-none transition-colors focus:border-green-500"
+							className="rounded-xl border border-stone-300 p-2.5 text-base font-normal text-stone-800 outline-none transition-colors focus:border-emerald"
 						/>
 					</label>
 
@@ -148,8 +148,8 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 										onClick={() => toggleSubject(s.subjectId)}
 										className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
 											isSelected
-												? "border-green-600 bg-green-600 text-white"
-												: "border-stone-300 text-stone-600 hover:bg-green-50"
+												? "border-emerald bg-emerald text-white"
+												: "border-stone-300 text-stone-600 hover:bg-cream"
 										}`}
 									>
 										{isSelected && <Check size={14} />}
@@ -158,7 +158,7 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 								);
 							})}
 							{subjects.length === 0 && (
-								<p className="text-sm italic text-stone-400">Memuat...</p>
+								<p className="text-base italic text-stone-600">Memuat...</p>
 							)}
 						</div>
 					</div>
@@ -175,8 +175,8 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 										onClick={() => setReferralSourceId(r.id)}
 										className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
 											isSelected
-												? "border-green-600 bg-green-600 text-white"
-												: "border-stone-300 text-stone-600 hover:bg-green-50"
+												? "border-emerald bg-emerald text-white"
+												: "border-stone-300 text-stone-600 hover:bg-cream"
 										}`}
 									>
 										{isSelected && <Check size={14} />}
@@ -193,7 +193,7 @@ export function RegistrationFormModal({ onClose }: { onClose: () => void }) {
 						type="button"
 						disabled={!canSubmit}
 						onClick={handleSubmit}
-						className="w-full cursor-pointer rounded-full bg-green-600 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+						className="w-full cursor-pointer rounded-full bg-emerald px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-emerald-dark disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Kirim Form Registrasi ke Admin
 					</button>
