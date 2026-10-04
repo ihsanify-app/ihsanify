@@ -8,6 +8,7 @@ const NAV_ITEMS = [
 	{ id: "vision-mission", label: "Visi & Misi" },
 	{ id: "programs-facilities", label: "Program & Fasilitas" },
 	{ id: "why-us", label: "Mengapa Kami" },
+	{ id: "teachers", label: "Pengajar" },
 	{ id: "testimonials", label: "Testimoni" },
 	{ id: "registration", label: "Registrasi" },
 	{ id: "faq", label: "FAQ" },
