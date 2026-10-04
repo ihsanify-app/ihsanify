@@ -124,7 +124,35 @@ export function Hero({
 							Lihat Program
 						</a>
 					</div>
-					<p className="mt-4 text-base text-stone-600">
+					<div className="mt-4 flex items-center gap-3">
+						<a
+							href="https://www.instagram.com/ilmin_naafi/"
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label="Instagram Madrasatul 'Ilmin Naafi'"
+							className="block h-9 w-9 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
+						>
+							<img
+								src="/landing/instagram-icon.png"
+								alt=""
+								className="h-full w-full object-cover"
+							/>
+						</a>
+						<a
+							href="https://www.threads.net/@ilmin_naafi"
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label="Threads Madrasatul 'Ilmin Naafi'"
+							className="block h-9 w-9 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
+						>
+							<img
+								src="/landing/threads-icon.png"
+								alt=""
+								className="h-full w-full object-cover"
+							/>
+						</a>
+					</div>
+					<p className="mt-3 text-base text-stone-600">
 						<i>Powered by Ihsanify ©</i>
 					</p>
 				</Reveal>

@@ -8,24 +8,29 @@ export function Footer() {
 					<Sprout size={24} className="text-green-300" />
 					Ihsanify
 				</div>
-				<div className="flex flex-col gap-2 text-base text-green-200">
+				<div className="flex items-center gap-3">
+					{/* Icons are the same dark-green-recolored assets used in the
+					    Hero — against this footer's identical bg-forest background
+					    they'd otherwise disappear, so each gets a small cream
+					    backing plate for contrast instead of a second icon color
+					    variant to maintain. */}
 					<a
 						href="https://www.instagram.com/ilmin_naafi/"
-						className="hover:text-white transition-colors"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Instagram Madrasatul 'Ilmin Naafi'"
+						className="block rounded-xl bg-cream p-1.5 transition-opacity hover:opacity-80"
 					>
-						About
+						<img src="/landing/instagram-icon.png" alt="" className="h-6 w-6" />
 					</a>
 					<a
-						href="https://www.instagram.com/ilmin_naafi/"
-						className="hover:text-white transition-colors"
+						href="https://www.threads.net/@ilmin_naafi"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Threads Madrasatul 'Ilmin Naafi'"
+						className="block rounded-xl bg-cream p-1.5 transition-opacity hover:opacity-80"
 					>
-						Contact
-					</a>
-					<a
-						href="https://www.instagram.com/ilmin_naafi/"
-						className="hover:text-white transition-colors"
-					>
-						Privacy Policy
+						<img src="/landing/threads-icon.png" alt="" className="h-6 w-6" />
 					</a>
 				</div>
 			</div>
