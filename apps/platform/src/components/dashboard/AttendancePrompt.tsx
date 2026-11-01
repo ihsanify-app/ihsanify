@@ -18,6 +18,9 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 	const [sessionId, setSessionId] = useState<string | null>(null);
 	const [showConfirmation, setShowConfirmation] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
+	const [isTopicPromptOpen, setIsTopicPromptOpen] = useState(false);
+	const [topicInput, setTopicInput] = useState("");
+	const [topicError, setTopicError] = useState("");
 
 	useEffect(() => {
 		const interval = setInterval(() => setNow(new Date()), 30_000);
@@ -61,7 +64,30 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 
 	if (authUser.role === "student" || !target) return null;
 
-	async function handleRecordAttendance() {
+	function handleLogAttendanceClick() {
+		// A session already exists for today (created earlier, e.g. via the
+		// group's own Sessions page) only if it already has a topic set — the
+		// backend requires one on create, so there's nothing left to collect.
+		if (sessionId) {
+			handleRecordAttendance();
+			return;
+		}
+		setTopicInput("");
+		setTopicError("");
+		setIsTopicPromptOpen(true);
+	}
+
+	function handleTopicSubmit() {
+		const trimmed = topicInput.trim();
+		if (!trimmed) {
+			setTopicError("Enter what was covered today before saving.");
+			return;
+		}
+		setIsTopicPromptOpen(false);
+		handleRecordAttendance(trimmed);
+	}
+
+	async function handleRecordAttendance(topicDiscussed?: string) {
 		if (!target) return;
 		setStatus("saving");
 		setErrorMessage("");
@@ -75,6 +101,7 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 						body: JSON.stringify({
 							date: now.toISOString(),
 							durationMinutes: DEFAULT_BLOCK_MINUTES,
+							topicDiscussed,
 						}),
 					},
 				);
@@ -138,7 +165,7 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 			) : (
 				<button
 					type="button"
-					onClick={handleRecordAttendance}
+					onClick={handleLogAttendanceClick}
 					disabled={status === "saving" || status === "checking"}
 					className={`group relative w-full overflow-hidden rounded-2xl bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 p-4 text-left text-white shadow-lg shadow-orange-500/30 transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:hover:translate-y-0 ${
 						status === "idle" ? "animate-shake" : ""
@@ -170,6 +197,57 @@ export function AttendancePrompt({ groups }: { groups: GroupWithSchedule[] }) {
 						</div>
 					</div>
 				</button>
+			)}
+
+			{isTopicPromptOpen && target && (
+				<div
+					role="dialog"
+					onKeyDown={(e) => e.key === "Escape" && setIsTopicPromptOpen(false)}
+					className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 p-4"
+					onClick={() => setIsTopicPromptOpen(false)}
+				>
+					<div
+						role="dialog"
+						onKeyDown={(e) => e.key === "Escape" && setIsTopicPromptOpen(false)}
+						className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<h2 className="font-heading text-lg text-green-800 mb-1">
+							What was covered today?
+						</h2>
+						<p className="text-sm text-stone-500 mb-3">{target.groupName}</p>
+						<input
+							className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+							placeholder="e.g. What is the material discussed today? Ex: Makharijul Huruf/ Vocabulary/ Speaking Practice."
+							value={topicInput}
+							onChange={(e) => {
+								setTopicInput(e.target.value);
+								setTopicError("");
+							}}
+							// biome-ignore lint/a11y/noAutofocus: a confirmation-style dialog the user just opened on purpose.
+							autoFocus
+						/>
+						{topicError && (
+							<p className="text-xs text-rose-600 mt-1">{topicError}</p>
+						)}
+						<div className="flex justify-end gap-2 mt-4">
+							<button
+								type="button"
+								onClick={() => setIsTopicPromptOpen(false)}
+								className="cursor-pointer rounded-xl border border-stone-300 text-stone-600 px-4 py-2 hover:bg-stone-50 transition-colors"
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								onClick={handleTopicSubmit}
+								className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
+							>
+								Continue
+							</button>
+						</div>
+					</div>
+				</div>
 			)}
 
 			{showConfirmation && (

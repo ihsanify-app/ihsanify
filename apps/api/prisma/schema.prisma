@@ -44,6 +44,12 @@ enum RecordStatus {
   FINISHED
 }
 
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -60,10 +66,11 @@ model User {
   phone     String?
   createdAt DateTime @default(now())
 
-  teacher       Teacher?
-  student       Student?
-  notifications Notification[]
-  lastActiveAt DateTime?
+  teacher             Teacher?
+  student             Student?
+  notifications       Notification[]
+  lastActiveAt        DateTime?
+  createdQuestionSets QuestionSet[]
 }
 
 enum NotificationType {
@@ -120,6 +127,7 @@ model Teacher {
   payslips        Payslip[]
   teachingHistory TeachingHistory[]
   sessions        Session[]
+  questionSets    QuestionSet[]
 }
 
 // A teacher's prior work history before joining — freeform organization name
@@ -151,11 +159,13 @@ model Student {
   // component of an InvoiceLine's invoiceNo — see that model's comment.
   studentNumber Int?    @unique
 
-  enrollmentHistory GroupEnrollment[]
-  sessionAttendance SessionAttendance[]
-  reports           Report[]
-  invoices          Invoice[]
-  payslipLines      PayslipLine[]
+  enrollmentHistory   GroupEnrollment[]
+  sessionAttendance   SessionAttendance[]
+  reports             Report[]
+  invoices            Invoice[]
+  payslipLines        PayslipLine[]
+  subjectLevels       StudentSubjectLevel[]
+  questionSetAttempts QuestionSetAttempt[]
 }
 
 enum ReportHeaderPattern {
@@ -218,8 +228,10 @@ model Subject {
   // never a broken embed.
   videoUrl      String?
 
-  groups   Group[]
-  teachers TeacherSubject[]
+  groups        Group[]
+  teachers      TeacherSubject[]
+  studentLevels StudentSubjectLevel[]
+  questionSets  QuestionSet[]
 }
 
 // A named color preset for Report PDF covers/banners/footers. One primary
@@ -311,6 +323,11 @@ model Session {
   attendanceRecorded Boolean  @default(false)
   createdAt          DateTime @default(now())
   group              Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  // What was covered (e.g. "Makharijul Huruf", "Vocabulary", "Speaking
+  // Practice") — required going forward whenever a session is logged.
+  // Nullable here only because existing rows predate this field, same
+  // reasoning as teacherId below.
+  topicDiscussed     String?
   // Who actually taught this session, captured when it's logged — not
   // derived from GroupTeacher at read time. A session is a historical
   // fact; recording the teacher here means payroll doesn't depend on
@@ -377,6 +394,105 @@ model Assignment {
   status      RecordStatus @default(DRAFT)
   createdAt   DateTime     @default(now())
   group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+// A student's difficulty level within one subject (set by an admin, Settings
+// → Assignment) — not event-sourced, since this is a current setting rather
+// than a historical fact needing replay (same category as
+// Student.studentNumber). Drives which QuestionSets that student can see.
+model StudentSubjectLevel {
+  studentId String
+  subjectId String
+  level     DifficultyLevel
+  updatedAt DateTime        @updatedAt
+  student   Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, subjectId])
+}
+
+// A teacher-authored multiple-choice question package. Visible to a student
+// only when the student currently shares this subject + level + teacher via
+// some active group (see groupState.ts's getCurrentSubjectTeacherPairsForStudent).
+// Immutable once created — deliberately no update route, only delete.
+model QuestionSet {
+  id          String               @id @default(cuid())
+  title       String
+  description String?
+  subjectId   String
+  teacherId   String
+  level       DifficultyLevel
+  // The User who actually clicked Save — distinct from teacherId when an
+  // admin creates a set on a teacher's behalf.
+  createdById String
+  createdAt   DateTime             @default(now())
+  subject     Subject              @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  teacher     Teacher              @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  createdBy   User                 @relation(fields: [createdById], references: [id])
+  questions   Question[]
+  attempts    QuestionSetAttempt[]
+
+  @@index([subjectId, teacherId, level])
+}
+
+model Question {
+  id             String                  @id @default(cuid())
+  questionSetId  String
+  // Stable ordering (A/B/C/D) — Postgres doesn't guarantee row order.
+  position       Int
+  text           String
+  questionSet    QuestionSet             @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  options        QuestionOption[]
+  attemptAnswers QuestionAttemptAnswer[]
+
+  @@unique([questionSetId, position])
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  // 0-3, mapped to A-D at render time.
+  position   Int
+  text       String
+  isCorrect  Boolean
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  attemptAnswers QuestionAttemptAnswer[]
+
+  @@unique([questionId, position])
+}
+
+// One student's single, final attempt at a QuestionSet. Score is never
+// stored here — QuestionSet/Question/QuestionOption are immutable once
+// created, so a score computed live from QuestionAttemptAnswer joined to
+// QuestionOption.isCorrect can never drift from one stored at submit time.
+model QuestionSetAttempt {
+  id            String                  @id @default(cuid())
+  questionSetId String
+  studentId     String
+  submittedAt   DateTime                @default(now())
+  questionSet   QuestionSet             @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+  student       Student                 @relation(fields: [studentId], references: [id])
+  answers       QuestionAttemptAnswer[]
+
+  // Enforces "one attempt, final" at the DB level, not just in application code.
+  @@unique([questionSetId, studentId])
+}
+
+// Cascades on question/option deletion too (not just attempt) — Question/
+// QuestionOption rows already cascade away when their QuestionSet is
+// deleted, and giving this its own Cascade on those same FKs avoids relying
+// on multi-path FK delete ordering.
+model QuestionAttemptAnswer {
+  id         String             @id @default(cuid())
+  attemptId  String
+  questionId String
+  optionId   String
+  attempt    QuestionSetAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question   Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option     QuestionOption     @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
 }
 
 // Monthly invoice for one student, covering every group they're billed for
