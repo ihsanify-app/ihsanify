@@ -323,6 +323,11 @@ model Session {
   attendanceRecorded Boolean  @default(false)
   createdAt          DateTime @default(now())
   group              Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  // What was covered (e.g. "Makharijul Huruf", "Vocabulary", "Speaking
+  // Practice") — required going forward whenever a session is logged.
+  // Nullable here only because existing rows predate this field, same
+  // reasoning as teacherId below.
+  topicDiscussed     String?
   // Who actually taught this session, captured when it's logged — not
   // derived from GroupTeacher at read time. A session is a historical
   // fact; recording the teacher here means payroll doesn't depend on

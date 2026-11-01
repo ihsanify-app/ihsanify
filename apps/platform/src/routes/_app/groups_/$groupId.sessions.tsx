@@ -33,7 +33,11 @@ type SessionRow = {
 	studentIds: Option[];
 	attendanceRecorded: boolean;
 	durationMinutes: number;
+	topicDiscussed: string | null;
 };
+
+const TOPIC_PLACEHOLDER =
+	"e.g. Makharijul Huruf, Vocabulary, Speaking Practice";
 
 function CreateSessionModal({
 	roster,
@@ -45,11 +49,14 @@ function CreateSessionModal({
 	onSubmit: (payload: {
 		date: string;
 		durationMinutes: number;
+		topicDiscussed: string;
 		studentIds: string[];
 	}) => void;
 }) {
 	const [date, setDate] = useState(todayAsDateInputValue());
 	const [durationMinutes, setDurationMinutes] = useState(60);
+	const [topicDiscussed, setTopicDiscussed] = useState("");
+	const [topicError, setTopicError] = useState("");
 	// Defaults to the whole roster checked, unlike EditSessionModal's
 	// empty default — there, an unchecked start avoids implying "these are
 	// already-confirmed attendees" for an existing session that looks like
@@ -64,6 +71,20 @@ function CreateSessionModal({
 		setSelectedStudentIds((prev) =>
 			prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
 		);
+	}
+
+	function handleSubmit() {
+		const trimmedTopic = topicDiscussed.trim();
+		if (!trimmedTopic) {
+			setTopicError("Enter what was covered today before saving.");
+			return;
+		}
+		onSubmit({
+			date,
+			durationMinutes,
+			topicDiscussed: trimmedTopic,
+			studentIds: selectedStudentIds,
+		});
 	}
 
 	return (
@@ -103,6 +124,20 @@ function CreateSessionModal({
 							}}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
+						<div>
+							<input
+								className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+								placeholder={TOPIC_PLACEHOLDER}
+								value={topicDiscussed}
+								onChange={(e) => {
+									setTopicDiscussed(e.target.value);
+									setTopicError("");
+								}}
+							/>
+							{topicError && (
+								<p className="text-xs text-rose-600 mt-1">{topicError}</p>
+							)}
+						</div>
 						<div className="border border-stone-200 rounded-xl p-2">
 							<p className="text-xs text-stone-500 mb-1">Students present</p>
 							<div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
@@ -133,13 +168,7 @@ function CreateSessionModal({
 					</button>
 					<button
 						type="button"
-						onClick={() =>
-							onSubmit({
-								date,
-								durationMinutes,
-								studentIds: selectedStudentIds,
-							})
-						}
+						onClick={handleSubmit}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						Save
@@ -162,6 +191,7 @@ function EditSessionModal({
 	onSubmit: (payload: {
 		date: string;
 		durationMinutes: number;
+		topicDiscussed: string;
 		studentIds: string[];
 	}) => void;
 }) {
@@ -169,6 +199,10 @@ function EditSessionModal({
 	const [durationMinutes, setDurationMinutes] = useState(
 		session.durationMinutes,
 	);
+	const [topicDiscussed, setTopicDiscussed] = useState(
+		session.topicDiscussed ?? "",
+	);
+	const [topicError, setTopicError] = useState("");
 	// Only prefill from `studentIds` once attendance has actually been saved
 	// before — until then, `studentIds` is just a "whole class" placeholder,
 	// not real data, so starting the checkboxes from it would make an
@@ -183,6 +217,20 @@ function EditSessionModal({
 		setSelectedStudentIds((prev) =>
 			prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
 		);
+	}
+
+	function handleSubmit() {
+		const trimmedTopic = topicDiscussed.trim();
+		if (!trimmedTopic) {
+			setTopicError("Enter what was covered today before saving.");
+			return;
+		}
+		onSubmit({
+			date,
+			durationMinutes,
+			topicDiscussed: trimmedTopic,
+			studentIds: selectedStudentIds,
+		});
 	}
 
 	return (
@@ -217,6 +265,20 @@ function EditSessionModal({
 							value={durationMinutes || ""}
 							onChange={(e) => setDurationMinutes(Number(e.target.value))}
 						/>
+						<div>
+							<input
+								className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+								placeholder={TOPIC_PLACEHOLDER}
+								value={topicDiscussed}
+								onChange={(e) => {
+									setTopicDiscussed(e.target.value);
+									setTopicError("");
+								}}
+							/>
+							{topicError && (
+								<p className="text-xs text-rose-600 mt-1">{topicError}</p>
+							)}
+						</div>
 						<div className="border border-stone-200 rounded-xl p-2">
 							<p className="text-xs text-stone-500 mb-1">Students present</p>
 							<div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
@@ -247,13 +309,7 @@ function EditSessionModal({
 					</button>
 					<button
 						type="button"
-						onClick={() =>
-							onSubmit({
-								date,
-								durationMinutes,
-								studentIds: selectedStudentIds,
-							})
-						}
+						onClick={handleSubmit}
 						className="cursor-pointer rounded-xl bg-green-600 text-white px-4 py-2 hover:bg-green-700 transition-colors"
 					>
 						Save Changes
@@ -345,6 +401,7 @@ function RouteComponent() {
 	async function handleCreate(payload: {
 		date: string;
 		durationMinutes: number;
+		topicDiscussed: string;
 		studentIds: string[];
 	}) {
 		const { body } = await apiFetch(`/groups/${groupId}/sessions`, {
@@ -364,6 +421,7 @@ function RouteComponent() {
 		payload: {
 			date: string;
 			durationMinutes: number;
+			topicDiscussed: string;
 			studentIds: string[];
 		},
 	) {
@@ -465,6 +523,7 @@ function RouteComponent() {
 								<th className="px-4 py-3 text-left">Teacher</th>
 								<th className="px-4 py-3 text-left">Students</th>
 								<th className="px-4 py-3 text-left">Subject</th>
+								<th className="px-4 py-3 text-left">Topic</th>
 								<th className="px-4 py-3 text-left">Attendance</th>
 								<th className="px-4 py-3 text-left">Duration</th>
 								{canManage && <th className="px-4 py-3 text-left">Action</th>}
@@ -474,7 +533,7 @@ function RouteComponent() {
 							{sessions.length === 0 && (
 								<tr>
 									<td
-										colSpan={canManage ? 9 : 8}
+										colSpan={canManage ? 10 : 9}
 										className="px-4 py-6 text-center text-stone-400 italic"
 									>
 										No sessions logged yet.
@@ -491,6 +550,9 @@ function RouteComponent() {
 										{s.studentIds.map((st) => st.studentName).join(", ") || "-"}
 									</td>
 									<td className="px-4 py-3">{s.subjectName ?? "-"}</td>
+									<td className="px-4 py-3 text-stone-600">
+										{s.topicDiscussed ?? "-"}
+									</td>
 									<td className="px-4 py-3">
 										<span
 											className={

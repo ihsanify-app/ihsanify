@@ -16,6 +16,7 @@ function serializeSession(
 		date: Date;
 		durationMinutes: number;
 		attendanceRecorded: boolean;
+		topicDiscussed: string | null;
 	},
 	teacherId: string | null,
 	teacherName: string | null,
@@ -39,8 +40,11 @@ function serializeSession(
 		// roster shown as a default" — both cases can list the same names.
 		attendanceRecorded: session.attendanceRecorded,
 		durationMinutes: session.durationMinutes,
+		topicDiscussed: session.topicDiscussed,
 	};
 }
+
+const TOPIC_MAX_LENGTH = 200;
 
 sessionsRouter.get("/groups/:id/sessions", requireAuth, async (c) => {
 	const authUser = c.get("authUser");
@@ -132,12 +136,26 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 	const body = (await c.req.json()) as {
 		date?: string;
 		durationMinutes?: number;
+		topicDiscussed?: string;
 		studentIds?: string[];
 	};
 
-	if (!body.date || !body.durationMinutes) {
+	const topicDiscussed = body.topicDiscussed?.trim();
+	if (!body.date || !body.durationMinutes || !topicDiscussed) {
 		return c.json(
-			{ success: false, message: "date and durationMinutes are required." },
+			{
+				success: false,
+				message: "date, durationMinutes, and topicDiscussed are required.",
+			},
+			400,
+		);
+	}
+	if (topicDiscussed.length > TOPIC_MAX_LENGTH) {
+		return c.json(
+			{
+				success: false,
+				message: `topicDiscussed must be ${TOPIC_MAX_LENGTH} characters or fewer.`,
+			},
 			400,
 		);
 	}
@@ -148,6 +166,7 @@ sessionsRouter.post("/groups/:id/sessions", requireAuth, async (c) => {
 			groupId,
 			date: new Date(body.date),
 			durationMinutes: body.durationMinutes,
+			topicDiscussed,
 			teacherId,
 			...(body.studentIds !== undefined && { attendanceRecorded: true }),
 		},
@@ -241,8 +260,29 @@ sessionsRouter.patch(
 		const body = (await c.req.json()) as {
 			date?: string;
 			durationMinutes?: number;
+			topicDiscussed?: string;
 			studentIds?: string[];
 		};
+
+		let topicDiscussed: string | undefined;
+		if (body.topicDiscussed !== undefined) {
+			topicDiscussed = body.topicDiscussed.trim();
+			if (!topicDiscussed) {
+				return c.json(
+					{ success: false, message: "topicDiscussed must not be empty." },
+					400,
+				);
+			}
+			if (topicDiscussed.length > TOPIC_MAX_LENGTH) {
+				return c.json(
+					{
+						success: false,
+						message: `topicDiscussed must be ${TOPIC_MAX_LENGTH} characters or fewer.`,
+					},
+					400,
+				);
+			}
+		}
 
 		const session = await prisma.session.update({
 			where: { id: sessionId },
@@ -251,6 +291,7 @@ sessionsRouter.patch(
 				...(body.durationMinutes !== undefined && {
 					durationMinutes: body.durationMinutes,
 				}),
+				...(topicDiscussed !== undefined && { topicDiscussed }),
 				...(body.studentIds !== undefined && { attendanceRecorded: true }),
 			},
 		});
