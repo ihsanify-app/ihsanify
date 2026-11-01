@@ -14,10 +14,12 @@ import { notificationsRouter } from "./routes/notifications";
 import { payrollRouter } from "./routes/payroll";
 import { profileRouter } from "./routes/profile";
 import { publicRouter } from "./routes/public";
+import { questionSetsRouter } from "./routes/questionSets";
 import { reportSettingsRouter } from "./routes/reportSettings";
 import { reportsRouter } from "./routes/reports";
 import { reportThemesRouter } from "./routes/reportThemes";
 import { sessionsRouter } from "./routes/sessions";
+import { studentSubjectLevelsRouter } from "./routes/studentSubjectLevels";
 import { subjectsRouter } from "./routes/subjects";
 import { testimonialsRouter } from "./routes/testimonials";
 import { usersRouter } from "./routes/users";
@@ -49,6 +51,8 @@ app
 	.route("/", sessionsRouter)
 	.route("/", reportsRouter)
 	.route("/", assignmentsRouter)
+	.route("/", questionSetsRouter)
+	.route("/", studentSubjectLevelsRouter)
 	.route("/", invoicesRouter)
 	.route("/", invoiceSettingsRouter)
 	.route("/", subjectsRouter)

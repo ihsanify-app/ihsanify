@@ -30,9 +30,12 @@ import { Route as AppSettingsInvoiceRouteImport } from './routes/_app/settings_/
 import { Route as AppSettingsGroupRouteImport } from './routes/_app/settings_/group'
 import { Route as AppSettingsAssignmentRouteImport } from './routes/_app/settings_/assignment'
 import { Route as AppPayrollPayslipIdRouteImport } from './routes/_app/payroll_/$payslipId'
+import { Route as AppAssignmentsNewRouteImport } from './routes/_app/assignments_/new'
+import { Route as AppAssignmentsQuestionSetIdRouteImport } from './routes/_app/assignments_/$questionSetId'
 import { Route as AppGroupsGroupIdSessionsRouteImport } from './routes/_app/groups_/$groupId.sessions'
 import { Route as AppGroupsGroupIdReportsRouteImport } from './routes/_app/groups_/$groupId.reports'
 import { Route as AppGroupsGroupIdAssignmentsRouteImport } from './routes/_app/groups_/$groupId.assignments'
+import { Route as AppAssignmentsQuestionSetIdEditRouteImport } from './routes/_app/assignments_/$questionSetId_.edit'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -138,6 +141,17 @@ const AppPayrollPayslipIdRoute = AppPayrollPayslipIdRouteImport.update({
   path: '/payroll/$payslipId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssignmentsNewRoute = AppAssignmentsNewRouteImport.update({
+  id: '/assignments_/new',
+  path: '/assignments/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssignmentsQuestionSetIdRoute =
+  AppAssignmentsQuestionSetIdRouteImport.update({
+    id: '/assignments_/$questionSetId',
+    path: '/assignments/$questionSetId',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppGroupsGroupIdSessionsRoute =
   AppGroupsGroupIdSessionsRouteImport.update({
     id: '/groups_/$groupId/sessions',
@@ -155,6 +169,12 @@ const AppGroupsGroupIdAssignmentsRoute =
     path: '/groups/$groupId/assignments',
     getParentRoute: () => AppRoute,
   } as any)
+const AppAssignmentsQuestionSetIdEditRoute =
+  AppAssignmentsQuestionSetIdEditRouteImport.update({
+    id: '/assignments_/$questionSetId_/edit',
+    path: '/assignments/$questionSetId/edit',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -169,6 +189,8 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
+  '/assignments/$questionSetId': typeof AppAssignmentsQuestionSetIdRoute
+  '/assignments/new': typeof AppAssignmentsNewRoute
   '/payroll/$payslipId': typeof AppPayrollPayslipIdRoute
   '/settings/assignment': typeof AppSettingsAssignmentRoute
   '/settings/group': typeof AppSettingsGroupRoute
@@ -177,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/settings/report': typeof AppSettingsReportRoute
   '/settings/subject': typeof AppSettingsSubjectRoute
   '/settings/user': typeof AppSettingsUserRoute
+  '/assignments/$questionSetId/edit': typeof AppAssignmentsQuestionSetIdEditRoute
   '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
   '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
   '/groups/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
@@ -194,6 +217,8 @@ export interface FileRoutesByTo {
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
+  '/assignments/$questionSetId': typeof AppAssignmentsQuestionSetIdRoute
+  '/assignments/new': typeof AppAssignmentsNewRoute
   '/payroll/$payslipId': typeof AppPayrollPayslipIdRoute
   '/settings/assignment': typeof AppSettingsAssignmentRoute
   '/settings/group': typeof AppSettingsGroupRoute
@@ -202,6 +227,7 @@ export interface FileRoutesByTo {
   '/settings/report': typeof AppSettingsReportRoute
   '/settings/subject': typeof AppSettingsSubjectRoute
   '/settings/user': typeof AppSettingsUserRoute
+  '/assignments/$questionSetId/edit': typeof AppAssignmentsQuestionSetIdEditRoute
   '/groups/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
   '/groups/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
   '/groups/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
@@ -221,6 +247,8 @@ export interface FileRoutesById {
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
+  '/_app/assignments_/$questionSetId': typeof AppAssignmentsQuestionSetIdRoute
+  '/_app/assignments_/new': typeof AppAssignmentsNewRoute
   '/_app/payroll_/$payslipId': typeof AppPayrollPayslipIdRoute
   '/_app/settings_/assignment': typeof AppSettingsAssignmentRoute
   '/_app/settings_/group': typeof AppSettingsGroupRoute
@@ -229,6 +257,7 @@ export interface FileRoutesById {
   '/_app/settings_/report': typeof AppSettingsReportRoute
   '/_app/settings_/subject': typeof AppSettingsSubjectRoute
   '/_app/settings_/user': typeof AppSettingsUserRoute
+  '/_app/assignments_/$questionSetId_/edit': typeof AppAssignmentsQuestionSetIdEditRoute
   '/_app/groups_/$groupId/assignments': typeof AppGroupsGroupIdAssignmentsRoute
   '/_app/groups_/$groupId/reports': typeof AppGroupsGroupIdReportsRoute
   '/_app/groups_/$groupId/sessions': typeof AppGroupsGroupIdSessionsRoute
@@ -248,6 +277,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/users'
+    | '/assignments/$questionSetId'
+    | '/assignments/new'
     | '/payroll/$payslipId'
     | '/settings/assignment'
     | '/settings/group'
@@ -256,6 +287,7 @@ export interface FileRouteTypes {
     | '/settings/report'
     | '/settings/subject'
     | '/settings/user'
+    | '/assignments/$questionSetId/edit'
     | '/groups/$groupId/assignments'
     | '/groups/$groupId/reports'
     | '/groups/$groupId/sessions'
@@ -273,6 +305,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/users'
+    | '/assignments/$questionSetId'
+    | '/assignments/new'
     | '/payroll/$payslipId'
     | '/settings/assignment'
     | '/settings/group'
@@ -281,6 +315,7 @@ export interface FileRouteTypes {
     | '/settings/report'
     | '/settings/subject'
     | '/settings/user'
+    | '/assignments/$questionSetId/edit'
     | '/groups/$groupId/assignments'
     | '/groups/$groupId/reports'
     | '/groups/$groupId/sessions'
@@ -299,6 +334,8 @@ export interface FileRouteTypes {
     | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
+    | '/_app/assignments_/$questionSetId'
+    | '/_app/assignments_/new'
     | '/_app/payroll_/$payslipId'
     | '/_app/settings_/assignment'
     | '/_app/settings_/group'
@@ -307,6 +344,7 @@ export interface FileRouteTypes {
     | '/_app/settings_/report'
     | '/_app/settings_/subject'
     | '/_app/settings_/user'
+    | '/_app/assignments_/$questionSetId_/edit'
     | '/_app/groups_/$groupId/assignments'
     | '/_app/groups_/$groupId/reports'
     | '/_app/groups_/$groupId/sessions'
@@ -467,6 +505,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPayrollPayslipIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assignments_/new': {
+      id: '/_app/assignments_/new'
+      path: '/assignments/new'
+      fullPath: '/assignments/new'
+      preLoaderRoute: typeof AppAssignmentsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assignments_/$questionSetId': {
+      id: '/_app/assignments_/$questionSetId'
+      path: '/assignments/$questionSetId'
+      fullPath: '/assignments/$questionSetId'
+      preLoaderRoute: typeof AppAssignmentsQuestionSetIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/groups_/$groupId/sessions': {
       id: '/_app/groups_/$groupId/sessions'
       path: '/groups/$groupId/sessions'
@@ -488,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGroupsGroupIdAssignmentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assignments_/$questionSetId_/edit': {
+      id: '/_app/assignments_/$questionSetId_/edit'
+      path: '/assignments/$questionSetId/edit'
+      fullPath: '/assignments/$questionSetId/edit'
+      preLoaderRoute: typeof AppAssignmentsQuestionSetIdEditRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -502,6 +561,8 @@ interface AppRouteChildren {
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
+  AppAssignmentsQuestionSetIdRoute: typeof AppAssignmentsQuestionSetIdRoute
+  AppAssignmentsNewRoute: typeof AppAssignmentsNewRoute
   AppPayrollPayslipIdRoute: typeof AppPayrollPayslipIdRoute
   AppSettingsAssignmentRoute: typeof AppSettingsAssignmentRoute
   AppSettingsGroupRoute: typeof AppSettingsGroupRoute
@@ -510,6 +571,7 @@ interface AppRouteChildren {
   AppSettingsReportRoute: typeof AppSettingsReportRoute
   AppSettingsSubjectRoute: typeof AppSettingsSubjectRoute
   AppSettingsUserRoute: typeof AppSettingsUserRoute
+  AppAssignmentsQuestionSetIdEditRoute: typeof AppAssignmentsQuestionSetIdEditRoute
   AppGroupsGroupIdAssignmentsRoute: typeof AppGroupsGroupIdAssignmentsRoute
   AppGroupsGroupIdReportsRoute: typeof AppGroupsGroupIdReportsRoute
   AppGroupsGroupIdSessionsRoute: typeof AppGroupsGroupIdSessionsRoute
@@ -526,6 +588,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
+  AppAssignmentsQuestionSetIdRoute: AppAssignmentsQuestionSetIdRoute,
+  AppAssignmentsNewRoute: AppAssignmentsNewRoute,
   AppPayrollPayslipIdRoute: AppPayrollPayslipIdRoute,
   AppSettingsAssignmentRoute: AppSettingsAssignmentRoute,
   AppSettingsGroupRoute: AppSettingsGroupRoute,
@@ -534,6 +598,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsReportRoute: AppSettingsReportRoute,
   AppSettingsSubjectRoute: AppSettingsSubjectRoute,
   AppSettingsUserRoute: AppSettingsUserRoute,
+  AppAssignmentsQuestionSetIdEditRoute: AppAssignmentsQuestionSetIdEditRoute,
   AppGroupsGroupIdAssignmentsRoute: AppGroupsGroupIdAssignmentsRoute,
   AppGroupsGroupIdReportsRoute: AppGroupsGroupIdReportsRoute,
   AppGroupsGroupIdSessionsRoute: AppGroupsGroupIdSessionsRoute,
