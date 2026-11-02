@@ -55,6 +55,7 @@ function CreateSessionModal({
 }) {
 	const [date, setDate] = useState(todayAsDateInputValue());
 	const [durationMinutes, setDurationMinutes] = useState(60);
+	const [durationError, setDurationError] = useState("");
 	const [topicDiscussed, setTopicDiscussed] = useState("");
 	const [topicError, setTopicError] = useState("");
 	// Defaults to the whole roster checked, unlike EditSessionModal's
@@ -74,8 +75,14 @@ function CreateSessionModal({
 	}
 
 	function handleSubmit() {
+		if (!durationMinutes) {
+			setTopicError("");
+			setDurationError("Enter how many minutes this session ran.");
+			return;
+		}
 		const trimmedTopic = topicDiscussed.trim();
 		if (!trimmedTopic) {
+			setDurationError("");
 			setTopicError("Enter what was covered today before saving.");
 			return;
 		}
@@ -111,19 +118,28 @@ function CreateSessionModal({
 							value={date}
 							onChange={(e) => setDate(e.target.value)}
 						/>
-						<input
-							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
-							type="number"
-							min={1}
-							placeholder="Duration (minutes)"
-							value={durationMinutes || ""}
-							onFocus={() => {
-								// Clear the default 60 on first focus so the user can
-								// type a fresh value instead of fighting "601" edits.
-								if (durationMinutes === 60) setDurationMinutes(0);
-							}}
-							onChange={(e) => setDurationMinutes(Number(e.target.value))}
-						/>
+						<div>
+							<input
+								className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
+								type="number"
+								min={1}
+								placeholder="Duration (minutes)"
+								value={durationMinutes || ""}
+								// Select the default 60 on focus, rather than clearing it to
+								// an empty/0 value — select-then-type is the standard pattern
+								// for "replace this prefilled value," and it can't silently
+								// leave the field blank if the user clicks elsewhere without
+								// typing (clearing-to-0 did, and submitted invisibly as 0).
+								onFocus={(e) => e.target.select()}
+								onChange={(e) => {
+									setDurationMinutes(Number(e.target.value));
+									setDurationError("");
+								}}
+							/>
+							{durationError && (
+								<p className="text-xs text-rose-600 mt-1">{durationError}</p>
+							)}
+						</div>
 						<div>
 							<input
 								className="w-full border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors"
