@@ -108,29 +108,32 @@ export function Hero({
 						dan Calistung untuk orang tua dan anak.
 					</p>
 
-					<div className="mt-6 flex flex-wrap items-center justify-start gap-3">
+					<div className="mt-5 flex flex-wrap items-center justify-start gap-2 sm:mt-6 sm:gap-3">
 						<button
 							type="button"
 							onClick={() => setIsFormOpen(true)}
-							className="inline-flex cursor-pointer items-center gap-2 bg-emerald hover:bg-emerald-dark transition-colors text-white text-lg font-semibold px-8 py-3.5 rounded-full shadow-lg shadow-emerald/20"
+							className="inline-flex cursor-pointer items-center gap-1.5 bg-emerald hover:bg-emerald-dark transition-colors text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-lg shadow-emerald/20 sm:text-lg sm:gap-2 sm:px-8 sm:py-3.5"
 						>
 							Daftar Sekarang
-							<ArrowRight size={20} />
+							<ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
 						</button>
+						{/* Secondary action: a touch lighter than the primary CTA on
+						    phone screens (thinner border, regular weight, no fill) so
+						    it visually recedes — same tap target size, just quieter. */}
 						<a
 							href="#programs-facilities"
-							className="inline-flex items-center gap-2 border border-emerald text-emerald hover:bg-cream transition-colors text-lg font-semibold px-8 py-3.5 rounded-full"
+							className="inline-flex items-center gap-2 border border-emerald/40 text-emerald hover:bg-cream transition-colors text-sm font-medium px-5 py-2.5 rounded-full sm:border-emerald sm:text-lg sm:font-semibold sm:px-8 sm:py-3.5"
 						>
 							Lihat Program
 						</a>
 					</div>
-					<div className="mt-4 flex items-center gap-3">
+					<div className="mt-3 flex items-center gap-2 sm:mt-4 sm:gap-3">
 						<a
 							href="https://www.instagram.com/ilmin_naafi/"
 							target="_blank"
 							rel="noopener noreferrer"
 							aria-label="Instagram Madrasatul 'Ilmin Naafi'"
-							className="block h-9 w-9 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
+							className="block h-7 w-7 overflow-hidden rounded-lg transition-opacity hover:opacity-80 sm:h-9 sm:w-9 sm:rounded-xl"
 						>
 							<img
 								src="/landing/instagram-icon.png"
@@ -143,7 +146,7 @@ export function Hero({
 							target="_blank"
 							rel="noopener noreferrer"
 							aria-label="Threads Madrasatul 'Ilmin Naafi'"
-							className="block h-9 w-9 overflow-hidden rounded-xl transition-opacity hover:opacity-80"
+							className="block h-7 w-7 overflow-hidden rounded-lg transition-opacity hover:opacity-80 sm:h-9 sm:w-9 sm:rounded-xl"
 						>
 							<img
 								src="/landing/threads-icon.png"

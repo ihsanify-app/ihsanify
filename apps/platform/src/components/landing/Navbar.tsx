@@ -53,7 +53,11 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 					<span className="truncate">Madrasatul 'Ilmin Naafi'</span>
 				</span>
 
-				<div className="hidden items-center gap-1 lg:flex">
+				{/* Needs `xl` (1280px), not `lg` (1024px) — with all 9 links at
+				    once, `lg` leaves tablet-landscape widths (1024-1279px, e.g.
+				    iPad) just short of the room this row needs, overflowing the
+				    page horizontally instead of wrapping. */}
+				<div className="hidden items-center gap-1 xl:flex">
 					{NAV_ITEMS.map((item) => (
 						<a
 							key={item.id}
@@ -80,7 +84,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 						type="button"
 						aria-label="Buka menu navigasi"
 						onClick={() => setIsMenuOpen((v) => !v)}
-						className="rounded-full p-2 text-emerald hover:bg-cream lg:hidden"
+						className="rounded-full p-2 text-emerald hover:bg-cream xl:hidden"
 					>
 						{isMenuOpen ? <X size={22} /> : <Menu size={22} />}
 					</button>
@@ -88,7 +92,7 @@ export function Navbar({ logoUrl }: { logoUrl: string | null }) {
 			</div>
 
 			{isMenuOpen && (
-				<div className="max-h-[70vh] overflow-y-auto border-t border-cream-2 px-4 py-3 lg:hidden">
+				<div className="max-h-[70vh] overflow-y-auto border-t border-cream-2 px-4 py-3 xl:hidden">
 					<div className="flex flex-col gap-1">
 						{NAV_ITEMS.map((item) => (
 							<a
