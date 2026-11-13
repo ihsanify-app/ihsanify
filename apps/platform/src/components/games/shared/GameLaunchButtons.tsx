@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { ArabicGame } from "../arabic/ArabicGame";
 import { EnglishGame } from "../english/EnglishGame";
+import { MathsGame } from "../maths/MathsGame";
 import { GamePopup } from "./GamePopup";
 import { PressableCard } from "./PressableCard";
 
@@ -30,28 +32,6 @@ const GAMES: {
 		tint: "bg-game-c5",
 	},
 ];
-
-function ComingSoon({ subject }: { subject: string }) {
-	return (
-		<div
-			className="flex flex-col items-center gap-2 py-10 text-center"
-			style={{
-				color: "var(--color-game-ink)",
-				fontFamily: "var(--font-game-body)",
-			}}
-		>
-			<p
-				className="text-2xl"
-				style={{ fontFamily: "var(--font-game-display)" }}
-			>
-				Segera Hadir
-			</p>
-			<p className="text-sm" style={{ color: "var(--color-game-muted)" }}>
-				Game {subject} sedang disiapkan.
-			</p>
-		</div>
-	);
-}
 
 export function GameLaunchButtons() {
 	const [openGame, setOpenGame] = useState<GameId | null>(null);
@@ -90,12 +70,12 @@ export function GameLaunchButtons() {
 			)}
 			{openGame === "maths" && (
 				<GamePopup title="Game Matematika" onClose={() => setOpenGame(null)}>
-					<ComingSoon subject="Matematika" />
+					<MathsGame />
 				</GamePopup>
 			)}
 			{openGame === "arabic" && (
 				<GamePopup title="Game Bahasa Arab" onClose={() => setOpenGame(null)}>
-					<ComingSoon subject="Bahasa Arab" />
+					<ArabicGame />
 				</GamePopup>
 			)}
 		</>

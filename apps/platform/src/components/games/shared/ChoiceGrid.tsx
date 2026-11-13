@@ -51,7 +51,10 @@ export function ChoiceGrid({
 						style={{ fontFamily: "var(--font-game-body)" }}
 						onClick={() => !isAnswered && onSelect(option.id)}
 					>
-						{option.text}
+						{/* dir="auto" — Arabic's game reuses this grid, and the
+						    bidi algorithm needs an explicit hint to render
+						    right-to-left script correctly alongside Latin text. */}
+						<span dir="auto">{option.text}</span>
 					</PressableCard>
 				);
 			})}
