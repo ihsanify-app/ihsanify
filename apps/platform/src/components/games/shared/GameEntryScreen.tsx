@@ -12,8 +12,8 @@ export type GameMode = {
 };
 
 // Entry screen shared by every subject's game — English, Maths, and Arabic
-// all render byte-identical chrome here (brand block, name box, trophy
-// chip, mode list, credit line), differing only in the pieces passed in.
+// all render byte-identical chrome here (brand block, name box, mode list,
+// credit line), differing only in the pieces passed in.
 // Recreated structure from reference/SPEC.md's English screen — never Tim
 // Sebentar's actual logo or credit line, see the two swaps in EnglishGame.
 export function GameEntryScreen({
@@ -87,10 +87,6 @@ export function GameEntryScreen({
 					</div>
 				</div>
 			)}
-
-			<span className="inline-flex items-center gap-1 rounded-game-pill border-2 border-game-ink bg-game-yellow px-3 py-1 text-xs font-bold">
-				🏆 0/24 Trofi Juara
-			</span>
 
 			<div className="flex w-full flex-col gap-3">
 				{modes.map((mode) => (
