@@ -344,6 +344,39 @@ code {
 	animation: game-rp-pulse 1s ease-in-out infinite;
 }
 
+/* Idle "look at me" wiggle for the 3 hero launch buttons — plays on its
+   own, no hover/tap needed, so it still catches a child's eye on a phone
+   or tablet (the buttons' PressableCard has no :hover state at all, by
+   design — see its own comment — so a hover-only effect would've been
+   invisible on touch, which is most of this audience). A short wiggle
+   burst near the start of each cycle, then a long rest, so it reads as a
+   periodic nudge rather than constant jitter next to a CTA. */
+@keyframes game-wiggle {
+	0%,
+	55%,
+	100% {
+		transform: rotate(0deg) scale(1);
+	}
+	5% {
+		transform: rotate(-4deg) scale(1.03);
+	}
+	13% {
+		transform: rotate(3deg) scale(1.03);
+	}
+	21% {
+		transform: rotate(-3deg) scale(1.02);
+	}
+	29% {
+		transform: rotate(2deg) scale(1.01);
+	}
+	37% {
+		transform: rotate(-1deg) scale(1.005);
+	}
+}
+.animate-game-wiggle {
+	animation: game-wiggle 3.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.animate-game-pop,
 	.animate-game-popin,
@@ -353,7 +386,8 @@ code {
 	.animate-game-flash-good,
 	.animate-game-flash-bad,
 	.animate-game-talk,
-	.animate-game-rp-pulse {
+	.animate-game-rp-pulse,
+	.animate-game-wiggle {
 		animation: none;
 	}
 }

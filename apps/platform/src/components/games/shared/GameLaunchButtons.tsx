@@ -167,14 +167,25 @@ export function GameLaunchButtons() {
 			    centering it is harmless on phone widths too, since max-w-xs
 			    (320px) is already close to the available column width there. */}
 			<div className="mx-auto flex w-full max-w-xs flex-col gap-3">
-				{GAMES.map((game) => (
+				{GAMES.map((game, i) => (
 					<PressableCard
 						key={game.id}
 						as="button"
 						size="md"
 						shadowColor={game.accent}
-						className={`flex items-center justify-center gap-2.5 rounded-game-card px-5 py-4 text-base font-bold ${game.tint}`}
-						style={{ fontFamily: "var(--font-game-display)" }}
+						// hover:scale-110 uses CSS's standalone `scale` property
+						// (not `transform`), so it composes cleanly on top of the
+						// wiggle keyframes' `transform: rotate()/scale()` instead
+						// of fighting them for the same property — same reason
+						// the existing active:translate press-feedback already
+						// worked fine alongside the wiggle.
+						className={`animate-game-wiggle flex items-center justify-center gap-2.5 rounded-game-card px-5 py-4 text-base font-bold transition-transform duration-150 hover:scale-110 ${game.tint}`}
+						// Staggered per button so all 3 don't wiggle in sync —
+						// reads as more alive/organic, less like one robotic cue.
+						style={{
+							fontFamily: "var(--font-game-display)",
+							animationDelay: `${i * 0.9}s`,
+						}}
 						onClick={() => setOpenGame(game.id)}
 					>
 						{game.icon}
