@@ -17,6 +17,7 @@ type DraftOption = { id: string; text: string };
 type DraftQuestion = {
 	id: string;
 	text: string;
+	explanation: string;
 	options: DraftOption[];
 	correctOptionId: string;
 };
@@ -31,6 +32,7 @@ export type QuestionSetFormInitialData = {
 	level: ApiLevel;
 	questions: {
 		text: string;
+		explanation: string | null;
 		options: { text: string; isCorrect: boolean }[];
 	}[];
 };
@@ -46,7 +48,13 @@ function makeEmptyQuestion(): DraftQuestion {
 		id,
 		text: "",
 	}));
-	return { id: makeId(), text: "", options, correctOptionId: options[0].id };
+	return {
+		id: makeId(),
+		text: "",
+		explanation: "",
+		options,
+		correctOptionId: options[0].id,
+	};
 }
 
 function draftQuestionsFrom(
@@ -62,6 +70,7 @@ function draftQuestionsFrom(
 		return {
 			id: makeId(),
 			text: q.text,
+			explanation: q.explanation ?? "",
 			options: options.map(({ id, text }) => ({ id, text })),
 			correctOptionId: correct.id,
 		};
@@ -230,6 +239,7 @@ export function QuestionSetForm({
 			level,
 			questions: questions.map((q) => ({
 				text: q.text.trim(),
+				explanation: q.explanation.trim() || null,
 				options: q.options.map((o) => ({
 					text: o.text.trim(),
 					isCorrect: o.id === q.correctOptionId,
@@ -428,6 +438,14 @@ export function QuestionSetForm({
 								</label>
 							))}
 						</div>
+						<textarea
+							className="border border-stone-300 focus:border-green-500 rounded-xl p-2 text-sm outline-none transition-colors min-h-14 ml-8"
+							placeholder="Explanation (optional) — shown to students once they've submitted their answer"
+							value={q.explanation}
+							onChange={(e) =>
+								updateQuestion(q.id, { explanation: e.target.value })
+							}
+						/>
 					</div>
 				))}
 

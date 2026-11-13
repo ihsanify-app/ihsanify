@@ -414,7 +414,8 @@ model StudentSubjectLevel {
 // A teacher-authored multiple-choice question package. Visible to a student
 // only when the student currently shares this subject + level + teacher via
 // some active group (see groupState.ts's getCurrentSubjectTeacherPairsForStudent).
-// Immutable once created — deliberately no update route, only delete.
+// Editable until the first student attempt, then locked — see the PATCH
+// route's comment in questionSets.ts.
 model QuestionSet {
   id          String               @id @default(cuid())
   title       String
@@ -441,6 +442,10 @@ model Question {
   // Stable ordering (A/B/C/D) — Postgres doesn't guarantee row order.
   position       Int
   text           String
+  // Optional teacher-written rationale for the correct answer. Shown to a
+  // STUDENT only alongside isCorrect — i.e. only after they've submitted
+  // their own attempt on this set (see questionSets.ts's includeIsCorrect).
+  explanation    String?
   questionSet    QuestionSet             @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
   options        QuestionOption[]
   attemptAnswers QuestionAttemptAnswer[]

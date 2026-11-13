@@ -96,6 +96,7 @@ type QuestionSetWithRelations = {
 		id: string;
 		position: number;
 		text: string;
+		explanation: string | null;
 		options: {
 			id: string;
 			position: number;
@@ -160,6 +161,10 @@ function serializeDetail(
 			.map((q) => ({
 				questionId: q.id,
 				text: q.text,
+				// Same visibility rule as isCorrect — only shown once the viewer
+				// is allowed to see the answer key (ADMIN/TEACHER always, a
+				// STUDENT only after their own submission).
+				...(includeIsCorrect ? { explanation: q.explanation } : {}),
 				options: q.options
 					.sort((a, b) => a.position - b.position)
 					.map((o) => ({
@@ -422,6 +427,7 @@ type CreateQuestionSetBody = {
 	level?: ApiDifficultyLevel;
 	questions?: {
 		text?: string;
+		explanation?: string | null;
 		options?: { text?: string; isCorrect?: boolean }[];
 	}[];
 };
@@ -434,6 +440,7 @@ type ValidatedQuestionSetInput = {
 	level: ApiDifficultyLevel;
 	questions: {
 		text: string;
+		explanation: string | null;
 		options: { text: string; isCorrect: boolean }[];
 	}[];
 };
@@ -509,6 +516,14 @@ async function validateQuestionSetInput(
 				status: 400,
 			};
 		}
+		// Optional — a teacher can leave it blank.
+		const explanation = question.explanation?.trim() || null;
+		if (explanation && explanation.length > 2000) {
+			return {
+				error: "An explanation can be at most 2000 characters.",
+				status: 400,
+			};
+		}
 		const options = question.options ?? [];
 		if (options.length !== 4) {
 			return {
@@ -556,6 +571,7 @@ async function validateQuestionSetInput(
 		}
 		normalizedQuestions.push({
 			text: questionText,
+			explanation,
 			options: normalizedOptions,
 		});
 	}
@@ -600,6 +616,7 @@ questionSetsRouter.post(
 					create: data.questions.map((question, qIndex) => ({
 						position: qIndex,
 						text: question.text,
+						explanation: question.explanation,
 						options: {
 							create: question.options.map((option, oIndex) => ({
 								position: oIndex,
@@ -705,6 +722,7 @@ questionSetsRouter.patch(
 							create: data.questions.map((question, qIndex) => ({
 								position: qIndex,
 								text: question.text,
+								explanation: question.explanation,
 								options: {
 									create: question.options.map((option, oIndex) => ({
 										position: oIndex,

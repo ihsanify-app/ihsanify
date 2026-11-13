@@ -30,6 +30,7 @@ type QuestionSetDetailForEdit = {
 	canEdit?: boolean;
 	questions: {
 		text: string;
+		explanation: string | null;
 		options: { text: string; isCorrect?: boolean }[];
 	}[];
 };
@@ -68,6 +69,7 @@ function RouteComponent() {
 				level: data.level,
 				questions: data.questions.map((q) => ({
 					text: q.text,
+					explanation: q.explanation,
 					options: q.options.map((o) => ({
 						text: o.text,
 						isCorrect: o.isCorrect === true,

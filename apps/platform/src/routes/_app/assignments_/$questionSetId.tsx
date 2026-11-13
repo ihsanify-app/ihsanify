@@ -42,6 +42,9 @@ type QuestionSetDetail = {
 	questions: {
 		questionId: string;
 		text: string;
+		// Present only alongside isCorrect — never shown before the viewer is
+		// allowed to see the answer key.
+		explanation?: string | null;
 		options: {
 			optionId: string;
 			text: string;
@@ -348,6 +351,14 @@ function RouteComponent() {
 										</div>
 									))}
 						</div>
+						{!isTakingQuiz && q.explanation && (
+							<p className="mt-3 text-sm text-stone-600 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2">
+								<span className="font-semibold text-stone-700">
+									Explanation:{" "}
+								</span>
+								{q.explanation}
+							</p>
+						)}
 					</div>
 				))}
 			</div>
