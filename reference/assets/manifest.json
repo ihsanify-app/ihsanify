@@ -1,0 +1,345 @@
+[
+  {
+    "localPath": "engindo/bungee-035d74f1.woff2",
+    "sourceUrl": "https://sebentar-engindo.netlify.app/fonts/bungee.woff2",
+    "type": "font",
+    "site": "engindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "engindo/fredoka-600-5c163809.woff2",
+    "sourceUrl": "https://sebentar-engindo.netlify.app/fonts/fredoka-600.woff2",
+    "type": "font",
+    "site": "engindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "engindo/fredoka-700-f5c6f2e4.woff2",
+    "sourceUrl": "https://sebentar-engindo.netlify.app/fonts/fredoka-700.woff2",
+    "type": "font",
+    "site": "engindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "engindo/fredoka-500-6f94e1d6.woff2",
+    "sourceUrl": "https://sebentar-engindo.netlify.app/fonts/fredoka-500.woff2",
+    "type": "font",
+    "site": "engindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "engindo/inline-svg-1-bbdb16fa.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "Mode picker"
+  },
+  {
+    "localPath": "engindo/inline-svg-2-34ab5932.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "Secondary actions row"
+  },
+  {
+    "localPath": "engindo/inline-svg-3-cd4ff4df.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "Secondary actions row"
+  },
+  {
+    "localPath": "engindo/inline-svg-4-c164bea1.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "engindo/inline-svg-5-ed354550.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "engindo/inline-svg-6-8f294f7b.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "engindo/inline-svg-7-87730b42.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "engindo/inline-svg-8-18d55eea.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "engindo/inline-svg-9-caadf67a.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "Quiz screen (hidden shell)"
+  },
+  {
+    "localPath": "engindo/inline-svg-10-33e28afd.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "engindo/inline-svg-11-2eb8382d.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "Modal/sheet (hidden shell)"
+  },
+  {
+    "localPath": "engindo/inline-svg-12-ba818409.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "engindo",
+    "section": "Modal/sheet (hidden shell)"
+  },
+  {
+    "localPath": "kalibagi/bungee-5bbceb44.woff2",
+    "sourceUrl": "https://sebentar-kalibagi.netlify.app/fonts/bungee.woff2",
+    "type": "font",
+    "site": "kalibagi",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "kalibagi/fredoka-600-0436f225.woff2",
+    "sourceUrl": "https://sebentar-kalibagi.netlify.app/fonts/fredoka-600.woff2",
+    "type": "font",
+    "site": "kalibagi",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "kalibagi/fredoka-500-eaa21132.woff2",
+    "sourceUrl": "https://sebentar-kalibagi.netlify.app/fonts/fredoka-500.woff2",
+    "type": "font",
+    "site": "kalibagi",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "kalibagi/fredoka-700-c4a9ff89.woff2",
+    "sourceUrl": "https://sebentar-kalibagi.netlify.app/fonts/fredoka-700.woff2",
+    "type": "font",
+    "site": "kalibagi",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-1-a0159921.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Mode picker"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-2-5bf82cbc.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Mode picker"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-3-bdca6e6f.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Mode picker"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-4-34ab5932.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Secondary actions row"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-5-cd4ff4df.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Secondary actions row"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-6-c164bea1.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-7-ed354550.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-8-8f294f7b.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-9-87730b42.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-10-18d55eea.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-11-0dac5676.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Quiz screen (hidden shell)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-12-33e28afd.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "kalibagi/inline-svg-13-ba818409.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "kalibagi",
+    "section": "Modal/sheet (hidden shell)"
+  },
+  {
+    "localPath": "arabindo/fredoka-600-f3e95c11.woff2",
+    "sourceUrl": "https://sebentar-arabindo.netlify.app/fonts/fredoka-600.woff2",
+    "type": "font",
+    "site": "arabindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "arabindo/fredoka-700-3f61592d.woff2",
+    "sourceUrl": "https://sebentar-arabindo.netlify.app/fonts/fredoka-700.woff2",
+    "type": "font",
+    "site": "arabindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "arabindo/bungee-3fb7a789.woff2",
+    "sourceUrl": "https://sebentar-arabindo.netlify.app/fonts/bungee.woff2",
+    "type": "font",
+    "site": "arabindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "arabindo/fredoka-500-db659709.woff2",
+    "sourceUrl": "https://sebentar-arabindo.netlify.app/fonts/fredoka-500.woff2",
+    "type": "font",
+    "site": "arabindo",
+    "section": "global/typography"
+  },
+  {
+    "localPath": "arabindo/inline-svg-1-be8d4629.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "Mode picker"
+  },
+  {
+    "localPath": "arabindo/inline-svg-2-34ab5932.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "Secondary actions row"
+  },
+  {
+    "localPath": "arabindo/inline-svg-3-cd4ff4df.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "Secondary actions row"
+  },
+  {
+    "localPath": "arabindo/inline-svg-4-c164bea1.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-5-ed354550.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-6-8f294f7b.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-7-87730b42.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-8-18d55eea.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-9-caadf67a.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "Quiz screen (hidden shell)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-10-33e28afd.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "App shell (unclassified)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-11-2eb8382d.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "Modal/sheet (hidden shell)"
+  },
+  {
+    "localPath": "arabindo/inline-svg-12-ba818409.svg",
+    "sourceUrl": "inline",
+    "type": "svg",
+    "site": "arabindo",
+    "section": "Modal/sheet (hidden shell)"
+  }
+]

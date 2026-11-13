@@ -1,5 +1,6 @@
 import { ArrowRight, Sprout } from "lucide-react";
 import { useState } from "react";
+import { GameLaunchButtons } from "../games/shared/GameLaunchButtons";
 import { RegistrationFormModal } from "./RegistrationFormModal";
 import { Reveal } from "./Reveal";
 
@@ -15,7 +16,7 @@ export function Hero({
 		<section className="relative overflow-hidden bg-linear-to-b from-cream via-white to-white px-4 py-16 sm:px-6 sm:py-24">
 			<div className="absolute -top-24 -right-24 w-72 h-72 bg-cream-2 rounded-full blur-3xl opacity-70" />
 			<div className="absolute -bottom-24 -left-24 w-72 h-72 bg-gold-soft rounded-full blur-3xl opacity-60" />
-			<div className="relative mx-auto max-w-2xl">
+			<div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
 				<Reveal className="flex flex-col items-start text-left">
 					{logoUrl ? (
 						<img
@@ -90,6 +91,10 @@ export function Hero({
 					<p className="mt-3 text-base text-stone-600">
 						<i>Powered by Ihsanify ©</i>
 					</p>
+				</Reveal>
+
+				<Reveal delayMs={120}>
+					<GameLaunchButtons />
 				</Reveal>
 			</div>
 			{isFormOpen && (

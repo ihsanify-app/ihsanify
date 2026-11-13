@@ -129,3 +129,231 @@ code {
 		animation: none;
 	}
 }
+
+/* ---------------------------------------------------------------------
+   Learning-games design tokens — maths/Arabic/English mini-games, scoped
+   with a `game-` prefix everywhere (colors, radius, shadows, keyframes) so
+   nothing here collides with the landing-page tokens above or the rest of
+   the app's default Tailwind palette.
+
+   These are an independent recreation of the visual *structure* documented
+   in reference/SPEC.md (hard-shadow interaction style, spacing/radius
+   approach, keyframe timings) after reverse-engineering 3 reference
+   sites — never copied source code, and deliberately NOT their actual
+   color values or fonts either (see below) or their logo/credit line —
+   this is Ihsanify's own look, fully owned, not a reskin.
+   See reference/SPEC.md for the full source analysis.
+
+   Color palette: remapped from Tim Sebentar's literal blue/red/purple/
+   neon-pastel values onto Ihsanify's own forest/emerald/gold/cream hue
+   family (see the existing landing-page @theme above) — same *roles*
+   (ink/paper/soft/muted, 3 mode accents, good/bad feedback, 5 pastel
+   tints) so every component built against these names still works
+   unchanged, but nothing here reads as "the same site" as the reference.
+
+   `static` (not the default, tree-shaken `@theme`) because nothing built
+   yet references any of these — without it, Tailwind v4 drops a theme
+   variable from the compiled output entirely until some utility class
+   actually consumes it, which would make these tokens silently
+   unavailable to read as plain CSS variables right up until the first
+   game component exists. */
+@theme static {
+	--color-game-ink: #1a2e22;
+	--color-game-paper: #ffffff;
+	--color-game-soft: #f6f1e4;
+	--color-game-muted: #6b7560;
+	--color-game-blue: #1f9e8a;
+	--color-game-red: #e0623f;
+	--color-game-purple: #c98a1f;
+	--color-game-green: #22a35e;
+	--color-game-green-d: #17824a;
+	--color-game-good: #22a35e;
+	--color-game-bad: #e0455a;
+	--color-game-orange: #e08f3a;
+	--color-game-yellow: #e8b84b;
+	--color-game-wa: #25d366;
+	--color-game-c1: #f3dfa3;
+	--color-game-c2: #f0bfae;
+	--color-game-c3: #a9ddd3;
+	--color-game-c4: #e3cf8f;
+	--color-game-c5: #b9e0c4;
+
+	/* Reuses Ihsanify's own already-loaded brand fonts (packages/ui's
+	   globals.css: Baloo 2 for headings, Nunito for body) rather than a
+	   separate font pairing just for games — genuinely on-brand, no extra
+	   font loading, and immediately distinct from the reference sites'
+	   self-hosted Bungee/Fredoka.
+
+	   `--font-game-body` is the literal value, not `var(--font-sans)`:
+	   `--font-sans` lives in packages/ui's own, separately-compiled
+	   Tailwind build (see that file's comment on `.font-handwritten`),
+	   and nothing in that package's own CSS references it via `var()`,
+	   so that build's tree-shaking drops it — it never exists as a real,
+	   readable custom property outside that package, unlike
+	   `--font-heading`, which survives there only because an `h1-h4`
+	   rule in that same file happens to reference it. */
+	--font-game-display: var(--font-heading);
+	--font-game-body: "Nunito", ui-sans-serif, system-ui, sans-serif;
+
+	/* Radius "scale" per reference/SPEC.md is component-size-driven, not a
+	   clean ramp — named by role rather than by number. */
+	--radius-game-icon: 11px;
+	--radius-game-card: 24px;
+	--radius-game-pill: 99px;
+
+	/* The signature hard, unblurred offset shadow, at the 3 sizes actually
+	   seen in the source (small chip / button / big card). Color is the
+	   default --color-game-ink edge; a component swaps to its own accent
+	   by overriding `--shadow-color` via an inline style or a modifier
+	   class when it's built, same as the reference sites do. */
+	--shadow-game-sm: 2px 2px 0 var(--color-game-ink);
+	--shadow-game-md: 4px 4px 0 var(--color-game-ink);
+	--shadow-game-lg: 8px 8px 0 var(--color-game-ink);
+}
+
+/* Keyframe set, named/timed per reference/SPEC.md's "Animation" section.
+   Kept inert here (no component references them yet) until the game
+   components that use each one are actually built. */
+@keyframes game-pop {
+	from {
+		transform: scale(0.6);
+		opacity: 0;
+	}
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+.animate-game-pop {
+	animation: game-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes game-popin {
+	from {
+		transform: scale(0) rotate(-30deg);
+		opacity: 0;
+	}
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+.animate-game-popin {
+	animation: game-popin 0.7s cubic-bezier(0.3, 1.8, 0.5, 1) both;
+}
+
+/* Wrong-answer nudge on a single choice button. Named distinctly from the
+   existing .animate-shake above (that one is a continuous attention
+   shake for the attendance prompt; this is a one-shot answer-feedback
+   nudge with a different keyframe shape). */
+@keyframes game-nudge {
+	25% {
+		transform: translateX(-6px);
+	}
+	75% {
+		transform: translateX(6px);
+	}
+}
+.animate-game-nudge {
+	animation: game-nudge 0.4s ease both;
+}
+
+/* Bigger whole-screen shake — stronger wrong-answer feedback. */
+@keyframes game-shake {
+	10%,
+	50%,
+	90% {
+		transform: translateX(-12px) rotate(-1.2deg);
+	}
+	30%,
+	70% {
+		transform: translateX(12px) rotate(1.2deg);
+	}
+}
+.animate-game-shake {
+	animation: game-shake 0.4s ease both;
+}
+
+@keyframes game-thumb-pop {
+	0% {
+		transform: scale(0) rotate(-20deg);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.2) rotate(8deg);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1) rotate(0deg);
+		opacity: 1;
+	}
+}
+.animate-game-thumb-pop {
+	animation: game-thumb-pop 0.6s ease-out both;
+}
+
+/* Background flash tint on an answer — two variants, correct/incorrect. */
+@keyframes game-flash-good {
+	0% {
+		opacity: 0;
+	}
+	8% {
+		opacity: 0.12;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+.animate-game-flash-good {
+	animation: game-flash-good 0.6s ease both;
+}
+
+@keyframes game-flash-bad {
+	0% {
+		opacity: 0;
+	}
+	8% {
+		opacity: 0.08;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+.animate-game-flash-bad {
+	animation: game-flash-bad 0.6s ease both;
+}
+
+/* Mascot/speaker micro-animation while audio plays ("talk"), or a simple
+   blink for the subject that has no spoken-word narration (Maths). Both
+   share the same keyframe shape — only the class name differs by use. */
+@keyframes game-talk {
+	50% {
+		transform: scale(1.12);
+	}
+}
+.animate-game-talk {
+	animation: game-talk 0.5s ease-in-out infinite;
+}
+
+@keyframes game-rp-pulse {
+	50% {
+		transform: scale(1.35);
+	}
+}
+.animate-game-rp-pulse {
+	animation: game-rp-pulse 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-game-pop,
+	.animate-game-popin,
+	.animate-game-nudge,
+	.animate-game-shake,
+	.animate-game-thumb-pop,
+	.animate-game-flash-good,
+	.animate-game-flash-bad,
+	.animate-game-talk,
+	.animate-game-rp-pulse {
+		animation: none;
+	}
+}
