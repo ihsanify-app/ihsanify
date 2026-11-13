@@ -1,4 +1,3 @@
-import { Languages } from "lucide-react";
 import { useState } from "react";
 import { GameEntryScreen, type GameMode } from "../shared/GameEntryScreen";
 import { QuizRunner } from "../shared/QuizRunner";
@@ -72,7 +71,17 @@ export function ArabicGame() {
 	return (
 		<GameEntryScreen
 			idPrefix="arabic"
-			brandIcon={<Languages size={30} color="var(--color-game-ink)" />}
+			// Same fix as the launch-button icon: the actual letter, not a
+			// generic "translate" glyph (lucide's Languages icon, which
+			// isn't Arabic-specific at all).
+			brandIcon={
+				<span
+					className="text-4xl font-bold leading-none"
+					style={{ color: "var(--color-game-ink)" }}
+				>
+					ض
+				</span>
+			}
 			brandIconBg="bg-game-c5"
 			wordmark={
 				<>
