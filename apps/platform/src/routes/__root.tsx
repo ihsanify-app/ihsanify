@@ -24,6 +24,35 @@ export const Route = createRootRoute({
 				content:
 					"A warm, simple learning platform for teachers, students, and families.",
 			},
+			// Open Graph / Twitter Card — without these, a share-preview crawler
+			// (Threads/Instagram/Facebook, WhatsApp, etc.) has nothing to go on
+			// and falls back to guessing an image from the page. It was picking
+			// the Instagram social-link icon (one of the only static <img> tags
+			// always present in the server-rendered HTML, since the real school
+			// logo loads client-side via a hook) instead of the actual logo.
+			{ property: "og:type", content: "website" },
+			{ property: "og:title", content: "Madrasatul 'Ilmin Naafi'" },
+			{
+				property: "og:description",
+				content:
+					"A warm, simple learning platform for teachers, students, and families.",
+			},
+			{
+				property: "og:image",
+				content: "https://ilminnaafi.com/landing/logo-mark.png",
+			},
+			{ property: "og:url", content: "https://ilminnaafi.com/" },
+			{ name: "twitter:card", content: "summary" },
+			{ name: "twitter:title", content: "Madrasatul 'Ilmin Naafi'" },
+			{
+				name: "twitter:description",
+				content:
+					"A warm, simple learning platform for teachers, students, and families.",
+			},
+			{
+				name: "twitter:image",
+				content: "https://ilminnaafi.com/landing/logo-mark.png",
+			},
 		],
 		links: [
 			{
